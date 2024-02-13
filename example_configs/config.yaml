@@ -1,0 +1,76 @@
+!ArenaConfig
+arenas:
+  0: !Arena
+    pass_mark: 0
+    t: 1000
+    items:
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 18, y: 0, z: 37.5}
+      - !Vector3 {x: 25, y: 0, z: 34} #occluder wall
+      - !Vector3 {x: 18, y: 0, z: 13}
+      - !Vector3 {x: 25, y: 0, z: 9.5} #occluder wall
+      - !Vector3 {x: 18, y: 0, z: 25}
+      - !Vector3 {x: 25, y: 0, z: 21.5} #occluder wall
+      rotations: [0,0,0,0,0,0]
+      sizes:
+      - !Vector3 {x: 29, y: 1, z: 5}
+      - !Vector3 {x: 15, y: 3, z: 2} 
+      - !Vector3 {x: 29, y: 1, z: 5}
+      - !Vector3 {x: 15, y: 3, z: 2}
+      - !Vector3 {x: 29, y: 1, z: 5}
+      - !Vector3 {x: 15, y: 3, z: 2}
+      colors:
+      - !RGB {r: 0, g: 0, b: 255}
+      - !RGB {r: 236, g: 195, b: 153} 
+      - !RGB {r: 0, g: 0, b: 255}
+      - !RGB {r: 236, g: 195, b: 153}
+      - !RGB {r: 0, g: 0, b: 255}
+      - !RGB {r: 236, g: 195, b: 153}
+    - !Item
+      name: WallTransparent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 34} 
+      - !Vector3 {x: 15, y: 0, z: 9.5} 
+      - !Vector3 {x: 12, y: 0, z: 21.5}
+      rotations: [0,0,0]
+      sizes:
+      - !Vector3 {x: 15, y: 3, z: 2} 
+      - !Vector3 {x: 5, y: 3, z: 2}
+      - !Vector3 {x: 10.4, y: 3, z: 2}
+    - !Item
+      name: Ramp
+      positions:
+      - !Vector3 {x: 34, y: 0, z: 25}
+      - !Vector3 {x: 34.5, y: 0, z: 37.5}
+      - !Vector3 {x: 34.5, y: 0, z: 13}
+      sizes:
+      - !Vector3 {x: 4, y: 1.5, z: 4}
+      - !Vector3 {x: 4, y: 1.5, z: 4}
+      - !Vector3 {x: 4, y: 1.5, z: 4}
+      rotations: [90, 90, 90]
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+      - !RGB {r: 255, g: 0, b: 255}
+      - !RGB {r: 255, g: 0, b: 255}
+    - !Item
+      name: DeathZone
+      positions:
+      - !Vector3 {x: 18, y: 0, z: 30.5}
+      - !Vector3 {x: 18, y: 0, z: 17.5}
+      sizes:
+      - !Vector3 {x: 29, y: 0.5, z: 5.5}
+      - !Vector3 {x: 29, y: 0.5, z: 5.5}
+      rotations: [0,0]
+    - !Item
+      name: GoodGoal
+      positions:
+      - !Vector3 {x: 12, y: 1.5, z: 37}
+      sizes:
+      - !Vector3 {x: 3, y: 3, z: 3} #Goal Size
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 2}
+      rotations: [0] #Agent Rotation Parameter
