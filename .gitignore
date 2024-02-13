@@ -3,3 +3,6 @@ venv
 
 # Any file which starts with prefix "discard"
 discard*
+
+# Undesired files
+__pycache__
