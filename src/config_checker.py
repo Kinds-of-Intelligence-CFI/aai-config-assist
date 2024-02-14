@@ -29,19 +29,19 @@ class ConfigChecker:
 
                     for item2_ix in range(item2_ix_start, len(items[type2_ix]["positions"])):
                         # # # To check that all indices are being compared sensibly
-                        # print(type1_ix, item1_ix, type2_ix, item2_ix)
+                        print(type1_ix, item1_ix, type2_ix, item2_ix)
 
                         # Only calculate boundaries if they have not been previously calculated for an item
                         pos1, size1 = items[type1_ix]["positions"][item1_ix], items[type1_ix]["sizes"][item1_ix]
-                        boundaries_item1 = boundaries.setdefault((type1_ix, item1_ix),
-                                                                 self._calculate_item_bounds(pos1, size1))
+                        boundaries1 = boundaries.setdefault((type1_ix, item1_ix),
+                                                            self._calculate_item_bounds(pos1, size1))
 
                         pos2, size2 = items[type2_ix]["positions"][item2_ix], items[type2_ix]["sizes"][item2_ix]
-                        boundaries_item2 = boundaries.setdefault((type2_ix, item2_ix),
+                        boundaries2 = boundaries.setdefault((type2_ix, item2_ix),
                                                                  self._calculate_item_bounds(pos2, size2))
 
-                        # overlap = self._check_overlap_between_items()
-                        #
+                        overlap, xo, yo, zo = self._check_overlap_from_item_boundaries(boundaries1, boundaries2)
+
                         # if overlap:
                         #     # Fetch the names of the items that are overlapping and display a summary of their overlap
                         #     name1 = self._get_item_name_from_indices(..., ...)
@@ -67,10 +67,20 @@ class ConfigChecker:
                     item_position["z"] + 0.5 * (item_size["z"]))
         return x_bounds, y_bounds, z_bounds
 
-    # def _check_overlap_between_items(self,):
-    #     """Checks the overlap between two items in the boundaries list. Returns None if there is no overlap and
-    #     returns the x, y, and z overlap if there is an overlap"""
-    #     return 0
+    def _check_overlap_from_item_boundaries(self, b1, b2):
+        """Checks the overlap between two items from the item boundaries b1 and b2 in the format
+        ((x_start, x_end), (y_start, y_end), (z_start, z_end)).
+
+        Returns whether the items overlap (True/False) and the overlap values in every dimension"""
+
+        x_overlap = max(0, min(b1[0][1], b2[0][1]) - max(b1[0][0], b2[0][0]))
+        y_overlap = max(0, min(b1[1][1], b2[1][1]) - max(b1[1][0], b2[1][0]))
+        z_overlap = max(0, min(b1[2][1], b2[2][1]) - max(b1[2][0], b2[2][0]))
+
+        items_overlap = bool(x_overlap and y_overlap and z_overlap)
+
+        return items_overlap, x_overlap, y_overlap, z_overlap
+
     #
     # def _display_overlap_summary(self, overlap, name1, name2):
     #     """Display the summary of overlap in a human-readable fashion"""
@@ -83,7 +93,7 @@ class ConfigChecker:
 
 if __name__ == "__main__":
     # Define a configuration checker
-    config_checker = ConfigChecker(config_path="example_configs/config.yaml")
+    config_checker = ConfigChecker(config_path="example_configs/config_short.yaml")
 
     # # Display the configuration data
     # print(config_checker.config_data)
@@ -91,9 +101,9 @@ if __name__ == "__main__":
     # Calculate the physical boundaries of an item in three-dimensional space
     position = config_checker.config_data["arenas"][0]["items"][0]["positions"][0]
     size = config_checker.config_data["arenas"][0]["items"][0]["sizes"][0]
-    print(f"position1: {position}")
-    print(f"size1: {size}")
-    print(config_checker._calculate_item_bounds(position, size))
+    # print(f"position1: {position}")
+    # print(f"size1: {size}")
+    # print(config_checker._calculate_item_bounds(position, size))
 
     # Check overlaps in entire configuration file
     config_checker.check_overlap()
