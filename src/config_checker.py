@@ -29,7 +29,7 @@ class ConfigChecker:
 
                     for item2_ix in range(item2_ix_start, len(items[type2_ix]["positions"])):
                         # # # To check that all indices are being compared sensibly
-                        print(type1_ix, item1_ix, type2_ix, item2_ix)
+                        # print(type1_ix, item1_ix, type2_ix, item2_ix)
 
                         # Only calculate boundaries if they have not been previously calculated for an item
                         pos1, size1 = items[type1_ix]["positions"][item1_ix], items[type1_ix]["sizes"][item1_ix]
@@ -38,14 +38,17 @@ class ConfigChecker:
 
                         pos2, size2 = items[type2_ix]["positions"][item2_ix], items[type2_ix]["sizes"][item2_ix]
                         boundaries2 = boundaries.setdefault((type2_ix, item2_ix),
-                                                                 self._calculate_item_bounds(pos2, size2))
+                                                            self._calculate_item_bounds(pos2, size2))
 
                         overlap, xo, yo, zo = self._check_overlap_from_item_boundaries(boundaries1, boundaries2)
 
-                        # if overlap:
-                        #     # Fetch the names of the items that are overlapping and display a summary of their overlap
-                        #     name1 = self._get_item_name_from_indices(..., ...)
-                        #     name2 = self._get_item_name_from_indices(..., ...)
+                        if overlap:
+                            # Extract the names of the items from the data
+                            name1 = self._set_item_name_from(type_name=items[type1_ix]["name"], item_ix=item1_ix)
+                            name2 = self._set_item_name_from(type_name=items[type2_ix]["name"], item_ix=item2_ix)
+
+                            print(name1, name2)
+
                         #     self._display_overlap_summary(overlap, name1, name2)
 
     def _load_config_data(self):
@@ -86,9 +89,9 @@ class ConfigChecker:
     #     """Display the summary of overlap in a human-readable fashion"""
     #     return 0
     #
-    # def _get_item_name_from_indices(self, items, type_idx, item_idx):
-    #     """Get the exact name and identification number (e.g. if there are several walls)"""
-    #     return 0
+    def _set_item_name_from(self, type_name, item_ix):
+        """Set a name for an item from its type and index (e.g. if there are several walls)"""
+        return f"{type_name} {item_ix}"
 
 
 if __name__ == "__main__":
