@@ -47,9 +47,11 @@ class ConfigChecker:
                             name1 = self._set_item_name_from(type_name=items[type1_ix]["name"], item_ix=item1_ix)
                             name2 = self._set_item_name_from(type_name=items[type2_ix]["name"], item_ix=item2_ix)
 
-                            print(name1, name2)
-
-                        #     self._display_overlap_summary(overlap, name1, name2)
+                            self._display_overlap_summary(overlap_values=(xo, yo, zo),
+                                                          boundaries1=boundaries1,
+                                                          boundaries2=boundaries2,
+                                                          name1=name1,
+                                                          name2=name2)
 
     def _load_config_data(self):
         """Returns the loaded data from the YAML configuration"""
@@ -84,19 +86,24 @@ class ConfigChecker:
 
         return items_overlap, x_overlap, y_overlap, z_overlap
 
-    #
-    # def _display_overlap_summary(self, overlap, name1, name2):
-    #     """Display the summary of overlap in a human-readable fashion"""
-    #     return 0
-    #
     def _set_item_name_from(self, type_name, item_ix):
         """Set a name for an item from its type and index (e.g. if there are several walls)"""
         return f"{type_name} {item_ix}"
 
+    def _display_overlap_summary(self, overlap_values, boundaries1, boundaries2, name1, name2):
+        """Display the summary of overlap in a human-readable fashion"""
+        print(f"Overlap between {name1} and {name2}")
+        print(f"- X direction: {overlap_values[0]}")
+        print(f"- Y direction: {overlap_values[1]}")
+        print(f"- Z direction: {overlap_values[2]}")
+        print(f"Boundaries of {name1}: {boundaries1}")
+        print(f"Boundaries of {name2}: {boundaries2}")
+        print(f"\n")
+
 
 if __name__ == "__main__":
     # Define a configuration checker
-    config_checker = ConfigChecker(config_path="example_configs/config_short.yaml")
+    config_checker = ConfigChecker(config_path="example_configs/config.yaml")
 
     # # Display the configuration data
     # print(config_checker.config_data)
