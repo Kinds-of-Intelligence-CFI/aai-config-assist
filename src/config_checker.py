@@ -1,5 +1,7 @@
 import yaml
-from arena_config_loader import ArenaConfigLoader
+from src.arena_config_loader import ArenaConfigLoader
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 
 class ConfigChecker:
@@ -52,6 +54,52 @@ class ConfigChecker:
                                                           boundaries2=boundaries2,
                                                           name1=name1,
                                                           name2=name2)
+
+    def visualise_config(self):
+        items = self.config_data["arenas"][0]["items"]
+        names, bounds = self._extract_names_and_bounds_from(items)
+
+        fig = plt.figure()
+        plt.xlim(0, 40.5)
+        plt.ylim(0, 40.5)
+        currentAxis = plt.gca()
+
+        for k in bounds.keys():
+            item_bounds = bounds[k]
+            bottom_left, width, height = self._transform_corner_coordinates(item_bounds)
+            currentAxis.add_patch(Rectangle(xy=bottom_left, width=width, height=height, edgecolor='k', lw=1, alpha=0.5,))
+            plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{names[k]}")
+
+        plt.show()
+
+    def _transform_corner_coordinates(self, bounds):
+        """Transforms the corner coordinates from the format (x1, x2), (y1, y2), (z1, z2)
+        to a 2d (excluding the vertical y axis) format suitable to use the matplotlib.patches.Rectangle class"""
+        x1, x2 = bounds[0][0], bounds[0][1]
+        z1, z2 = bounds[2][0], bounds[2][1]
+
+        bottom_left = (min(x1, x2), min(z1, z2))
+        width = x2 - x1
+        height = z2 - z1
+
+        return bottom_left, width, height
+
+    def _extract_names_and_bounds_from(self, items):
+        names = {}
+        bounds = {}
+
+        for type_ix in range(len(items)):
+            if items[type_ix]["name"] == "Agent":
+                print("Implement a way to deal with the agent extraction")
+
+            else:
+                item = items[type_ix]
+                for item_ix in range(len(item["positions"])):
+                    names[(type_ix, item_ix)] = self._set_item_name_from(type_name=item["name"], item_ix=item_ix)
+                    bounds[(type_ix, item_ix)] = self._calculate_item_bounds(item["positions"][item_ix],
+                                                                             item["sizes"][item_ix])
+
+        return names, bounds
 
     def _load_config_data(self):
         """Returns the loaded data from the YAML configuration"""
@@ -108,14 +156,17 @@ if __name__ == "__main__":
     # # Display the configuration data
     # print(config_checker.config_data)
 
-    # Calculate the physical boundaries of an item in three-dimensional space
-    position = config_checker.config_data["arenas"][0]["items"][0]["positions"][0]
-    size = config_checker.config_data["arenas"][0]["items"][0]["sizes"][0]
+    # # Calculate the physical boundaries of an item in three-dimensional space
+    # position = config_checker.config_data["arenas"][0]["items"][0]["positions"][0]
+    # size = config_checker.config_data["arenas"][0]["items"][0]["sizes"][0]
     # print(f"position1: {position}")
     # print(f"size1: {size}")
     # print(config_checker._calculate_item_bounds(position, size))
 
-    # Check overlaps in entire configuration file
+    # # Check overlaps in entire configuration file
     config_checker.check_overlap()
+
+    # Visualise the arena from the configuration
+    config_checker.visualise_config()
 
     print("Exit ok")
