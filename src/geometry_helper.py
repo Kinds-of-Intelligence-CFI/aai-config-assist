@@ -39,12 +39,25 @@ def calculate_clockwise_rotated_2d_point(points, angle_deg):
     rotated_point = np.matmul(rotation_mat, points.T)
     return rotated_point.T
 
+
+def determine_overlap_between_aligned_segments(segment1, segment2):
+    """Determines the overlap value between segments 1 and 2, each defined by a min and max
+       value corresponding to their start and stop points on the same line"""
+    start1, stop1 = min(segment1), max(segment1)
+    start2, stop2 = min(segment2), max(segment2)
+    overlap = max(0, min(stop2, stop1) - max(start2, start1))
+    return overlap
+
+
 def get_min_max_projections(points, axis):
-    """Returns the minimum and maximum projection values of all the points onto axis"""
+    """Returns the minimum and maximum projection values of all the points onto axis
+       This is equivalent to the boundaries of the total projection distance covered by a polygon
+       when all of its vertices (defined in points), are projected onto a vector (defined as axis)"""
     projections = get_projected_distance_of_2d_points_onto_axis(points, axis)
     min_distance = min(projections)
     max_distance = max(projections)
     return min_distance, max_distance
+
 
 def get_projected_distance_of_2d_points_onto_axis(points, axis):
     """Returns the distance along the axis points: original coordinates, numpy array nx2 with n, the number of points
@@ -96,8 +109,23 @@ if __name__ == "__main__":
     print(normalised_axis == normalised_axis / np.linalg.norm(normalised_axis))
 
     # Project a points onto an axis
-    points = np.array([[4, 1], [4, 1], [5, 1]])
+    points = np.array([[4, 1], [4, 1], [5, 1], [6, 2], [-1, 5]])
     new_axis = np.array([1, -1])
     normalised_new_axis = normalise_vector(new_axis)
     new_points = get_projected_distance_of_2d_points_onto_axis(points, normalised_new_axis)
     print(new_points)
+
+    # Get min and max values of projected points onto an axis
+    points = np.array([[4, 1], [4, 1], [5, 1], [6, 2], [-1, 5]])
+    new_axis = np.array([1, -1])
+    normalised_new_axis = normalise_vector(new_axis)
+    min_val, max_val = get_min_max_projections(points, normalised_new_axis)
+    print(min_val, max_val)
+
+    # Determine the overlap between two segments
+    segment1 = np.array([-1, 2])
+    segment2 = np.array([-3, 1])
+    overlap = determine_overlap_between_aligned_segments(segment1, segment2)
+    print(overlap)
+
+    print("Exit ok")
