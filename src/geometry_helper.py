@@ -1,15 +1,16 @@
 import numpy as np
 
+# TODO: check all functions with tests
 
-def calculate_vertices_of_rotated_rectangle(centroid, width, height, angle_deg):
-    vertices = calculate_vertices_of_axis_aligned_rectangle(centroid, width, height)
-    rotated_vertices = calculate_clockwise_rotated_2d_point(vertices, angle_deg)
+def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
+    vertices = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
+    rotated_vertices = calculate_clockwise_rotated_2d_point(vertices, angle_deg, center)
     return rotated_vertices
 
 
 def calculate_vertices_of_axis_aligned_rectangle(centroid, width, height):
     """Returns the coordinates of the vertices a, b, c, d (top left, top right, bottom right, bottom left)
-       centroid: coordinates of centroid, numpy array 2x1
+       center: coordinates of center, numpy array 2x1
        width, height: int/float"""
     half_width = 0.5 * width
     half_height = 0.5 * height
@@ -23,21 +24,28 @@ def calculate_vertices_of_axis_aligned_rectangle(centroid, width, height):
     return vertices
 
 
-def calculate_clockwise_rotated_2d_point(points, angle_deg):
+def calculate_clockwise_rotated_2d_point(points, angle_deg, center_of_rotation=np.array([0, 0])):
+    # TODO: check/test function because made some changes (regarding center_of_rotation translations)
     """Returns the new coordinates of points(s), rotated by a clockwise angle in degrees
        points: original coordinates, numpy array nx2 with n, the number of points
-       angle_deg: int/float expressed in degrees"""
+       angle_deg: int/float expressed in degrees
+       center_of_rotation: 1x2 numpy array defining the point to rotate about"""
 
+    # Translate the points by center_of_rotation
+    points -= center_of_rotation
+
+    # Perform the rotation
     angle = np.deg2rad(angle_deg)
-
     # Note: this is for clockwise 2d rotation, not for the more common anticlockwise counterpart
     rotation_mat = np.array([
         [np.cos(angle), np.sin(angle)],
         [-np.sin(angle), np.cos(angle)]
     ])
+    rotated_points = np.matmul(rotation_mat, points.T).T
 
-    rotated_point = np.matmul(rotation_mat, points.T)
-    return rotated_point.T
+    # Reverse the translation by center_of_rotation
+    rotated_points += center_of_rotation
+    return rotated_points
 
 
 def determine_overlap_between_aligned_segments(segment1, segment2):
@@ -74,17 +82,17 @@ def normalise_vector(vec):
 
 
 if __name__ == "__main__":
-    # Calculating the rotated vertices of a rectangle from centroid, width, height, and rotation in degrees
+    # Calculating the rotated vertices of a rectangle from center, width, height, and rotation in degrees
     centroid2 = np.array([0, 0])
     height2 = 2
     width2 = 2
     rotation2 = 45
-    vertices2 = calculate_vertices_of_rotated_rectangle(centroid=centroid2, width=width2,
+    vertices2 = calculate_vertices_of_rotated_rectangle(center=centroid2, width=width2,
                                                         height=height2, angle_deg=rotation2)
     print(np.shape(vertices2))
     print(vertices2)
 
-    # Calculating the vertices of an axis-aligned rectangle from centroid, width, and height
+    # Calculating the vertices of an axis-aligned rectangle from center, width, and height
     centroid1 = np.array([0, 0])
     height1 = 2
     width1 = 2
