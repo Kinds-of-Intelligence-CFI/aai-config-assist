@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # TODO: check all functions with tests
 
 def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
@@ -50,7 +51,8 @@ def calculate_clockwise_rotated_2d_point(points, angle_deg, center_of_rotation=n
 
 def determine_overlap_between_aligned_segments(segment1, segment2):
     """Determines the overlap value between segments 1 and 2, each defined by a min and max
-       value corresponding to their start and stop points on the same line"""
+       value corresponding to their start and stop points on the same line
+       segment1/2: numpy arrays 1x2 of the min and max values of the segment along the common line"""
     start1, stop1 = min(segment1), max(segment1)
     start2, stop2 = min(segment2), max(segment2)
     overlap = max(0, min(stop2, stop1) - max(start2, start1))

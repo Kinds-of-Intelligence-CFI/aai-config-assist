@@ -3,15 +3,47 @@ import numpy as np
 from geometry_helper import *
 
 
-# def apply_separating_axis_theorem(rectangle1, rectangle2):
-#     """Returns minimum translation vector for possibly overlapping rectangles 1 and 2"""
-#     # Store the possible axes in a set to avoid checking the same axis twice
-#     possible_separation_axes = set()
-#     for rectangle in [rectangle1, rectangle2]:
-#         ax1, ax2 = get_potential_separation_axes(rectangle.deg_rotation)
-#         possible_separation_axes.add(ax1)
-#         possible_separation_axes.add(ax2)
+def apply_separating_axis_theorem(rectangle1, rectangle2):
+    """Returns minimum translation vector for possibly overlapping rectangles 1 and 2"""
+    # Prepare the possible separation axes candidates
+    # Store the possible axes in a set to avoid checking the same axis twice
+    possible_separation_axes = set()
+    for rectangle in [rectangle1, rectangle2]:
+        ax1, ax2 = get_potential_separation_axes(rectangle.deg_rotation)
+        possible_separation_axes.add(ax1)
+        possible_separation_axes.add(ax2)
 
+    # Store the non-zero overlap values per axis in the format {axis: overlap} e.g. {(0, 1): 2, (1, 0): 1.5}
+    overlaps = {}
+
+    # Main loop
+    for axis in possible_separation_axes:
+        # Get min and max projection values of each rectangle on this axis
+        min1, max1 = get_min_max_projections(rectangle1.vertices, axis)
+        min2, max2 = get_min_max_projections(rectangle2.vertices, axis)
+        segment1 = np.array([min1, max1])
+        segment2 = np.array([min2, max2])
+
+        # Check overlap of rectangles on this axis
+        overlap = determine_overlap_between_aligned_segments(segment1, segment2)
+
+        if overlap != 0:
+            overlaps[axis] = overlap
+
+    # Get the minimum overlap axis and value if the rectangles overlap
+    if overlaps:
+        min_overlap = np.inf
+        dir_min_overlap = None
+        for k in overlaps.keys():
+            if overlaps[k] < min_overlap:
+                min_overlap = overlaps[k]
+                dir_min_overlap = k
+    else:
+        # The overlaps dict is empty: there were no overlaps
+        min_overlap = 0
+        dir_min_overlap = None
+
+    return dir_min_overlap, min_overlap
 
 def get_potential_separation_axes(deg_angle):
     """We will define the separation axes (with all angles in degrees) as:
@@ -66,7 +98,14 @@ if __name__ == "__main__":
         ax1, ax2 = get_potential_separation_axes(rectangle.deg_rotation)
         possible_separation_axes.add(ax1)
         possible_separation_axes.add(ax2)
-    print(possible_separation_axes)
+    # print(possible_separation_axes)
 
-    # apply_separating_axis_theorem()
+    dir_min_overlap, overlap_val = apply_separating_axis_theorem(rectangle1, rectangle2)
+    print(dir_min_overlap)
+    print(overlap_val)
+    mtv = overlap_val * np.array(dir_min_overlap)
+    print(mtv)
+    print(f"To overcome overlap you will have to move either item simultaneously by {abs(mtv[0])} in the x-drection "
+          f"and by {abs(mtv[1])} in the y-direction")
+
     print("Exit ok")
