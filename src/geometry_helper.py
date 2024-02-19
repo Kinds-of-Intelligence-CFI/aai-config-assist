@@ -1,6 +1,21 @@
 import numpy as np
 
 
+def calculate_vertices_of_axis_aligned_rectangle(centroid, width, height):
+    """Returns the coordinates of the vertices a, b, c, d (top left, top right, bottom right, bottom left)
+       centroid: coordinates of centroid, numpy array 2x1
+       width, height: int/float"""
+    half_width = 0.5 * width
+    half_height = 0.5 * height
+
+    a = centroid + np.array([-half_width, half_height])
+    b = centroid + np.array([half_width, half_height])
+    c = centroid + np.array([half_width, -half_height])
+    d = centroid + np.array([-half_width, -half_height])
+
+    return a, b, c, d
+
+
 def calculate_clockwise_rotated_2d_point(point, angle_deg):
     """Returns the new coordinates of a point, rotated by a clockwise angle in degrees
        point: original coordinates, numpy array 2x1
@@ -25,3 +40,13 @@ if __name__ == "__main__":
     angle_degrees = 90
     new_point = calculate_clockwise_rotated_2d_point(point=original_point, angle_deg=angle_degrees)
     print(new_point)
+
+    # Calculating the vertices of an axis-aligned rectangle from centroid, width, and height
+    centroid1 = np.array([0, 0])
+    height1 = 2
+    width1 = 2
+    vertices1 = calculate_vertices_of_axis_aligned_rectangle(centroid=centroid1, width=width1, height=height1)
+    print(vertices1)
+
+
+
