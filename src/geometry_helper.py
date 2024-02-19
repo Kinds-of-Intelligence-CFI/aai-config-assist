@@ -1,8 +1,12 @@
 import numpy as np
 
-# def calculate_vertices_of_rotated_rectangle(centroid, width, height, angle_deg):
-#     vertices = calculate_vertices_of_axis_aligned_rectangle(centroid, width, height)
-#
+
+def calculate_vertices_of_rotated_rectangle(centroid, width, height, angle_deg):
+    vertices = calculate_vertices_of_axis_aligned_rectangle(centroid, width, height)
+    rotated_vertices = calculate_clockwise_rotated_2d_point(vertices, angle_deg)
+
+    return rotated_vertices
+
 
 def calculate_vertices_of_axis_aligned_rectangle(centroid, width, height):
     """Returns the coordinates of the vertices a, b, c, d (top left, top right, bottom right, bottom left)
@@ -40,12 +44,15 @@ def calculate_clockwise_rotated_2d_point(points, angle_deg):
 
 
 if __name__ == "__main__":
-    # Rotating a points in a 2d plane
-    original_point = np.array([[-2, 2], [2, 2], [2, -2], [-2, -2]])
-    angle_degrees = 90
-    new_points = calculate_clockwise_rotated_2d_point(points=original_point, angle_deg=angle_degrees)
-    print(np.shape(new_points))
-    print(new_points)
+    # Calculating the rotated vertices of a rectangle from centroid, width, height, and rotation in degrees
+    centroid2 = np.array([0, 0])
+    height2 = 2
+    width2 = 2
+    rotation2 = 45
+    vertices2 = calculate_vertices_of_rotated_rectangle(centroid=centroid2, width=width2,
+                                                        height=height2, angle_deg=rotation2)
+    print(np.shape(vertices2))
+    print(vertices2)
 
     # Calculating the vertices of an axis-aligned rectangle from centroid, width, and height
     centroid1 = np.array([0, 0])
@@ -55,5 +62,9 @@ if __name__ == "__main__":
     print(np.shape(vertices1))
     print(vertices1)
 
-
-
+    # Rotating a points in a 2d plane
+    original_point = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
+    angle_degrees = 45
+    new_points = calculate_clockwise_rotated_2d_point(points=original_point, angle_deg=angle_degrees)
+    print(np.shape(new_points))
+    print(new_points)
