@@ -3,8 +3,20 @@ import numpy as np
 from geometry_helper import *
 
 
+# TODO: improve the efficiency and elegance of the logic in apply_sat function
+
 def apply_separating_axis_theorem(rectangle1, rectangle2):
-    """Returns minimum translation vector for possibly overlapping rectangles 1 and 2"""
+    """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
+
+    The mtv will be the 0 vector if the rectangles do not overlap.
+
+    Args:
+        rectangle1 (Rectangle): An object of type Rectangle defined by its size, vertex coordinates, and rotation value.
+        rectangle2 (Rectangle): An object of type Rectangle defined by its size, vertex coordinates, and rotation value.
+
+    Returns:
+        (tuple): The direction (list or tuple or np.ndarray) and magnitude (float) of overlap.
+    """
     # Prepare the possible separation axes candidates
     # Store the possible axes in a set to avoid checking the same axis twice
     possible_separation_axes = set()
@@ -45,21 +57,30 @@ def apply_separating_axis_theorem(rectangle1, rectangle2):
 
     return dir_min_overlap, min_overlap
 
+
 def get_potential_separation_axes(deg_angle):
-    """We will define the separation axes (with all angles in degrees) as:
+    """Computes the potential separation axes from the angle of rotation of a rectangle.
+
+    We will define the separation axes (with all angles in degrees) as:
        - the axis defined by the rectangle rotation theta
        - the axis defined by theta + 90 [360]; that's 'modulo 360'
 
-       Indeed, for a rectangle, the SAT algorithm defines the only possible separation axes
-       as the axis defined by its angle of rotation and the axis normal to that one.
+    Indeed, for a rectangle, the SAT algorithm defines the only possible separation axes
+    as the axis defined by its angle of rotation and the axis normal to that one.
 
-       Note, the potential separation axes should be normalised. This is immediately achieved
-       by defining the axes components as the trigonometric function outputs, as done below"""
+    Note, the potential separation axes should be normalised. This is immediately achieved
+    by defining the axes components as the trigonometric function outputs, as done below.
 
+    Args:
+        deg_angle (float): The clockwise angle of rotation of the rectangle, from a starting horizontal state.
+
+    Returns:
+        (tuple): The two possible separation axes (each defined by a np.ndarray of shape (2, 1)) for the inputted angle.
+    """
     rad_angle1 = np.deg2rad(deg_angle)
     rad_angle2 = np.deg2rad((deg_angle + 90) % 360)
 
-    # Note the axes are returned as tuples to be hashable and hence inputtable into a set
+    # Note the axes are returned as tuples to be hashable and hence placeable into a set
     ax1 = (np.cos(rad_angle1), np.sin(rad_angle1))
     ax2 = (np.cos(rad_angle2), np.sin(rad_angle2))
 
@@ -67,7 +88,17 @@ def get_potential_separation_axes(deg_angle):
 
 
 class Rectangle:
+    """A rectangle defined by its center, width, height, and degree of rotation in a two dimensional plane."""
+
     def __init__(self, center, width, height, deg_rotation):
+        """Constructs an instance of Rectangle.
+
+        Args:
+            center (np.ndarray): The x and y coordinates of the rectangle's centroid.
+            width (float): The width of the rectangle.
+            height (float): The height of the rectangle.
+            deg_rotation (float): The clockwise angle of rotation of the rectangle, given in degrees.
+        """
         self.center = center
         self.width = width
         self.height = height
