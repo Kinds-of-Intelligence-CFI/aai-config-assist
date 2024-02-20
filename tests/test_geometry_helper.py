@@ -111,3 +111,32 @@ class TestGeometryHelper(unittest.TestCase):
         expected = 2
         result = determine_overlap_between_aligned_segments(seg1, seg2)
         self.assertTrue(np.isclose(expected, result))
+
+    def test_get_min_max_projections(self):
+        points = np.array([[0, 1],
+                           [0, 0.5],
+                           [1, 0],
+                           [-1, 0],
+                           [0, -0.5],
+                           [0, -1]])
+        sqrt_2 = np.sqrt(2)
+        axis = np.array([1 / sqrt_2, 1 / sqrt_2])
+        expected = np.array([-1 / sqrt_2, 1 / sqrt_2])
+        result = get_min_max_projections(points, axis)
+        self.assertTrue(np.all(np.isclose(expected, result)))
+
+    def test_get_projected_distance_of_2d_points_onto_axis(self):
+        points = np.array([[0, 1],
+                           [1, 0]])
+        sqrt_2 = np.sqrt(2)
+        axis = np.array([1 / sqrt_2, 1 / sqrt_2])
+        expected = np.array([1 / sqrt_2, 1 / sqrt_2])
+        result = get_projected_distance_of_2d_points_onto_axis(points, axis)
+        self.assertTrue(np.all(np.isclose(expected, result)))
+
+    def test_normalise_vector(self):
+        vec = np.array([1, 1])
+        sqrt_2 = np.sqrt(2)
+        expected = np.array([1 / sqrt_2, 1 / sqrt_2])
+        result = normalise_vector(vec)
+        self.assertTrue(np.all(np.isclose(expected, result)))
