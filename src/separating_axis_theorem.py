@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 import numpy as np
-from geometry_helper import *
+from src.geometry_helper import *
 
 
-# TODO: improve the efficiency and elegance of the logic in apply_sat function
+# TODO:
+#  - check all functions with tests
+#  - improve the efficiency and elegance of the logic in apply_sat function
 
-def apply_separating_axis_theorem(rectangle1, rectangle2):
+def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
     """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
 
     The mtv will be the 0 vector if the rectangles do not overlap.
@@ -44,18 +46,22 @@ def apply_separating_axis_theorem(rectangle1, rectangle2):
 
     # Get the minimum overlap axis and value if the rectangles overlap
     if overlaps:
-        min_overlap = np.inf
-        dir_min_overlap = None
-        for k in overlaps.keys():
-            if overlaps[k] < min_overlap:
-                min_overlap = overlaps[k]
-                dir_min_overlap = k
-    else:
-        # The overlaps dict is empty: there were no overlaps
-        min_overlap = 0
-        dir_min_overlap = None
+        min_overlap_distance = min(overlaps.values())
+        min_overlap_vector = [key for key in overlaps if overlaps[key] == min_overlap_distance][0]
+        mtv = min_overlap_distance * np.array(min_overlap_vector)
 
-    return dir_min_overlap, min_overlap
+        if verbose:
+            print(f"The minimum overlap distance is: {min_overlap_distance}")
+            print(f"The minimum overlap unit vector is: {min_overlap_vector}")
+            print(f"The minimum translation vector is hence their product: {mtv}")
+    else:
+        # There is no overlap, and hence no distance to be covered in either direction
+        mtv = np.array([0, 0])
+
+        if verbose:
+            print(f"No overlap was found and hence the minimum translation vector is: {mtv}")
+
+    return mtv
 
 
 def get_potential_separation_axes(deg_angle):
@@ -131,12 +137,7 @@ if __name__ == "__main__":
         possible_separation_axes.add(ax2)
     # print(possible_separation_axes)
 
-    dir_min_overlap, overlap_val = apply_separating_axis_theorem(rectangle1, rectangle2)
-    print(dir_min_overlap)
-    print(overlap_val)
-    mtv = overlap_val * np.array(dir_min_overlap)
+    mtv = apply_separating_axis_theorem(rectangle1, rectangle2)
     print(mtv)
-    print(f"To overcome overlap you will have to move either item simultaneously by {abs(mtv[0])} in the x-drection "
-          f"and by {abs(mtv[1])} in the y-direction")
 
     print("Exit ok")
