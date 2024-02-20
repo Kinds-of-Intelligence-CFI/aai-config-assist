@@ -1,37 +1,62 @@
 import numpy as np
 
 
+# TODO: write doc strings for the methods
+# TODO: add examples to all the methods (can just use the examples that you've written out below)
 # TODO: check all functions with tests
 
 def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
+    """Calculates the 4 vertex coordinates of a rectangle in the x-y plane rotated about its centroid.
+
+    Args:
+        center (np.ndarray): The x and y coordinates of the rectangle's centroid.
+        width (float): The width of the rectangle.
+        height (float): The height of the rectangle.
+        angle_deg (float): The clockwise angle of rotation of the rectangle, given in degrees.
+
+    Returns:
+        np.ndarray: Array (4x2) containing the 4 x and y coordinate pairs of the rotated rectangle's vertices.
+    """
     vertices = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
     rotated_vertices = calculate_clockwise_rotated_2d_point(vertices, angle_deg, center)
     return rotated_vertices
 
 
-def calculate_vertices_of_axis_aligned_rectangle(centroid, width, height):
-    """Returns the coordinates of the vertices a, b, c, d (top left, top right, bottom right, bottom left)
-       center: coordinates of center, numpy array 2x1
-       width, height: int/float"""
+def calculate_vertices_of_axis_aligned_rectangle(center, width, height):
+    """Calculates the 4 vertex coordinates of a rectangle whose sides are aligned with the x and y axes.
+
+    Args:
+        center (np.ndarray): The x and y coordinates of the rectangle's centroid.
+        width (float): The width of the rectangle.
+        height (float): The height of the rectangle.
+
+    Returns:
+      np.ndarray: Array (4x2) containing the 4 x and y coordinate pairs of the rectangle vertices.
+    """
     half_width = 0.5 * width
     half_height = 0.5 * height
 
-    a = centroid + np.array([-half_width, half_height])
-    b = centroid + np.array([half_width, half_height])
-    c = centroid + np.array([half_width, -half_height])
-    d = centroid + np.array([-half_width, -half_height])
+    a = center + np.array([-half_width, half_height])
+    b = center + np.array([half_width, half_height])
+    c = center + np.array([half_width, -half_height])
+    d = center + np.array([-half_width, -half_height])
 
     vertices = np.array([a, b, c, d])
     return vertices
 
 
 def calculate_clockwise_rotated_2d_point(points, angle_deg, center_of_rotation=np.array([0, 0])):
-    # TODO: check/test function because made some changes (regarding center_of_rotation translations)
-    """Returns the new coordinates of points(s), rotated by a clockwise angle in degrees
-       points: original coordinates, numpy array nx2 with n, the number of points
-       angle_deg: int/float expressed in degrees
-       center_of_rotation: 1x2 numpy array defining the point to rotate about"""
+    """Calculates the new coordinates of 2d points rotated by a given angle about a center of rotation.
 
+    Args:
+        points (np.ndarray): The x and y coordinates of all the points to be rotated, stacked vertically.
+            If N points are provided, the array will be of dimension (N, 2).
+        angle_deg (float): The clockwise angle of rotation of the points, given in degrees.
+        center_of_rotation (np.ndarray): The x and y coordinates of the center of rotation.
+
+    Returns:
+        np.ndarray: The x and y coordinates of all the rotated points.
+    """
     # Translate the points by center_of_rotation
     points -= center_of_rotation
 
@@ -50,9 +75,17 @@ def calculate_clockwise_rotated_2d_point(points, angle_deg, center_of_rotation=n
 
 
 def determine_overlap_between_aligned_segments(segment1, segment2):
-    """Determines the overlap value between segments 1 and 2, each defined by a min and max
-       value corresponding to their start and stop points on the same line
-       segment1/2: numpy arrays 1x2 of the min and max values of the segment along the common line"""
+    """Determines the overlap value between segments 1 and 2.
+
+    Each segment is defined by a min and max value corresponding to their start and stop points on the same line.
+
+    Args:
+        segment1 (np.ndarray): The min and max values of segment 1 along a common line, in an array of dimension (1, 2)
+        segment2 (np.ndarray): The min and max values of segment 2 along a common line, in an array of dimension (1, 2)
+
+    Returns:
+        float: The overlap distance between the two inputted segments.
+    """
     start1, stop1 = min(segment1), max(segment1)
     start2, stop2 = min(segment2), max(segment2)
     overlap = max(0, min(stop2, stop1) - max(start2, start1))
@@ -60,9 +93,19 @@ def determine_overlap_between_aligned_segments(segment1, segment2):
 
 
 def get_min_max_projections(points, axis):
-    """Returns the minimum and maximum projection values of all the points onto axis
-       This is equivalent to the boundaries of the total projection distance covered by a polygon
-       when all of its vertices (defined in points), are projected onto a vector (defined as axis)"""
+    """Computes the minimum and maximum projection values of the inputted points onto an axis.
+
+    This is equivalent to the boundaries of the total projection distance covered by a polygon when all of its
+    vertices (defined in points), are projected onto a vector (defined as axis).
+
+    Args:
+        points (np.ndarray): The x and y coordinates of all the points to be rotated, stacked vertically.
+            If N points are provided, the array will be of dimension (N, 2).
+        axis (np.ndarray): A normalised axis defined by an x and y coordinate given in an array of dimension (1, 2).
+
+    Returns:
+        tuple(float, float): The minimum and maximum values of the projections of all inputted points onto the axis.
+    """
     projections = get_projected_distance_of_2d_points_onto_axis(points, axis)
     min_distance = min(projections)
     max_distance = max(projections)
@@ -70,8 +113,17 @@ def get_min_max_projections(points, axis):
 
 
 def get_projected_distance_of_2d_points_onto_axis(points, axis):
-    """Returns the distance along the axis points: original coordinates, numpy array nx2 with n, the number of points
-       axis: unit (normalised!) vector defining the axis, 2x1 numpy array"""
+    """Compute the projected distance (the dot product) of a set of points onto an axis.
+
+    Args:
+        points (np.ndarray): The x and y coordinates of all the points to be rotated, stacked vertically.
+            If N points are provided, the array will be of dimension (N, 2).
+        axis (np.ndarray): A normalised axis defined by an x and y coordinate given in an array of dimension (1, 2).
+
+    Returns:
+        np.ndarray: The distances obtained from projecting the inputted points onto the inputted axis. The resulting
+            array has the same dimension as the inputted points array.
+    """
     # TODO: decide whether to normalise here or not
     # axis = normalise_vector(axis)
     projected_points = np.dot(points, axis)
@@ -79,6 +131,14 @@ def get_projected_distance_of_2d_points_onto_axis(points, axis):
 
 
 def normalise_vector(vec):
+    """Normalises a vector.
+
+    Args:
+        vec (np.ndarray): An array of component values, as many values as the dimensionality of the vector space.
+
+    Returns:
+        np.ndarray: A normalised vector whose component values sum to 1.
+    """
     normalised_vec = vec / np.linalg.norm(vec)
     return normalised_vec
 
@@ -98,7 +158,7 @@ if __name__ == "__main__":
     centroid1 = np.array([0, 0])
     height1 = 2
     width1 = 2
-    vertices1 = calculate_vertices_of_axis_aligned_rectangle(centroid=centroid1, width=width1, height=height1)
+    vertices1 = calculate_vertices_of_axis_aligned_rectangle(center=centroid1, width=width1, height=height1)
     print(np.shape(vertices1))
     print(vertices1)
 
