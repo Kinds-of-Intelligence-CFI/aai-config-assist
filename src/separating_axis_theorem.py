@@ -83,6 +83,8 @@ def get_potential_separation_axes(deg_angle):
     Returns:
         (tuple): The two possible separation axes (each defined by a np.ndarray of shape (2, 1)) for the inputted angle.
     """
+    # Flip the sign of deg_angle to account for clockwise rotation (trigonometric funcs assume anticlockwise rotation)
+    deg_angle = - deg_angle
     rad_angle1 = np.deg2rad(deg_angle)
     rad_angle2 = np.deg2rad((deg_angle + 90) % 360)
 
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     height1 = 2.5
     rotation1 = 315
     rectangle1 = Rectangle(center1, width1, height1, rotation1)
-    print(rectangle1.vertices)
+    print(f"Rectangle 1 vertices:\n{rectangle1.vertices}\n")
 
     # Rectangle 2
     center2 = np.array([3.5, 2])
@@ -127,7 +129,7 @@ if __name__ == "__main__":
     height2 = 2
     rotation2 = 45
     rectangle2 = Rectangle(center2, width2, height2, rotation2)
-    print(rectangle2.vertices)
+    print(f"Rectangle 2 vertices:\n{rectangle2.vertices}\n")
 
     # Determine the possible separation axes
     possible_separation_axes = set()
@@ -135,9 +137,8 @@ if __name__ == "__main__":
         ax1, ax2 = get_potential_separation_axes(rectangle.deg_rotation)
         possible_separation_axes.add(ax1)
         possible_separation_axes.add(ax2)
-    # print(possible_separation_axes)
+    print(f"Possible separation axes:\n{possible_separation_axes}\n")
 
     mtv = apply_separating_axis_theorem(rectangle1, rectangle2)
-    print(mtv)
 
     print("Exit ok")
