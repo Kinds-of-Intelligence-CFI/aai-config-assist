@@ -97,7 +97,13 @@ class ConfigAssistant:
 
                 # Instantiate a Rectangle with the extracted and transformed data
                 # TODO: Make sure that the first three parameters are correct
-                rectangle = Rectangle(xz_planar_centroid, size_x, size_z, rotation, size_y, name)
+                rectangle = Rectangle(center=xz_planar_centroid,
+                                      width=size_x,
+                                      height=size_z,
+                                      deg_rotation=rotation,
+                                      depth=size_y,
+                                      depth_start=position["y"],
+                                      name=name)
 
                 # Add this instance to the rectangles list
                 rectangles += [rectangle]
@@ -112,6 +118,6 @@ class ConfigAssistant:
 if __name__ == "__main__":
     config_path = "../example_configs/config.yaml"
     config_assistant = ConfigAssistant(config_path)
-    config_assistant.visualise_config()
     config_assistant.check_overlap()
+    config_assistant.visualise_config()
     print("Exit ok")

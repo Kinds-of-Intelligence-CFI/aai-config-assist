@@ -15,6 +15,16 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
     Returns:
         (tuple): The direction (list or tuple or np.ndarray) and magnitude (float) of overlap.
     """
+    # Check whether the items overlap in the depth-direction
+    depth_segment1 = np.array([rectangle1.depth_start, rectangle1.depth_start + rectangle1.depth])
+    depth_segment2 = np.array([rectangle2.depth_start, rectangle2.depth_start + rectangle2.depth])
+    depth_overlap = determine_overlap_between_aligned_segments(depth_segment1, depth_segment2)
+
+    if np.isclose(a=depth_overlap, b=0):
+        # If the items do not overlap in depth direction, then they could be stacked but not overlapping
+        mtv = np.array([0, 0])
+        return mtv
+
     # Start by assuming overlap until assumption is proven wrong
     do_overlap = True
 
@@ -42,7 +52,9 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
 
         overlaps[axis] = overlap
 
-        if overlap == 0:
+        # This function ensures that any overlap value under 1e-08 is not recorded as an overlap
+        # Though, may want to know when items are overlapping even a tiny bit, so could revert to if overlap == 0
+        if np.isclose(overlap, 0):
             do_overlap = False
 
     # Get the minimum overlap axis and value if the rectangles overlap
@@ -100,7 +112,7 @@ def get_potential_separation_axes(deg_angle):
 class Rectangle:
     """A rectangle defined by its center, width, height, and degree of rotation in a two dimensional plane."""
 
-    def __init__(self, center, width, height, deg_rotation, depth=0, name=None):
+    def __init__(self, center, width, height, deg_rotation, depth=0, depth_start=0, name=None):
         """Constructs an instance of Rectangle.
 
         Args:
@@ -109,12 +121,14 @@ class Rectangle:
             height (float): The height of the rectangle.
             deg_rotation (float): The clockwise angle of rotation of the rectangle, given in degrees.
             depth (float): The third dimension of an orthogonal parallelepiped.
+            depth_start (float): The depth coordinate of the rectangle's base, not centroid.
             name (str): Name of the item.
         """
         self.center = center
         self.width = width
         self.height = height
         self.depth = depth
+        self.depth_start = depth_start
         self.deg_rotation = deg_rotation
         self.name = name
         self.vertices = calculate_vertices_of_rotated_rectangle(center, width, height, deg_rotation)
