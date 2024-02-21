@@ -15,6 +15,9 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
     Returns:
         (tuple): The direction (list or tuple or np.ndarray) and magnitude (float) of overlap.
     """
+    # Start by assuming overlap until assumption is proven wrong
+    do_overlap = True
+
     # Prepare the possible separation axes candidates
     # Store the possible axes in a set to avoid checking the same axis twice
     possible_separation_axes = set()
@@ -37,25 +40,28 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
         # Check overlap of rectangles on this axis
         overlap = determine_overlap_between_aligned_segments(segment1, segment2)
 
-        if overlap != 0:
-            overlaps[axis] = overlap
+        overlaps[axis] = overlap
+
+        if overlap == 0:
+            do_overlap = False
 
     # Get the minimum overlap axis and value if the rectangles overlap
-    if overlaps:
+    if do_overlap:
         min_overlap_distance = min(overlaps.values())
         min_overlap_vector = [key for key in overlaps if overlaps[key] == min_overlap_distance][0]
         mtv = min_overlap_distance * np.array(min_overlap_vector)
 
         if verbose:
-            print(f"The minimum overlap distance is: {min_overlap_distance}")
-            print(f"The minimum overlap unit vector is: {min_overlap_vector}")
-            print(f"The minimum translation vector is hence their product: {mtv}")
+            print(f"Comparing {rectangle1.name} and {rectangle2.name}")
+            print(f"* The minimum overlap distance is: {min_overlap_distance}")
+            print(f"* The minimum overlap unit vector is: {min_overlap_vector}")
+            print(f"* The minimum translation vector is hence their product: {mtv}\n")
     else:
         # There is no overlap, and hence no distance to be covered in either direction
         mtv = np.array([0, 0])
 
-        if verbose:
-            print(f"No overlap was found and hence the minimum translation vector is: {mtv}")
+        # if verbose:
+        #     print(f"* No overlap was found and hence the minimum translation vector is: {mtv}\n")
 
     return mtv
 
