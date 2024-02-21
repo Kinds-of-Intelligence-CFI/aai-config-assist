@@ -3,10 +3,11 @@ from src.arena_config_loader import ArenaConfigLoader
 from src.separating_axis_theorem import Rectangle, apply_separating_axis_theorem
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle as RectangleMatplotlib # Can remove renaming when SAT Rectangle is renamed
+from matplotlib.patches import Rectangle as RectangleMatplotlib  # Can remove renaming when SAT Rectangle is renamed
 
 
 class ConfigAssistant:
+    """Assists in visualising and debugging Animal-AI configurations"""
     def __init__(self, config_path):
         """Constructs the ConfigAssistant class.
 
@@ -18,14 +19,16 @@ class ConfigAssistant:
         self.physical_items = self._create_rectangle_list()
 
     def check_overlap(self):
+        """Displays a log of possible overlaps to the terminal."""
         N = len(self.physical_items)
         for i in range(N):
-            for j in range(i+1, N):
+            for j in range(i + 1, N):
                 item1 = self.physical_items[i]
                 item2 = self.physical_items[j]
                 apply_separating_axis_theorem(item1, item2)
 
     def visualise_config(self):
+        """Displays a 2d representation of the class configuration (seen from above)."""
         fig = plt.figure()
         plt.xlim(0, 40.5)
         plt.ylim(0, 40.5)
@@ -102,9 +105,8 @@ class ConfigAssistant:
         return rectangles
 
     def _set_item_name_from(self, type_name, item_ix):
-        """Set a name for an item from its type and index (e.g. if there are several walls)"""
+        """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
-
 
 
 if __name__ == "__main__":
