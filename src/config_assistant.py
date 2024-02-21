@@ -40,13 +40,17 @@ class ConfigAssistant:
             height = physical_item.height
             name = physical_item.name
             anti_cw_rotation = - physical_item.deg_rotation
+            colour_dict = physical_item.colour
+            rgb_colour = (colour_dict["r"]/256,
+                          colour_dict["g"]/256,
+                          colour_dict["b"]/256) if physical_item.colour is not None else (0, 0, 1)
 
             # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
             bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
 
-            currentAxis.add_patch(RectangleMatplotlib(xy=bottom_left, width=width, height=height, edgecolor='k',
-                                                      lw=1, alpha=0.5, rotation_point=center_of_rotation,
-                                                      angle=anti_cw_rotation))
+            currentAxis.add_patch(RectangleMatplotlib(xy=bottom_left, width=width, height=height, edgecolor="k",
+                                                      lw=1, alpha=0.4, rotation_point=center_of_rotation,
+                                                      angle=anti_cw_rotation, facecolor=rgb_colour))
             plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
 
         plt.show()
@@ -88,6 +92,7 @@ class ConfigAssistant:
                 position = items["positions"][j]
                 size = items["sizes"][j]
                 rotation = items["rotations"][j] if "rotations" in items else 0
+                colour = items["colors"][j] if "colors" in items else None
 
                 # Transform some of the extracted data to suit
                 size_x = size["x"]
@@ -103,7 +108,8 @@ class ConfigAssistant:
                                       deg_rotation=rotation,
                                       depth=size_y,
                                       depth_start=position["y"],
-                                      name=name)
+                                      name=name,
+                                      colour=colour)
 
                 # Add this instance to the rectangles list
                 rectangles += [rectangle]

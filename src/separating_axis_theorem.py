@@ -3,7 +3,7 @@ import numpy as np
 from src.geometry_helper import *
 
 
-def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
+def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_decimals=3):
     """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
 
     The mtv will be the 0 vector if the rectangles do not overlap.
@@ -64,10 +64,14 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
         mtv = min_overlap_distance * np.array(min_overlap_vector)
 
         if verbose:
-            print(f"Comparing {rectangle1.name} and {rectangle2.name}")
-            print(f"* The minimum overlap distance is: {min_overlap_distance}")
-            print(f"* The minimum overlap unit vector is: {min_overlap_vector}")
-            print(f"* The minimum translation vector is hence their product: {mtv}\n")
+            print(f"Overlap between {rectangle1.name} and {rectangle2.name}")
+            # print(f"* The minimum overlap distance is: {min_overlap_distance}")
+            # print(f"* The minimum overlap unit vector is: {min_overlap_vector}")
+            # print(f"* The minimum translation vector is hence their product: {mtv}")
+            print(f"* Must move the objects away simultaneously by "
+                  f"{np.round(mtv[0], overlap_decimals)} in the x-dir"
+                  f"and {np.round(mtv[1], overlap_decimals)} in the z-dir")
+            print("")
     else:
         # There is no overlap, and hence no distance to be covered in either direction
         mtv = np.array([0, 0])
@@ -112,7 +116,7 @@ def get_potential_separation_axes(deg_angle):
 class Rectangle:
     """A rectangle defined by its center, width, height, and degree of rotation in a two dimensional plane."""
 
-    def __init__(self, center, width, height, deg_rotation, depth=0, depth_start=0, name=None):
+    def __init__(self, center, width, height, deg_rotation, depth=0, depth_start=0, name=None, colour=None):
         """Constructs an instance of Rectangle.
 
         Args:
@@ -131,6 +135,7 @@ class Rectangle:
         self.depth_start = depth_start
         self.deg_rotation = deg_rotation
         self.name = name
+        self.colour = colour
         self.vertices = calculate_vertices_of_rotated_rectangle(center, width, height, deg_rotation)
 
 
