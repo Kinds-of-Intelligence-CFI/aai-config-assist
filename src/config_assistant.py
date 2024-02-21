@@ -25,6 +25,29 @@ class ConfigAssistant:
                 item2 = self.physical_items[j]
                 apply_separating_axis_theorem(item1, item2)
 
+    def visualise_config(self):
+        fig = plt.figure()
+        plt.xlim(0, 40.5)
+        plt.ylim(0, 40.5)
+        currentAxis = plt.gca()
+
+        for physical_item in self.physical_items:
+            center_of_rotation = tuple(physical_item.center)
+            width = physical_item.width
+            height = physical_item.height
+            name = physical_item.name
+            anti_cw_rotation = - physical_item.deg_rotation
+
+            # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
+            bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
+
+            currentAxis.add_patch(RectangleMatplotlib(xy=bottom_left, width=width, height=height, edgecolor='k',
+                                                      lw=1, alpha=0.5, rotation_point=center_of_rotation,
+                                                      angle=anti_cw_rotation))
+            plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
+
+        plt.show()
+
     def _load_config_data(self):
         """Parses and loads the data from the YAML file inputted to class constructor.
 
