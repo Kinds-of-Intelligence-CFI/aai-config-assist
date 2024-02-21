@@ -2,6 +2,8 @@ import unittest
 from src.geometry_helper import *
 import numpy as np
 
+# Run in terminal to get per test breakdown: python -m unittest -v tests/test_geometry_helper.py
+
 
 class TestGeometryHelper(unittest.TestCase):
     def test_calculate_vertices_of_rotated_rectangle_when_rotation_is_0(self):

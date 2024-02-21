@@ -3,10 +3,6 @@ import numpy as np
 from src.geometry_helper import *
 
 
-# TODO:
-#  - check all functions with tests
-#  - improve the efficiency and elegance of the logic in apply_sat function
-
 def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True):
     """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
 
@@ -98,7 +94,7 @@ def get_potential_separation_axes(deg_angle):
 class Rectangle:
     """A rectangle defined by its center, width, height, and degree of rotation in a two dimensional plane."""
 
-    def __init__(self, center, width, height, deg_rotation):
+    def __init__(self, center, width, height, deg_rotation, depth=0, name=None):
         """Constructs an instance of Rectangle.
 
         Args:
@@ -106,13 +102,28 @@ class Rectangle:
             width (float): The width of the rectangle.
             height (float): The height of the rectangle.
             deg_rotation (float): The clockwise angle of rotation of the rectangle, given in degrees.
+            depth (float): The third dimension of an orthogonal parallelepiped.
+            name (str): Name of the item.
         """
         self.center = center
         self.width = width
         self.height = height
+        self.depth = depth
         self.deg_rotation = deg_rotation
+        self.name = name
         self.vertices = calculate_vertices_of_rotated_rectangle(center, width, height, deg_rotation)
 
+
+# TODO (the first 2 are needed and important but will take some refactoring):
+#  - may want to rename Rectangle class to Orthogonal Parallelepiped because it now has a notion of depth
+#    in this case, maybe it would be good to have a check at the end of apply_sat that just checks whether or
+#    not, the depth axes overlap; because only if they do should the mvt be given. Can even have a routine checking
+#    which overlap is smaller the depth (vertical, y in AAI) or the planar mtv from the arena flat plane and then return
+#    that as the mtv.
+#  - on that note, could even offload some of the logic in config_assistant by making it such that you can directly
+#    pass the size and position objects as they are (no need to unpack before passing to OrthogonalParallelepiped)
+#  - improve the efficiency and elegance of the logic in apply_sat function
+#  - put the examples from below into the docstrings (in the correct doctest format)
 
 if __name__ == "__main__":
     # Rectangle 1
