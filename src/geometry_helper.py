@@ -1,10 +1,6 @@
 import numpy as np
 
 
-# TODO: write doc strings for the methods
-# TODO: add examples to all the methods (can just use the examples that you've written out below)
-# TODO: check all functions with tests
-
 def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
     """Calculates the 4 vertex coordinates of a rectangle in the x-y plane rotated about its centroid.
 
@@ -15,10 +11,12 @@ def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
         angle_deg (float): The clockwise angle of rotation of the rectangle, given in degrees.
 
     Returns:
-        np.ndarray: Array (4x2) containing the 4 x and y coordinate pairs of the rotated rectangle's vertices.
+        np.ndarray: Array (4, 2) containing the 4 x and y coordinate pairs of the rotated rectangle's vertices. The
+            array gives the rotated coordinates of the top-left, top-right, bottom-right, bottom-left vertices of the
+            original, un-rotated rectangle.
     """
     vertices = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
-    rotated_vertices = calculate_clockwise_rotated_2d_point(vertices, angle_deg, center)
+    rotated_vertices = calculate_clockwise_rotated_2d_points(vertices, angle_deg, center)
     return rotated_vertices
 
 
@@ -45,7 +43,7 @@ def calculate_vertices_of_axis_aligned_rectangle(center, width, height):
     return vertices
 
 
-def calculate_clockwise_rotated_2d_point(points, angle_deg, center_of_rotation=np.array([0, 0])):
+def calculate_clockwise_rotated_2d_points(points, angle_deg, center_of_rotation=np.array([0, 0])):
     """Calculates the new coordinates of 2d points rotated by a given angle about a center of rotation.
 
     Args:
@@ -143,6 +141,9 @@ def normalise_vector(vec):
     return normalised_vec
 
 
+# TODO:
+#  - put the examples from below into the docstrings (in the correct doctest format)
+
 if __name__ == "__main__":
     # Calculating the rotated vertices of a rectangle from center, width, height, and rotation in degrees
     centroid2 = np.array([0, 0])
@@ -162,10 +163,10 @@ if __name__ == "__main__":
     print(np.shape(vertices1))
     print(vertices1)
 
-    # Rotating a points in a 2d plane
+    # Rotating points in a 2d plane
     original_point = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
     angle_degrees = 45
-    new_points = calculate_clockwise_rotated_2d_point(points=original_point, angle_deg=angle_degrees)
+    new_points = calculate_clockwise_rotated_2d_points(points=original_point, angle_deg=angle_degrees)
     print(np.shape(new_points))
     print(new_points)
 

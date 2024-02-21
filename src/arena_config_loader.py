@@ -2,7 +2,7 @@ import yaml
 
 
 class ArenaConfigLoader(yaml.SafeLoader):
-    """Loader with custom constructors for the custom tags (e.g. !ArenaConfig) in the configuration YAMLs"""
+    """Loader with custom constructors for the custom tags (e.g. !ArenaConfig) in the configuration YAMLs."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_constructor('!Arena', self.construct_arena)
@@ -29,13 +29,9 @@ class ArenaConfigLoader(yaml.SafeLoader):
 
 if __name__ == "__main__":
     # Load a configuration yaml file
-    config_path = "example_configs/config.yaml"
-
+    config_path = "example_configs/config_broken.yaml"
     with open(config_path) as file:
         config_data = yaml.load(file, Loader=ArenaConfigLoader)
-
-    print(config_data)
-
+    # print(config_data)
     # print([element for element in config_data["arenas"][0]["items"] if element["name"] != "arena"])
-
     print("Exit ok")
