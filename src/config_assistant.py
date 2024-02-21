@@ -2,6 +2,9 @@ import yaml
 from src.arena_config_loader import ArenaConfigLoader
 from src.separating_axis_theorem import Rectangle, apply_separating_axis_theorem
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle as RectangleMatplotlib # Can remove renaming when SAT Rectangle is renamed
+
 
 class ConfigAssistant:
     def __init__(self, config_path):
@@ -13,6 +16,14 @@ class ConfigAssistant:
         self.config_path = config_path
         self.config_data = self._load_config_data()
         self.physical_items = self._create_rectangle_list()
+
+    def check_overlap(self):
+        N = len(self.physical_items)
+        for i in range(N):
+            for j in range(i+1, N):
+                item1 = self.physical_items[i]
+                item2 = self.physical_items[j]
+                apply_separating_axis_theorem(item1, item2)
 
     def _load_config_data(self):
         """Parses and loads the data from the YAML file inputted to class constructor.
@@ -60,7 +71,7 @@ class ConfigAssistant:
 
                 # Instantiate a Rectangle with the extracted and transformed data
                 # TODO: Make sure that the first three parameters are correct
-                rectangle = Rectangle(xz_planar_centroid, size_z, size_x, rotation, size_y, name)
+                rectangle = Rectangle(xz_planar_centroid, size_x, size_z, rotation, size_y, name)
 
                 # Add this instance to the rectangles list
                 rectangles += [rectangle]
@@ -72,8 +83,10 @@ class ConfigAssistant:
         return f"{type_name} {item_ix}"
 
 
+
 if __name__ == "__main__":
     config_path = "../example_configs/config.yaml"
     config_assistant = ConfigAssistant(config_path)
-    print(config_assistant.physical_items)
+    config_assistant.visualise_config()
+    config_assistant.check_overlap()
     print("Exit ok")
