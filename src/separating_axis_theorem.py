@@ -53,7 +53,7 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_
         overlaps[axis] = overlap
 
         # This function ensures that any overlap value under 1e-08 is not recorded as an overlap
-        # Though, may want to know when items are overlapping even a tiny bit, so could revert to if overlap == 0
+        # Though, may want to know when items are overlapping even a tiny bit, so could revert to: if overlap == 0
         if np.isclose(overlap, 0):
             do_overlap = False
 
@@ -69,7 +69,7 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_
             # print(f"* The minimum overlap unit vector is: {min_overlap_vector}")
             # print(f"* The minimum translation vector is hence their product: {mtv}")
             print(f"* Must move the objects away simultaneously by "
-                  f"{np.round(mtv[0], overlap_decimals)} in the x-dir"
+                  f"{np.round(mtv[0], overlap_decimals)} in the x-dir "
                   f"and {np.round(mtv[1], overlap_decimals)} in the z-dir")
             print("")
     else:
@@ -139,6 +139,44 @@ class Rectangle:
         self.vertices = calculate_vertices_of_rotated_rectangle(center, width, height, deg_rotation)
 
 
+class RectangularCuboid:
+    """A rectangular cuboid, defined by its the centroid, size, and rotation of its lower base.
+
+    Note:
+        - This class was written to be compatible with the preexisting conventions of Animal-AI (AAI).
+        - Hence length is AAI's x-direction, width is AAI's z-direction, and height is AAI's y-direction.
+        - The only rotation possible for this object is a height-wise, "yaw"-type rotation of the lower base rectangle.
+        - The lower base face is always parallel to the 2d plane made up of the 1st and 2nd dimensions of the 3d space.
+    """
+    def __init__(self, lower_base_centroid, dimensions, rotation, name=None, colour=None):
+        """Constructs an instance of RectangularCuboid.
+
+        Args:
+            lower_base_centroid (np.ndarray): The length, width, and height coordinates of the lower base's centroid.
+            dimensions (tuple): The length (AAI-x), width (AAI-z), and height (AAI-y) of the cuboid.
+            rotation (float): The clockwise angle of rotation of the rectangle, given in degrees.
+            name (str): Name of the item.
+            colour (dict or None): Colour of the item, e.g. {"r": 256, "g": 256, "b": 0}.
+        """
+        self.center = lower_base_centroid
+        self.length = dimensions[0]
+        self.width = dimensions[1]
+        self.height = dimensions[2]
+        self.deg_rotation = rotation
+        self.name = name
+        self.colour = colour
+
+        # The following function works in a 2d planar world. Hence its definitions of width and height are not the same
+        # as those defined in the 3d world (see this class's docstring).
+        # The length of the 3d item = the width of the 2d item & the width of the 3d item = the height of the 2d item.
+        # This is why the arguments provided below may seem to be in conflict with their parameter names.
+        # The center should be only the 2d centroid coordinates, hence the clipping of the 3rd dimension with [:2].
+        self.vertices = calculate_vertices_of_rotated_rectangle(center=self.center[:2],
+                                                                width=self.length,
+                                                                height=self.width,
+                                                                angle_deg=self.deg_rotation)
+
+
 # TODO (the first 2 are needed and important but will take some refactoring):
 #  - may want to rename Rectangle class to Orthogonal Parallelepiped because it now has a notion of depth
 #    in this case, maybe it would be good to have a check at the end of apply_sat that just checks whether or
@@ -177,4 +215,10 @@ if __name__ == "__main__":
 
     mtv = apply_separating_axis_theorem(rectangle1, rectangle2)
 
+    # Defining a Rectangular Cuboid
+    lower_base_centroid = np.array([1, 2, 3])
+    dimensions = (2, 2, 3)
+    rotation = 45
+    rec_cuboid = RectangularCuboid(lower_base_centroid, dimensions, rotation)
+    print(rec_cuboid)
     print("Exit ok")
