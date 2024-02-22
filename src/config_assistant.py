@@ -8,6 +8,7 @@ from matplotlib.patches import Rectangle as RectangleMatplotlib  # Can remove re
 
 class ConfigAssistant:
     """Assists in visualising and debugging Animal-AI configurations"""
+
     def __init__(self, config_path):
         """Constructs the ConfigAssistant class.
 
@@ -41,9 +42,9 @@ class ConfigAssistant:
             name = physical_item.name
             anti_cw_rotation = - physical_item.deg_rotation
             colour_dict = physical_item.colour
-            rgb_colour = (colour_dict["r"]/256,
-                          colour_dict["g"]/256,
-                          colour_dict["b"]/256) if physical_item.colour is not None else (0, 0, 1)
+            rgb_colour = (colour_dict["r"] / 256,
+                          colour_dict["g"] / 256,
+                          colour_dict["b"] / 256) if physical_item.colour is not None else (0, 0, 1)
 
             # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
             bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
@@ -75,7 +76,7 @@ class ConfigAssistant:
 
         # Extract the item_types from the configuration file and omit the agent
         item_types = self.config_data["arenas"][0]["items"]
-        item_types = [element for element in item_types if element["name"] != "Agent"]
+        # item_types = [element for element in item_types if element["name"] != "Agent"]
 
         # Items are grouped by type, so len(item_types) is the number of item types in this configuration,
         # not the number of items per type which could be accessed via e.g. len(item_types[0]) for the 0th item type
@@ -90,9 +91,15 @@ class ConfigAssistant:
                 # Extract the useful data
                 name = self._set_item_name_from(type_name=items["name"], item_ix=j)
                 position = items["positions"][j]
-                size = items["sizes"][j]
-                rotation = items["rotations"][j] if "rotations" in items else 0
-                colour = items["colors"][j] if "colors" in items else None
+
+                if "Agent" in name:
+                    size = {"x": 1, "y": 1, "z": 1}
+                    colour = {"r":0, "g": 0, "b": 0}
+
+                else:
+                    size = items["sizes"][j]
+                    rotation = items["rotations"][j] if "rotations" in items else 0
+                    colour = items["colors"][j] if "colors" in items else None
 
                 # Transform some of the extracted data to suit
                 size_x = size["x"]
@@ -101,7 +108,6 @@ class ConfigAssistant:
                 xz_planar_centroid = np.array([position["x"], position["z"]])
 
                 # Instantiate a Rectangle with the extracted and transformed data
-                # TODO: Make sure that the first three parameters are correct
                 rectangle = Rectangle(center=xz_planar_centroid,
                                       width=size_x,
                                       height=size_z,
