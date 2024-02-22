@@ -1,6 +1,6 @@
 import yaml
 from src.arena_config_loader import ArenaConfigLoader
-from src.separating_axis_theorem import Rectangle, apply_separating_axis_theorem
+from src.separating_axis_theorem import Rectangle, RectangularCuboid, apply_separating_axis_theorem
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle as RectangleMatplotlib  # Can remove renaming when SAT Rectangle is renamed
@@ -17,7 +17,7 @@ class ConfigAssistant:
         """
         self.config_path = config_path
         self.config_data = self._load_config_data()
-        self.physical_items = self._create_rectangle_list()
+        self.physical_items = self._create_rectangular_cuboid_list()
 
     def check_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
@@ -36,9 +36,12 @@ class ConfigAssistant:
         currentAxis = plt.gca()
 
         for physical_item in self.physical_items:
-            center_of_rotation = tuple(physical_item.center)
-            width = physical_item.width
-            height = physical_item.height
+            center_of_rotation = tuple(physical_item.center[:2])
+
+            # See RectangularCuboid class definition to understand why these permutations may seem contradictory
+            width = physical_item.length
+            height = physical_item.width
+
             name = physical_item.name
             anti_cw_rotation = - physical_item.deg_rotation
             colour_dict = physical_item.colour
@@ -66,21 +69,16 @@ class ConfigAssistant:
             config_data = yaml.load(file, Loader=ArenaConfigLoader)
         return config_data
 
-    def _create_rectangle_list(self):
-        """Creates a list of Rectangle instances corresponding to the objects in the configuration data.
+    def _create_rectangular_cuboid_list(self):
+        """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.
 
         Returns:
-            (list): The Rectangle instances.
+            (list): The RectangularCuboid instances.
         """
-        rectangles = []
+        rec_cuboids = []
 
         # Extract the item_types from the configuration file and omit the agent
         item_types = self.config_data["arenas"][0]["items"]
-        # item_types = [element for element in item_types if element["name"] != "Agent"]
-
-        # Items are grouped by type, so len(item_types) is the number of item types in this configuration,
-        # not the number of items per type which could be accessed via e.g. len(item_types[0]) for the 0th item type
-        num_item_types = len(item_types)
 
         # For every item type
         for i, items in enumerate(item_types):
@@ -94,33 +92,28 @@ class ConfigAssistant:
 
                 if "Agent" in name:
                     size = {"x": 1, "y": 1, "z": 1}
-                    colour = {"r":0, "g": 0, "b": 0}
-
+                    colour = {"r": 0, "g": 0, "b": 0}
                 else:
                     size = items["sizes"][j]
                     rotation = items["rotations"][j] if "rotations" in items else 0
                     colour = items["colors"][j] if "colors" in items else None
 
-                # Transform some of the extracted data to suit
-                size_x = size["x"]
-                size_y = size["y"]
-                size_z = size["z"]
-                xz_planar_centroid = np.array([position["x"], position["z"]])
+                # Transform some of the extracted data
+                xzy_lower_base_centroid = np.array([position["x"], position["z"], position["y"]])
+                xzy_dimensions = (size["x"], size["z"], size["y"])
 
-                # Instantiate a Rectangle with the extracted and transformed data
-                rectangle = Rectangle(center=xz_planar_centroid,
-                                      width=size_x,
-                                      height=size_z,
-                                      deg_rotation=rotation,
-                                      depth=size_y,
-                                      depth_start=position["y"],
-                                      name=name,
-                                      colour=colour)
+                # Instantiate a RectangularCuboid with the extracted and transformed data
+                rec_cuboid = RectangularCuboid(lower_base_centroid=xzy_lower_base_centroid,
+                                               dimensions=xzy_dimensions,
+                                               rotation=rotation,
+                                               name=name,
+                                               colour=colour
+                                               )
 
-                # Add this instance to the rectangles list
-                rectangles += [rectangle]
+                # Add this instance to the rectangular_cuboids list
+                rec_cuboids += [rec_cuboid]
 
-        return rectangles
+        return rec_cuboids
 
     def _set_item_name_from(self, type_name, item_ix):
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
@@ -132,4 +125,5 @@ if __name__ == "__main__":
     config_assistant = ConfigAssistant(config_path)
     config_assistant.check_overlap()
     config_assistant.visualise_config()
+
     print("Exit ok")
