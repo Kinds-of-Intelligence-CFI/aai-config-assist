@@ -3,21 +3,23 @@ import numpy as np
 from src.geometry_helper import *
 
 
-def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_decimals=3):
+def apply_separating_axis_theorem(rec_cuboid1, rec_cuboid2, verbose=True, overlap_decimals=3):
     """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
 
     The mtv will be the 0 vector if the rectangles do not overlap.
 
     Args:
-        rectangle1 (Rectangle): An object of type Rectangle defined by its size, vertex coordinates, and rotation value.
-        rectangle2 (Rectangle): An object of type Rectangle defined by its size, vertex coordinates, and rotation value.
+        rec_cuboid1 (RectangularCuboid): An object of type RectangularCuboid.
+        rec_cuboid2 (RectangularCuboid): An object of type RectangularCuboid.
+        verbose (bool): Descriptive print statements if True, none if False.
+        overlap_decimals (int): Decimal precision that overlap values and vectors are printed with.
 
     Returns:
-        (tuple): The direction (list or tuple or np.ndarray) and magnitude (float) of overlap.
+        (np.ndarray): The minimum translation vector to overcome overlap between the two cuboids (0 vec, if no overlap)
     """
     # Check whether the items overlap in the depth-direction
-    depth_segment1 = np.array([rectangle1.depth_start, rectangle1.depth_start + rectangle1.depth])
-    depth_segment2 = np.array([rectangle2.depth_start, rectangle2.depth_start + rectangle2.depth])
+    depth_segment1 = np.array([rec_cuboid1.center[2], rec_cuboid1.center[2] + rec_cuboid1.height])
+    depth_segment2 = np.array([rec_cuboid2.center[2], rec_cuboid2.center[2] + rec_cuboid2.height])
     depth_overlap = determine_overlap_between_aligned_segments(depth_segment1, depth_segment2)
 
     if np.isclose(a=depth_overlap, b=0):
@@ -31,8 +33,8 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_
     # Prepare the possible separation axes candidates
     # Store the possible axes in a set to avoid checking the same axis twice
     possible_separation_axes = set()
-    for rectangle in [rectangle1, rectangle2]:
-        ax1, ax2 = get_potential_separation_axes(rectangle.deg_rotation)
+    for cuboid in [rec_cuboid1, rec_cuboid2]:
+        ax1, ax2 = get_potential_separation_axes(cuboid.deg_rotation)
         possible_separation_axes.add(ax1)
         possible_separation_axes.add(ax2)
 
@@ -42,8 +44,8 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_
     # Main loop
     for axis in possible_separation_axes:
         # Get min and max projection values of each rectangle on this axis
-        min1, max1 = get_min_max_projections(rectangle1.vertices, axis)
-        min2, max2 = get_min_max_projections(rectangle2.vertices, axis)
+        min1, max1 = get_min_max_projections(rec_cuboid1.lower_base_vertices, axis)
+        min2, max2 = get_min_max_projections(rec_cuboid2.lower_base_vertices, axis)
         segment1 = np.array([min1, max1])
         segment2 = np.array([min2, max2])
 
@@ -64,7 +66,7 @@ def apply_separating_axis_theorem(rectangle1, rectangle2, verbose=True, overlap_
         mtv = min_overlap_distance * np.array(min_overlap_vector)
 
         if verbose:
-            print(f"Overlap between {rectangle1.name} and {rectangle2.name}")
+            print(f"Overlap between {rec_cuboid1.name} and {rec_cuboid2.name}")
             # print(f"* The minimum overlap distance is: {min_overlap_distance}")
             # print(f"* The minimum overlap unit vector is: {min_overlap_vector}")
             # print(f"* The minimum translation vector is hence their product: {mtv}")
@@ -171,10 +173,10 @@ class RectangularCuboid:
         # The length of the 3d item = the width of the 2d item & the width of the 3d item = the height of the 2d item.
         # This is why the arguments provided below may seem to be in conflict with their parameter names.
         # The center should be only the 2d centroid coordinates, hence the clipping of the 3rd dimension with [:2].
-        self.vertices = calculate_vertices_of_rotated_rectangle(center=self.center[:2],
-                                                                width=self.length,
-                                                                height=self.width,
-                                                                angle_deg=self.deg_rotation)
+        self.lower_base_vertices = calculate_vertices_of_rotated_rectangle(center=self.center[:2],
+                                                                           width=self.length,
+                                                                           height=self.width,
+                                                                           angle_deg=self.deg_rotation)
 
 
 # TODO (the first 2 are needed and important but will take some refactoring):
