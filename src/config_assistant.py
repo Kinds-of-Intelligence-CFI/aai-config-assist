@@ -19,35 +19,53 @@ class ConfigAssistant:
         self.config_data = self._load_config_data()
         self.physical_items = self._create_rectangular_cuboid_list()
 
-    def check_overlap(self):
+    def check_config_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
-        N = len(self.physical_items)
-        for i in range(N):
-            for j in range(i + 1, N):
-                item1 = self.physical_items[i]
-                item2 = self.physical_items[j]
-                apply_separating_axis_theorem(item1, item2)
+        cuboids = self.physical_items
+        self._check_overlaps_between_cuboids(cuboids)
 
     def visualise_config(self):
         """Displays a 2d representation of the class configuration (seen from above)."""
+        cuboids = self.physical_items
+        self._visualise_cuboid_bases(cuboids)
+
+    def _check_overlaps_between_cuboids(self, cuboids):
+        """Displays a log of possible overlaps to the terminal.
+
+        Args:
+            cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
+        """
+        N = len(cuboids)
+        for i in range(N):
+            for j in range(i + 1, N):
+                item1 = cuboids[i]
+                item2 = cuboids[j]
+                apply_separating_axis_theorem(item1, item2)
+
+    def _visualise_cuboid_bases(self, cuboids):
+        """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
+
+        Args:
+            cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
+        """
         fig = plt.figure()
         plt.xlim(0, 40.5)
         plt.ylim(0, 40.5)
         currentAxis = plt.gca()
 
-        for physical_item in self.physical_items:
-            center_of_rotation = tuple(physical_item.center[:2])
+        for cuboid in cuboids:
+            center_of_rotation = tuple(cuboid.center[:2])
 
             # See RectangularCuboid class definition to understand why these permutations may seem contradictory
-            width = physical_item.length
-            height = physical_item.width
+            width = cuboid.length
+            height = cuboid.width
 
-            name = physical_item.name
-            anti_cw_rotation = - physical_item.deg_rotation
-            colour_dict = physical_item.colour
+            name = cuboid.name
+            anti_cw_rotation = - cuboid.deg_rotation
+            colour_dict = cuboid.colour
             rgb_colour = (colour_dict["r"] / 256,
                           colour_dict["g"] / 256,
-                          colour_dict["b"] / 256) if physical_item.colour is not None else (0, 0, 1)
+                          colour_dict["b"] / 256) if cuboid.colour is not None else (0, 0, 1)
 
             # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
             bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
@@ -123,7 +141,14 @@ class ConfigAssistant:
 if __name__ == "__main__":
     config_path = "../example_configs/config.yaml"
     config_assistant = ConfigAssistant(config_path)
-    config_assistant.check_overlap()
+    config_assistant.check_config_overlap()
     config_assistant.visualise_config()
+
+    # Visualising a single custom rectangular cuboid
+    lower_base_centroid = np.array([10, 20, 3])
+    dimensions = (10, 10, 30)
+    rotation = 45
+    rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
+    config_assistant._visualise_cuboid_bases(rec_cuboid)
 
     print("Exit ok")
