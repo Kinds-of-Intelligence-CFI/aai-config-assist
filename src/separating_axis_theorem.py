@@ -222,5 +222,4 @@ if __name__ == "__main__":
     dimensions = (2, 2, 3)
     rotation = 45
     rec_cuboid = RectangularCuboid(lower_base_centroid, dimensions, rotation)
-    print(rec_cuboid)
     print("Exit ok")

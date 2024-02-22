@@ -21,7 +21,7 @@ class TestGeometryHelper(unittest.TestCase):
         result = calculate_vertices_of_rotated_rectangle(center=centroid, width=width,
                                                          height=height, angle_deg=rotation)
 
-        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated vertices are not as expected.")
+        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated lower_base_vertices are not as expected.")
 
     def test_calculate_vertices_of_rotated_rectangle_when_rotation_is_positive_and_centroid_is_not_at_origin(self):
         x_centroid = 1
@@ -45,7 +45,7 @@ class TestGeometryHelper(unittest.TestCase):
         result = calculate_vertices_of_rotated_rectangle(center=centroid, width=width,
                                                          height=height, angle_deg=rotation)
 
-        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated vertices are not as expected.")
+        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated lower_base_vertices are not as expected.")
 
     def test_calculate_vertices_of_rotated_rectangle_when_rotation_is_negative(self):
         centroid = np.array([0, 0])
@@ -62,7 +62,7 @@ class TestGeometryHelper(unittest.TestCase):
         result = calculate_vertices_of_rotated_rectangle(center=centroid, width=width,
                                                          height=height, angle_deg=rotation)
 
-        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated vertices are not as expected.")
+        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated lower_base_vertices are not as expected.")
 
     def test_calculate_vertices_of_axis_aligned_rectangle(self):
         x_centroid = 1
@@ -83,7 +83,7 @@ class TestGeometryHelper(unittest.TestCase):
 
         result = calculate_vertices_of_axis_aligned_rectangle(center=centroid, width=width, height=height)
 
-        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated vertices are not as expected.")
+        self.assertTrue(np.all(np.isclose(expected, result)), "The rotated lower_base_vertices are not as expected.")
 
     def test_calculate_clockwise_rotated_2d_point(self):
         original_points = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])

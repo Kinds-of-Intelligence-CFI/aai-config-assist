@@ -29,6 +29,16 @@ class ConfigAssistant:
         cuboids = self.physical_items
         self._visualise_cuboid_bases(cuboids)
 
+    def _load_config_data(self):
+        """Parses and loads the data from the YAML file inputted to class constructor.
+
+        Returns:
+            (dict): The loaded data.
+        """
+        with open(self.config_path) as file:
+            config_data = yaml.load(file, Loader=ArenaConfigLoader)
+        return config_data
+
     def _check_overlaps_between_cuboids(self, cuboids):
         """Displays a log of possible overlaps to the terminal.
 
@@ -76,16 +86,6 @@ class ConfigAssistant:
             plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
 
         plt.show()
-
-    def _load_config_data(self):
-        """Parses and loads the data from the YAML file inputted to class constructor.
-
-        Returns:
-            (dict): The loaded data.
-        """
-        with open(self.config_path) as file:
-            config_data = yaml.load(file, Loader=ArenaConfigLoader)
-        return config_data
 
     def _create_rectangular_cuboid_list(self):
         """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.

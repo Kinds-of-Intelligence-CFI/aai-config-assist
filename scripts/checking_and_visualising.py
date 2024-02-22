@@ -5,5 +5,5 @@ if __name__ == "__main__":
     config_path = "../example_configs/config.yaml"
 
     config_assistant = ConfigAssistant(config_path)
-    config_assistant.check_overlap()
+    config_assistant.check_config_overlap()
     config_assistant.visualise_config()

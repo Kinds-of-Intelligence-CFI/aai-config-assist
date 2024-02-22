@@ -11,8 +11,8 @@ def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
         angle_deg (float): The clockwise angle of rotation of the rectangle, given in degrees.
 
     Returns:
-        np.ndarray: Array (4, 2) containing the 4 x and y coordinate pairs of the rotated rectangle's vertices. The
-            array gives the rotated coordinates of the top-left, top-right, bottom-right, bottom-left vertices of the
+        np.ndarray: Array (4, 2) containing the 4 x and y coordinate pairs of the rotated rectangle's lower_base_vertices. The
+            array gives the rotated coordinates of the top-left, top-right, bottom-right, bottom-left lower_base_vertices of the
             original, un-rotated rectangle.
     """
     vertices = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
@@ -29,7 +29,7 @@ def calculate_vertices_of_axis_aligned_rectangle(center, width, height):
         height (float): The height of the rectangle.
 
     Returns:
-      np.ndarray: Array (4x2) containing the 4 x and y coordinate pairs of the rectangle vertices.
+      np.ndarray: Array (4x2) containing the 4 x and y coordinate pairs of the rectangle lower_base_vertices.
     """
     half_width = 0.5 * width
     half_height = 0.5 * height
@@ -94,7 +94,7 @@ def get_min_max_projections(points, axis):
     """Computes the minimum and maximum projection values of the inputted points onto an axis.
 
     This is equivalent to the boundaries of the total projection distance covered by a polygon when all of its
-    vertices (defined in points), are projected onto a vector (defined as axis).
+    lower_base_vertices (defined in points), are projected onto a vector (defined as axis).
 
     Args:
         points (np.ndarray): The x and y coordinates of all the points to be rotated, stacked vertically.
@@ -145,7 +145,7 @@ def normalise_vector(vec):
 #  - put the examples from below into the docstrings (in the correct doctest format)
 
 if __name__ == "__main__":
-    # Calculating the rotated vertices of a rectangle from center, width, height, and rotation in degrees
+    # Calculating the rotated lower_base_vertices of a rectangle from center, width, height, and rotation in degrees
     centroid2 = np.array([0, 0])
     height2 = 2
     width2 = 2
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     print(np.shape(vertices2))
     print(vertices2)
 
-    # Calculating the vertices of an axis-aligned rectangle from center, width, and height
+    # Calculating the lower_base_vertices of an axis-aligned rectangle from center, width, and height
     centroid1 = np.array([0, 0])
     height1 = 2
     width1 = 2
