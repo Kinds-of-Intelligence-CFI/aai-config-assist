@@ -4,6 +4,7 @@ from src.separating_axis_theorem import Rectangle, RectangularCuboid, apply_sepa
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle as RectangleMatplotlib  # Can remove renaming when SAT Rectangle is renamed
+import os
 
 
 class ConfigAssistant:
@@ -107,13 +108,13 @@ class ConfigAssistant:
                 # Extract the useful data
                 name = self._set_item_name_from(type_name=items["name"], item_ix=j)
                 position = items["positions"][j]
+                rotation = items["rotations"][j] if "rotations" in items else 0
 
                 if "Agent" in name:
                     size = {"x": 1, "y": 1, "z": 1}
                     colour = {"r": 0, "g": 0, "b": 0}
                 else:
                     size = items["sizes"][j]
-                    rotation = items["rotations"][j] if "rotations" in items else 0
                     colour = items["colors"][j] if "colors" in items else None
 
                 # Transform some of the extracted data
@@ -139,7 +140,7 @@ class ConfigAssistant:
 
 
 if __name__ == "__main__":
-    config_path = "../example_configs/config.yaml"
+    config_path = os.path.join("example_configs", "config.yaml")
     config_assistant = ConfigAssistant(config_path)
     config_assistant.check_config_overlap()
     config_assistant.visualise_config()

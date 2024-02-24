@@ -1,4 +1,5 @@
 import yaml
+import os
 
 
 class ArenaConfigLoader(yaml.SafeLoader):
@@ -29,7 +30,7 @@ class ArenaConfigLoader(yaml.SafeLoader):
 
 if __name__ == "__main__":
     # Load a configuration yaml file
-    config_path = "example_configs/config_broken.yaml"
+    config_path = os.path.join("example_configs", "config_broken.yaml")
     with open(config_path) as file:
         config_data = yaml.load(file, Loader=ArenaConfigLoader)
     # print(config_data)
