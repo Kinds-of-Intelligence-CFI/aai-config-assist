@@ -28,7 +28,7 @@ class ConfigAssistant:
     def visualise_config(self):
         """Displays a 2d representation of the class configuration (seen from above)."""
         cuboids = self.physical_items
-        self._visualise_cuboid_bases(cuboids)
+        self._visualise_cuboid_bases_plotly(cuboids)
 
     def _load_config_data(self):
         """Parses and loads the data from the YAML file inputted to class constructor.
@@ -53,7 +53,7 @@ class ConfigAssistant:
                 item2 = cuboids[j]
                 apply_separating_axis_theorem(item1, item2)
 
-    def _visualise_cuboid_bases(self, cuboids):
+    def _visualise_cuboid_bases_matplotlib(self, cuboids):
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
 
         Args:
@@ -76,17 +76,94 @@ class ConfigAssistant:
             colour_dict = cuboid.colour
             rgb_colour = (colour_dict["r"] / 256,
                           colour_dict["g"] / 256,
-                          colour_dict["b"] / 256) if cuboid.colour is not None else (0, 0, 1)
+                          colour_dict["b"] / 256) if cuboid.colour is not None else self._get_default_item_colour(name)
 
             # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
             bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
 
             currentAxis.add_patch(RectangleMatplotlib(xy=bottom_left, width=width, height=height, edgecolor="k",
-                                                      lw=1, alpha=0.4, rotation_point=center_of_rotation,
+                                                      lw=1, alpha=0.3, rotation_point=center_of_rotation,
                                                       angle=anti_cw_rotation, facecolor=rgb_colour))
             plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
-
         plt.show()
+
+    def _visualise_cuboid_bases_plotly(self, cuboids):
+        """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
+
+        Args:
+            cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
+        """
+        import plotly.graph_objects as go
+        fig = go.Figure()
+        fig.update_xaxes(range=[-1, 41], showgrid=True)
+        fig.update_yaxes(range=[-1, 41], showgrid=True)
+
+
+        for cuboid in cuboids:
+            center_of_rotation = tuple(cuboid.center[:2])
+
+            # See RectangularCuboid class definition to understand why these permutations may seem contradictory
+            width = cuboid.length
+            height = cuboid.width
+
+            name = cuboid.name
+            colour_dict = cuboid.colour
+            rgb_colour = (colour_dict["r"],
+                          colour_dict["g"],
+                          colour_dict["b"]) if cuboid.colour is not None else self._get_default_item_colour(name)
+
+            r, g, b = rgb_colour
+            opa = 0.4
+
+            # Concatenation because need to provide first element back to path for shape contour to be complete
+            # See first example of https://plotly.com/python/shapes/
+            x_path = np.concatenate((cuboid.lower_base_vertices[:, 0], np.reshape(cuboid.lower_base_vertices[0, 0], newshape=(1,))))
+            y_path = np.concatenate((cuboid.lower_base_vertices[:, 1], np.reshape(cuboid.lower_base_vertices[0, 1], newshape=(1,))))
+
+            fig.add_trace(go.Scatter(x=x_path,
+                                     y=y_path,
+                                     fill="toself",
+                                     line=dict(color=f"rgba({0}, {0}, {0}, {1})", width=1,),
+                                     fillcolor=f"rgba({r}, {g}, {b}, {opa})",
+                                     name=name,
+                                     marker=dict(opacity=0)
+                                     ),
+                          )
+
+        fig.show()
+
+    def _get_default_item_colour(self, item_name):
+        """Provides the default colour of a particular Animal-AI item.
+
+        Args:
+            item_name (str): Name of the physical Animal-AI item.
+
+        Returns:
+            (tuple): The red, green, blue (rgb) components of the default colour for the inputted item.
+        """
+        # These are placeholders until I get the exact colours for the Animal-AI items
+        item_colour_dict = {
+            "GoodGoal": (0, 256, 0),
+            "GoodGoalBounce": (0, 256, 0),
+            "BadGoal": (256, 0, 0),
+            "BadGoalBounce": (256, 0, 0),
+            "GoodGoalMulti": (0, 256, 256),
+            "GoodGoalMultiBounce": (0, 256, 256),
+            "DeathZone": (256, 0, 0),
+            "HotZone": (255, 165, 0),
+            "CardBox1": (200, 200, 200),
+            "CardBox2": (200, 200, 200),
+            "UObject": (200, 200, 200),
+            "LObject": (200, 200, 200),
+            "LObject2": (200, 200, 200),
+            "WallTransparent": (50, 50, 50)
+        }
+
+        item_name = item_name.split(" ")[0]
+
+        default_colour = item_colour_dict.get(item_name, (10, 10, 100))
+
+        return default_colour
 
     def _create_rectangular_cuboid_list(self):
         """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.
@@ -138,6 +215,7 @@ class ConfigAssistant:
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
 
+# TODO: eventually, can decouple the checking and plotting functionalities of this class
 
 if __name__ == "__main__":
     config_path = os.path.join("example_configs", "config.yaml")
@@ -145,11 +223,11 @@ if __name__ == "__main__":
     config_assistant.check_config_overlap()
     config_assistant.visualise_config()
 
-    # Visualising a single custom rectangular cuboid
-    lower_base_centroid = np.array([10, 20, 3])
-    dimensions = (10, 10, 30)
-    rotation = 45
-    rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
-    config_assistant._visualise_cuboid_bases(rec_cuboid)
+    # # Visualising a single custom rectangular cuboid
+    # lower_base_centroid = np.array([10, 20, 3])
+    # dimensions = (10, 10, 30)
+    # rotation = 45
+    # rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
+    # config_assistant._visualise_cuboid_bases(rec_cuboid)
 
     print("Exit ok")
