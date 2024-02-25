@@ -24,6 +24,23 @@ This section will guide you through installing and using Animal-AI Configuration
     pip install -r requirements.txt
     ```
 
+### Using the library
+1. Open the [checking_and_visualising.py](scripts/checking_and_visualising.py) file in an editor of your choice
+(Vim, TextEdit, VS Code, Pycharm...)
+2. Replace the `config_path` variable with the path from the repository root to your `.yaml` configuration file. For
+example, if your configuration file is `aai-config-assist/config.yaml` then your path would be 
+`os.path.join("example_configs", "config.yaml")`
+3. Open Terminal, and navigate to the root of this repository. You can run `pwd` in Terminal to ensure that your
+working directory is the `aai-config-assistant` repository on your local machine.
+4. In Terminal, enter the following command to execute the [checking_and_visualising.py](scripts/checking_and_visualising.py)
+   ```shell
+   python3 -m scripts.checking_and_visualising
+   ```
+You should now see a visualisation of your configuration arena as well as a summary of the overlaps
+between items in your configuration (in the Terminal log output).
+
+If you run into any issues, please get in touch (see Contact section below).
+
 ## License
 [MIT License](LICENSE)
 
