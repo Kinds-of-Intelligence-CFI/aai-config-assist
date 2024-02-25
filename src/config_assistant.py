@@ -1,10 +1,11 @@
 import yaml
 from src.arena_config_loader import ArenaConfigLoader
-from src.separating_axis_theorem import Rectangle, RectangularCuboid, apply_separating_axis_theorem
+from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle as RectangleMatplotlib  # Can remove renaming when SAT Rectangle is renamed
+from matplotlib.patches import Rectangle  # Can remove renaming when SAT Rectangle is renamed
 import os
+import plotly.graph_objects as go
 
 
 class ConfigAssistant:
@@ -19,11 +20,12 @@ class ConfigAssistant:
         self.config_path = config_path
         self.config_data = self._load_config_data()
         self.physical_items = self._create_rectangular_cuboid_list()
+        self.names_items_with_overlap = []
 
     def check_config_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
         cuboids = self.physical_items
-        self._check_overlaps_between_cuboids(cuboids)
+        self.names_items_with_overlap = self._check_overlaps_between_cuboids(cuboids)
 
     def visualise_config(self):
         """Displays a 2d representation of the class configuration (seen from above)."""
@@ -45,13 +47,25 @@ class ConfigAssistant:
 
         Args:
             cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
+
+        Returns:
+            (set[str]): Names of the items which have an overlap.
         """
+        items_with_overlap = set()
+
         N = len(cuboids)
         for i in range(N):
             for j in range(i + 1, N):
                 item1 = cuboids[i]
                 item2 = cuboids[j]
-                apply_separating_axis_theorem(item1, item2)
+                mtv = apply_separating_axis_theorem(item1, item2)
+
+                # If there is an overlap, add the items in question
+                if not np.all(np.isclose(mtv, np.array([0, 0]))):
+                    items_with_overlap.add(item1.name)
+                    items_with_overlap.add(item2.name)
+
+        return items_with_overlap
 
     def _visualise_cuboid_bases_matplotlib(self, cuboids):
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
@@ -81,9 +95,9 @@ class ConfigAssistant:
             # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
             bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
 
-            currentAxis.add_patch(RectangleMatplotlib(xy=bottom_left, width=width, height=height, edgecolor="k",
-                                                      lw=1, alpha=0.3, rotation_point=center_of_rotation,
-                                                      angle=anti_cw_rotation, facecolor=rgb_colour))
+            currentAxis.add_patch(Rectangle(xy=bottom_left, width=width, height=height, edgecolor="k",
+                                            lw=1, alpha=0.3, rotation_point=center_of_rotation,
+                                            angle=anti_cw_rotation, facecolor=rgb_colour))
             plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
         plt.show()
 
@@ -93,19 +107,23 @@ class ConfigAssistant:
         Args:
             cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
         """
-        import plotly.graph_objects as go
+        # Configure the figure environment and add an arena rectangle
         fig = go.Figure()
-        fig.update_xaxes(range=[-1, 41], showgrid=True)
-        fig.update_yaxes(range=[-1, 41], showgrid=True)
-
+        fig.update_xaxes(range=[-2, 42], showgrid=True)
+        fig.update_yaxes(range=[-2, 42], showgrid=True)
+        # To add an arena border
+        fig.add_shape(type="rect",
+                      x0=0, y0=0, x1=40, y1=40,
+                      line=dict(color=f"rgba({100}, {100}, {100}, {1})", width=1.5, dash=None),
+                      fillcolor=f"rgba({255}, {224}, {130}, {0.1})"
+                      )
+        # To make the axes equal (the cells square)
+        fig.update_yaxes(
+            scaleanchor="x",
+            scaleratio=1,
+        )
 
         for cuboid in cuboids:
-            center_of_rotation = tuple(cuboid.center[:2])
-
-            # See RectangularCuboid class definition to understand why these permutations may seem contradictory
-            width = cuboid.length
-            height = cuboid.width
-
             name = cuboid.name
             colour_dict = cuboid.colour
             rgb_colour = (colour_dict["r"],
@@ -117,13 +135,25 @@ class ConfigAssistant:
 
             # Concatenation because need to provide first element back to path for shape contour to be complete
             # See first example of https://plotly.com/python/shapes/
-            x_path = np.concatenate((cuboid.lower_base_vertices[:, 0], np.reshape(cuboid.lower_base_vertices[0, 0], newshape=(1,))))
-            y_path = np.concatenate((cuboid.lower_base_vertices[:, 1], np.reshape(cuboid.lower_base_vertices[0, 1], newshape=(1,))))
+            x_path = np.concatenate(
+                (cuboid.lower_base_vertices[:, 0], np.reshape(cuboid.lower_base_vertices[0, 0], newshape=(1,))))
+            y_path = np.concatenate(
+                (cuboid.lower_base_vertices[:, 1], np.reshape(cuboid.lower_base_vertices[0, 1], newshape=(1,))))
+
+            # If this an item with an overlap, make its border red and make its width thicker
+            if name in self.names_items_with_overlap:
+                line_col = f"rgba({256}, {0}, {0}, {1})"
+                line_width = 1.5
+
+            # Else, keep its border black and standard thickness
+            else:
+                line_col = f"rgba({0}, {0}, {0}, {1})"
+                line_width = 1
 
             fig.add_trace(go.Scatter(x=x_path,
                                      y=y_path,
                                      fill="toself",
-                                     line=dict(color=f"rgba({0}, {0}, {0}, {1})", width=1,),
+                                     line=dict(color=line_col, width=line_width, ),
                                      fillcolor=f"rgba({r}, {g}, {b}, {opa})",
                                      name=name,
                                      marker=dict(opacity=0)
@@ -214,6 +244,7 @@ class ConfigAssistant:
     def _set_item_name_from(self, type_name, item_ix):
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
+
 
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
 
