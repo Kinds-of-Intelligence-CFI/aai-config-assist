@@ -14,11 +14,18 @@ This section will guide you through installing and using Animal-AI Configuration
    git clone git@github.com:mgm21/aai-config-assist.git
    cd aai-config-assist
    ```
-3. Set up your virtual environment in the root of the cloned repository
-    ```sh
-   python -m venv venv
-   source venv/bin/activate
-    ```
+2. Set up your virtual environment in the root of the cloned repository
+   1. Linux/macOS 
+      ```sh
+      python -m venv venv
+      source venv/bin/activate
+      ```
+   2. Windows
+      ```sh
+      python -m venv venv
+      venv\Scripts\activate
+      ```
+
 4. Install the required packages in the development environment
     ```shell
     pip install -r requirements.txt
@@ -34,7 +41,7 @@ example, if your configuration file is `aai-config-assist/config.yaml` then your
 working directory is the `aai-config-assistant` repository on your local machine.
 4. In Terminal, enter the following command to execute the [checking_and_visualising.py](scripts/checking_and_visualising.py)
    ```shell
-   python3 -m scripts.checking_and_visualising
+   python -m scripts.checking_and_visualising
    ```
 You should now see a visualisation of your configuration arena as well as a summary of the overlaps
 between items in your configuration (in the Terminal log output).
