@@ -1,4 +1,5 @@
 import numpy as np
+
 from src.geometry_helper import *
 
 
@@ -71,7 +72,9 @@ def apply_separating_axis_theorem(rec_cuboid1, rec_cuboid2, verbose=True, overla
             # print(f"* The minimum translation vector is hence their product: {mtv}")
             print(f"* Must move the objects away simultaneously by "
                   f"{np.round(mtv[0], overlap_decimals)} in the x-dir "
-                  f"and {np.round(mtv[1], overlap_decimals)} in the z-dir")
+                  f"and {np.round(mtv[1], overlap_decimals)} in the z-dir "
+                  f"(or, alternatively, by {depth_overlap} in the y-dir)"
+                  )
             print("")
     else:
         # There is no overlap, and hence no distance to be covered in either direction
@@ -114,34 +117,8 @@ def get_potential_separation_axes(deg_angle):
     return ax1, ax2
 
 
-class Rectangle:
-    """A rectangle defined by its center, width, height, and degree of rotation in a two dimensional plane."""
-
-    def __init__(self, center, width, height, deg_rotation, depth=0, depth_start=0, name=None, colour=None):
-        """Constructs an instance of Rectangle.
-
-        Args:
-            center (np.ndarray): The x and y coordinates of the rectangle's centroid.
-            width (float): The width of the rectangle.
-            height (float): The height of the rectangle.
-            deg_rotation (float): The clockwise angle of rotation of the rectangle, given in degrees.
-            depth (float): The third dimension of an orthogonal parallelepiped.
-            depth_start (float): The depth coordinate of the rectangle's base, not centroid.
-            name (str): Name of the item.
-        """
-        self.center = center
-        self.width = width
-        self.height = height
-        self.depth = depth
-        self.depth_start = depth_start
-        self.deg_rotation = deg_rotation
-        self.name = name
-        self.colour = colour
-        self.vertices = calculate_vertices_of_rotated_rectangle(center, width, height, deg_rotation)
-
-
 class RectangularCuboid:
-    """A rectangular cuboid, defined by its the centroid, size, and rotation of its lower base.
+    """A rectangular cuboid, defined by its centroid, size, and rotation of its lower base.
 
     Note:
         - This class was written to be compatible with the preexisting conventions of Animal-AI (AAI).
@@ -149,7 +126,7 @@ class RectangularCuboid:
         - The only rotation possible for this object is a height-wise, "yaw"-type rotation of the lower base rectangle.
         - The lower base face is always parallel to the 2d plane made up of the 1st and 2nd dimensions of the 3d space.
     """
-    def __init__(self, lower_base_centroid, dimensions, rotation, name=None, colour=None):
+    def __init__(self, lower_base_centroid, dimensions, rotation, name="Cuboid", colour=None):
         """Constructs an instance of RectangularCuboid.
 
         Args:
@@ -167,7 +144,7 @@ class RectangularCuboid:
         self.name = name
         self.colour = colour
 
-        # The following function works in a 2d planar world. Hence its definitions of width and height are not the same
+        # The following function works in a 2d planar world. Hence, its definitions of width and height are not the same
         # as those defined in the 3d world (see this class's docstring).
         # The length of the 3d item = the width of the 2d item & the width of the 3d item = the height of the 2d item.
         # This is why the arguments provided below may seem to be in conflict with their parameter names.
@@ -178,47 +155,39 @@ class RectangularCuboid:
                                                                            angle_deg=self.deg_rotation)
 
 
-# TODO (the first 2 are needed and important but will take some refactoring):
-#  - may want to rename Rectangle class to Orthogonal Parallelepiped because it now has a notion of depth
-#    in this case, maybe it would be good to have a check at the end of apply_sat that just checks whether or
-#    not, the depth axes overlap; because only if they do should the mvt be given. Can even have a routine checking
-#    which overlap is smaller the depth (vertical, y in AAI) or the planar mtv from the arena flat plane and then return
-#    that as the mtv.
-#  - on that note, could even offload some of the logic in config_assistant by making it such that you can directly
-#    pass the size and position objects as they are (no need to unpack before passing to OrthogonalParallelepiped)
-#  - improve the efficiency and elegance of the logic in apply_sat function
-#  - put the examples from below into the docstrings (in the correct doctest format)
+# TODO: put the examples from below into the docstrings (in the correct doctest format)
 
 if __name__ == "__main__":
-    # Rectangle 1
-    center1 = np.array([2, 3.5])
-    width1 = 3
-    height1 = 2.5
+    # Rectangular Cuboid 1
+    center1 = np.array([2, 3.5, 5])
+    dimensions1 = (1, 2, 3)
     rotation1 = 315
-    rectangle1 = Rectangle(center1, width1, height1, rotation1)
-    print(f"Rectangle 1 vertices:\n{rectangle1.vertices}\n")
-
-    # Rectangle 2
-    center2 = np.array([3.5, 2])
-    width2 = 2.5
-    height2 = 2
-    rotation2 = 45
-    rectangle2 = Rectangle(center2, width2, height2, rotation2)
-    print(f"Rectangle 2 vertices:\n{rectangle2.vertices}\n")
+    name1 = "Cuboid 1"
+    colour1 = {"r": 0, "g": 100, "b": 50}
+    rectangular_cuboid1 = RectangularCuboid(center1, dimensions1, rotation1, name1, )
+    print(f"Rectangular cuboid 1 vertices:\n{rectangular_cuboid1.lower_base_vertices}\n")
+    
+    # Rectangular Cuboid 2
+    center2 = np.array([2, 3.5, 5])
+    dimensions2 = (2, 2, 3)
+    rotation2 = 325
+    name2 = "Cuboid 2"
+    colour2 = {"r": 0, "g": 200, "b": 50}
+    rectangular_cuboid2 = RectangularCuboid(center2, dimensions2, rotation2, name2, )
+    print(f"Rectangular cuboid 2 vertices:\n{rectangular_cuboid2.lower_base_vertices}\n")
 
     # Determine the possible separation axes
-    possible_separation_axes = set()
-    for rectangle in [rectangle1, rectangle2]:
-        ax1, ax2 = get_potential_separation_axes(rectangle.deg_rotation)
-        possible_separation_axes.add(ax1)
-        possible_separation_axes.add(ax2)
-    print(f"Possible separation axes:\n{possible_separation_axes}\n")
+    possible_sep_axes = set()
+    for rectangle in [rectangular_cuboid1, rectangular_cuboid2]:
+        axis1, axis2 = get_potential_separation_axes(rectangle.deg_rotation)
+        possible_sep_axes.add(axis1)
+        possible_sep_axes.add(axis2)
+    print(f"Possible separation axes:\n{possible_sep_axes}\n")
 
-    mtv = apply_separating_axis_theorem(rectangle1, rectangle2)
+    mtv = apply_separating_axis_theorem(rectangular_cuboid1, rectangular_cuboid2)
 
     # Defining a Rectangular Cuboid
     lower_base_centroid = np.array([1, 2, 3])
     dimensions = (2, 2, 3)
     rotation = 45
     rec_cuboid = RectangularCuboid(lower_base_centroid, dimensions, rotation)
-    print("Exit ok")

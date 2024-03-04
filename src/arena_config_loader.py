@@ -12,27 +12,37 @@ class ArenaConfigLoader(yaml.SafeLoader):
         self.add_constructor('!Vector3', self.construct_vector3)
         self.add_constructor('!RGB', self.construct_rgb)
 
-    def construct_arena(self, loader, node):
+    @staticmethod
+    def construct_arena(loader, node):
         return loader.construct_mapping(node)
 
-    def construct_arena_config(self, loader, node):
+    @staticmethod
+    def construct_arena_config(loader, node):
         return loader.construct_mapping(node)
 
-    def construct_item(self, loader, node):
+    @staticmethod
+    def construct_item(loader, node):
         return loader.construct_mapping(node)
 
-    def construct_vector3(self, loader, node):
+    @staticmethod
+    def construct_vector3(loader, node):
         return loader.construct_mapping(node)
 
-    def construct_rgb(self, loader, node):
+    @staticmethod
+    def construct_rgb(loader, node):
         return loader.construct_mapping(node)
 
 
 if __name__ == "__main__":
+    import pprint
+
     # Load a configuration yaml file
-    config_path = os.path.join("example_configs", "config_broken.yaml")
+    config_path = os.path.join("example_configs", "config.yaml")
     with open(config_path) as file:
         config_data = yaml.load(file, Loader=ArenaConfigLoader)
-    # print(config_data)
-    # print([element for element in config_data["arenas"][0]["items"] if element["name"] != "arena"])
-    print("Exit ok")
+
+    print("* Entire configuration data:")
+    pprint.pprint(config_data)
+
+    print("\n* Configuration items without the Agent item:")
+    pprint.pprint([element for element in config_data["arenas"][0]["items"] if element["name"] != "Agent"])

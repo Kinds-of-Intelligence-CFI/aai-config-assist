@@ -1,7 +1,11 @@
 import unittest
-from src.separating_axis_theorem import *
+
 import numpy as np
 
+from src.separating_axis_theorem import *
+
+
+# Run in terminal to get per test breakdown: python -m unittest -v tests/separating_axis_theorem.py
 
 class TestSeparatingAxisTheorem(unittest.TestCase):
     def test_get_potential_separation_axes_when_theta_is_0(self):

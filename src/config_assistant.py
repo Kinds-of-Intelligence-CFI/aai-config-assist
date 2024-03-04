@@ -1,11 +1,13 @@
 import yaml
-from src.arena_config_loader import ArenaConfigLoader
-from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle  # Can remove renaming when SAT Rectangle is renamed
-import os
+from matplotlib.patches import Rectangle
 import plotly.graph_objects as go
+
+from src.arena_config_loader import ArenaConfigLoader
+from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
 
 
 class ConfigAssistant:
@@ -42,7 +44,8 @@ class ConfigAssistant:
             config_data = yaml.load(file, Loader=ArenaConfigLoader)
         return config_data
 
-    def _check_overlaps_between_cuboids(self, cuboids):
+    @staticmethod
+    def _check_overlaps_between_cuboids(cuboids):
         """Displays a log of possible overlaps to the terminal.
 
         Args:
@@ -53,9 +56,9 @@ class ConfigAssistant:
         """
         items_with_overlap = set()
 
-        N = len(cuboids)
-        for i in range(N):
-            for j in range(i + 1, N):
+        n = len(cuboids)
+        for i in range(n):
+            for j in range(i + 1, n):
                 item1 = cuboids[i]
                 item2 = cuboids[j]
                 mtv = apply_separating_axis_theorem(item1, item2)
@@ -109,8 +112,8 @@ class ConfigAssistant:
         """
         # Configure the figure environment and add an arena rectangle
         fig = go.Figure()
-        fig.update_xaxes(range=[-2, 42], showgrid=True)
-        fig.update_yaxes(range=[-2, 42], showgrid=True)
+        fig.update_xaxes(range=[-2, 42], showgrid=False, zeroline=False, visible=True)
+        fig.update_yaxes(range=[-2, 42], showgrid=False, zeroline=False, visible=True)
         # To add an arena border
         fig.add_shape(type="rect",
                       x0=0, y0=0, x1=40, y1=40,
@@ -131,7 +134,7 @@ class ConfigAssistant:
                           colour_dict["b"]) if cuboid.colour is not None else self._get_default_item_colour(name)
 
             r, g, b = rgb_colour
-            opa = 0.4
+            opa = 0.35
 
             # Concatenation because need to provide first element back to path for shape contour to be complete
             # See first example of https://plotly.com/python/shapes/
@@ -161,39 +164,6 @@ class ConfigAssistant:
                           )
 
         fig.show()
-
-    def _get_default_item_colour(self, item_name):
-        """Provides the default colour of a particular Animal-AI item.
-
-        Args:
-            item_name (str): Name of the physical Animal-AI item.
-
-        Returns:
-            (tuple): The red, green, blue (rgb) components of the default colour for the inputted item.
-        """
-        # These are placeholders until I get the exact colours for the Animal-AI items
-        item_colour_dict = {
-            "GoodGoal": (0, 256, 0),
-            "GoodGoalBounce": (0, 256, 0),
-            "BadGoal": (256, 0, 0),
-            "BadGoalBounce": (256, 0, 0),
-            "GoodGoalMulti": (0, 256, 256),
-            "GoodGoalMultiBounce": (0, 256, 256),
-            "DeathZone": (256, 0, 0),
-            "HotZone": (255, 165, 0),
-            "CardBox1": (200, 200, 200),
-            "CardBox2": (200, 200, 200),
-            "UObject": (200, 200, 200),
-            "LObject": (200, 200, 200),
-            "LObject2": (200, 200, 200),
-            "WallTransparent": (50, 50, 50)
-        }
-
-        item_name = item_name.split(" ")[0]
-
-        default_colour = item_colour_dict.get(item_name, (10, 10, 100))
-
-        return default_colour
 
     def _create_rectangular_cuboid_list(self):
         """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.
@@ -241,7 +211,42 @@ class ConfigAssistant:
 
         return rec_cuboids
 
-    def _set_item_name_from(self, type_name, item_ix):
+    @staticmethod
+    def _get_default_item_colour(item_name):
+        """Provides the default colour of a particular Animal-AI item.
+
+        Args:
+            item_name (str): Name of the physical Animal-AI item.
+
+        Returns:
+            (tuple): The red, green, blue (rgb) components of the default colour for the inputted item.
+        """
+        # These are placeholders until I get the exact colours for the Animal-AI items
+        item_colour_dict = {
+            "GoodGoal": (0, 256, 0),
+            "GoodGoalBounce": (0, 256, 0),
+            "BadGoal": (256, 0, 0),
+            "BadGoalBounce": (256, 0, 0),
+            "GoodGoalMulti": (0, 256, 0),
+            "GoodGoalMultiBounce": (0, 256, 0),
+            "DeathZone": (256, 0, 0),
+            "HotZone": (255, 165, 0),
+            "CardBox1": (200, 200, 200),
+            "CardBox2": (200, 200, 200),
+            "UObject": (200, 200, 200),
+            "LObject": (200, 200, 200),
+            "LObject2": (200, 200, 200),
+            "WallTransparent": (50, 50, 50)
+        }
+
+        item_name = item_name.split(" ")[0]
+
+        default_colour = item_colour_dict.get(item_name, (10, 10, 100))
+
+        return default_colour
+
+    @staticmethod
+    def _set_item_name_from(type_name, item_ix):
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
 
@@ -249,16 +254,15 @@ class ConfigAssistant:
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
 
 if __name__ == "__main__":
-    config_path = os.path.join("example_configs", "config.yaml")
-    config_assistant = ConfigAssistant(config_path)
+    # Checking and visualising an entire configuration file
+    configuration_path = os.path.join("example_configs", "config.yaml")
+    config_assistant = ConfigAssistant(configuration_path)
     config_assistant.check_config_overlap()
     config_assistant.visualise_config()
 
-    # # Visualising a single custom rectangular cuboid
-    # lower_base_centroid = np.array([10, 20, 3])
-    # dimensions = (10, 10, 30)
-    # rotation = 45
-    # rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
-    # config_assistant._visualise_cuboid_bases(rec_cuboid)
-
-    print("Exit ok")
+    # Visualising a single custom rectangular cuboid
+    lower_base_centroid = np.array([10, 20, 3])
+    dimensions = (10, 10, 30)
+    rotation = 45
+    rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
+    config_assistant._visualise_cuboid_bases_plotly(rec_cuboid)
