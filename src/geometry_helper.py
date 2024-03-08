@@ -141,6 +141,26 @@ def normalise_vector(vec):
     return normalised_vec
 
 
+def round_up(val, num_decimals):
+    """Rounds up a number to a number of decimals.
+
+    Args:
+        val (float): The original number.
+        num_decimals (int): The number of decimals after which rounding should occur.
+
+
+    Examples:
+        >>> round_up(4.1231, 2)
+        4.13
+
+    Returns:
+        (float): The rounded number.
+    """
+    factor = 10 ** num_decimals
+    new_val = np.ceil(val * factor)/factor
+    return new_val
+
+
 # TODO: could put the examples from below into the docstrings (in the correct doctest format)
 
 if __name__ == "__main__":
@@ -202,3 +222,6 @@ if __name__ == "__main__":
     segment2 = np.array([-3, 1])
     overlap = determine_overlap_between_aligned_segments(segment1, segment2)
     print(f"Overlap: {overlap}")
+
+    import doctest
+    doctest.testmod()

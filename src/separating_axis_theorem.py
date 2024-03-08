@@ -71,8 +71,8 @@ def apply_separating_axis_theorem(rec_cuboid1, rec_cuboid2, verbose=True, overla
             # print(f"* The minimum overlap unit vector is: {min_overlap_vector}")
             # print(f"* The minimum translation vector is hence their product: {mtv}")
             print(f"* Must move the objects away simultaneously by "
-                  f"{np.round(mtv[0], overlap_decimals)} in the x-dir "
-                  f"and {np.round(mtv[1], overlap_decimals)} in the z-dir "
+                  f"{round_up(mtv[0], overlap_decimals)} in the x-dir "
+                  f"and {round_up(mtv[1], overlap_decimals)} in the z-dir "
                   f"(or, alternatively, by {depth_overlap} in the y-dir)"
                   )
             print("")
