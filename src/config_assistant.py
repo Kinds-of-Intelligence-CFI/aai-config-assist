@@ -8,11 +8,12 @@ import plotly.graph_objects as go
 from dash import Dash, dcc, html, Output, Input, State, callback
 
 from src.arena_config_loader import ArenaConfigLoader
+from src.geometry_helper import calculate_vertices_of_rotated_rectangle
 from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
 
 
 class ConfigAssistant:
-    """Assists in visualising and debugging Animal-AI configurations"""
+    """Assists in visualising and debugging Animal-AI configurations."""
 
     def __init__(self, config_path):
         """Constructs the ConfigAssistant class.
@@ -114,32 +115,81 @@ class ConfigAssistant:
         # Initial figure
         fig_init = self._visualise_cuboid_bases_plotly(cuboids)
 
+        # TODO: think about how to handle this more gracefully (not really a class
+        #  attribute)
+        # Initialise the item to be moved
+        self.idx_item_to_move = 0
+
+        def get_custom_dcc_slider(pos):
+            slider = dcc.Slider(id="x-slider", min=0, max=40, step=0.1, value=pos, marks=None,
+                                tooltip={"placement": "top",
+                                         "always_visible": True,
+                                         "template": "x = {value}",
+                                         "style": {"fontSize": "15px"}})
+            return slider
+
         # Create a Dash application for more interactivity
         app = Dash(__name__)
-        app.layout = html.Div(
-            dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"})
-        )
+        app.layout = html.Div([
+            dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"}),
+            dcc.Slider(id="x-slider", min=0, max=40, step=0.1, value=0, marks=None,
+                       tooltip={"placement": "top",
+                                "always_visible": True,
+                                "template": "x = {value}",
+                                "style": {"fontSize": "15px"}}),
+            dcc.Slider(id="y-slider", min=0, max=40, step=0.1, value=0, marks=None,
+                       tooltip={"placement": "top",
+                                "always_visible": True,
+                                "template": "y = {value}",
+                                "style": {"fontSize": "15px"}}),
+            html.Div(id='app_id')
+        ])
 
+        # Creates a callback mechanism for when one of the items is selected to be moved
         @callback(
-            Output(component_id='aai-diagram', component_property='figure'),
+            Output(component_id='x-slider', component_property="value"),
+            Output(component_id='y-slider', component_property="value"),
             Input(component_id='aai-diagram', component_property='clickData'),
             prevent_initial_call=True
         )
-        def update_plot(point_clicked):  # the function argument comes from the component property of the Input
-            x = point_clicked['points'][0]
-            print(x)
+        def update_sliders(point_clicked):
+            """Updates the sliders when one of the items is selected to be moved."""
+            if point_clicked is not None:
+                self.idx_item_to_move = point_clicked['points'][0]["curveNumber"]
+                print(f"You have just clicked: {cuboids[self.idx_item_to_move].name}")
+                return cuboids[self.idx_item_to_move].center[0], cuboids[self.idx_item_to_move].center[1]
+
+            else:
+                print("You have not clicked an item")
+                return 0, 0
+
+        # Creates a callback mechanism for when the sliders are being used to move items
+        @callback(
+            Output(component_id='aai-diagram', component_property='figure'),
+            Input(component_id="x-slider", component_property="value"),
+            Input(component_id="y-slider", component_property="value"),
+            prevent_initial_call=True
+        )
+        def update_plot(x_slider_value,
+                        y_slider_value):
+            """Updates the plot when dash detects user interaction.
+
+            Note:
+                - The function arguments come from the component property of the Input.
+            """
+            idx_item_to_move = self.idx_item_to_move
+            # Update the cuboid center coordinates
+            cuboids[idx_item_to_move].center[0] = x_slider_value
+            cuboids[idx_item_to_move].center[1] = y_slider_value
+
+            cuboids[idx_item_to_move].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
+                center=np.array([x_slider_value, y_slider_value]),
+                width=cuboids[idx_item_to_move].length,
+                height=cuboids[idx_item_to_move].width,
+                angle_deg=cuboids[idx_item_to_move].deg_rotation)
+
+            print(f"You have just clicked: {cuboids[idx_item_to_move].name}")
             fig = self._visualise_cuboid_bases_plotly(cuboids)
-            # index_clicked_curve = point_clicked['points'][0]['curveNumber']
-            # gp_index = index_clicked_curve // self.num_plotly_objects_per_gp
-            # print(index_clicked_curve)
-            # print(gp_index)
-            #
-            # gps_arr[gp_index].update_seen_point(x=x)
-            # fig = self._generate_plotly_figure(gps_arr, plot_elements)
-            #
-            # print(point_clicked)
-            # print(type(point_clicked))
-            # print(x)
 
             return fig
 
