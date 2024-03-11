@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import plotly.graph_objects as go
+from dash import Dash, dcc, html, Output, Input, State, callback
 
 from src.arena_config_loader import ArenaConfigLoader
 from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
@@ -32,7 +33,7 @@ class ConfigAssistant:
     def visualise_config(self):
         """Displays a 2d representation of the class configuration (seen from above)."""
         cuboids = self.physical_items
-        self._visualise_cuboid_bases_plotly(cuboids)
+        self._run_dash_app_cuboid_visualisation(cuboids)
 
     def _load_config_data(self):
         """Parses and loads the data from the YAML file inputted to class constructor.
@@ -104,6 +105,46 @@ class ConfigAssistant:
             plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
         plt.show()
 
+    def _run_dash_app_cuboid_visualisation(self, cuboids):
+        """Launches Dash application to visualise cuboids.
+
+        Args:
+            cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
+        """
+        # Initial figure
+        fig_init = self._visualise_cuboid_bases_plotly(cuboids)
+
+        # Create a Dash application for more interactivity
+        app = Dash(__name__)
+        app.layout = html.Div(
+            dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"})
+        )
+
+        @callback(
+            Output(component_id='aai-diagram', component_property='figure'),
+            Input(component_id='aai-diagram', component_property='clickData'),
+            prevent_initial_call=True
+        )
+        def update_plot(point_clicked):  # the function argument comes from the component property of the Input
+            x = point_clicked['points'][0]
+            print(x)
+            fig = self._visualise_cuboid_bases_plotly(cuboids)
+            # index_clicked_curve = point_clicked['points'][0]['curveNumber']
+            # gp_index = index_clicked_curve // self.num_plotly_objects_per_gp
+            # print(index_clicked_curve)
+            # print(gp_index)
+            #
+            # gps_arr[gp_index].update_seen_point(x=x)
+            # fig = self._generate_plotly_figure(gps_arr, plot_elements)
+            #
+            # print(point_clicked)
+            # print(type(point_clicked))
+            # print(x)
+
+            return fig
+
+        app.run(port=8000)
+
     def _visualise_cuboid_bases_plotly(self, cuboids):
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
 
@@ -114,6 +155,7 @@ class ConfigAssistant:
         fig = go.Figure()
         fig.update_xaxes(range=[-2, 42], showgrid=False, zeroline=False, visible=True)
         fig.update_yaxes(range=[-2, 42], showgrid=False, zeroline=False, visible=True)
+
         # To add an arena border
         fig.add_shape(type="rect",
                       x0=0, y0=0, x1=40, y1=40,
@@ -163,7 +205,10 @@ class ConfigAssistant:
                                      ),
                           )
 
-        fig.show()
+        # Temporarily disabled for Dash app development
+        # fig.show()
+
+        return fig
 
     def _create_rectangular_cuboid_list(self):
         """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.
@@ -254,15 +299,16 @@ class ConfigAssistant:
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
 
 if __name__ == "__main__":
-    # Checking and visualising an entire configuration file
+    # # Checking and visualising an entire configuration file
     configuration_path = os.path.join("example_configs", "config.yaml")
     config_assistant = ConfigAssistant(configuration_path)
     config_assistant.check_config_overlap()
     config_assistant.visualise_config()
 
-    # Visualising a single custom rectangular cuboid
-    lower_base_centroid = np.array([10, 20, 3])
-    dimensions = (10, 10, 30)
-    rotation = 45
-    rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
-    config_assistant._visualise_cuboid_bases_plotly(rec_cuboid)
+    # # Visualising a single custom rectangular cuboid
+    # lower_base_centroid = np.array([10, 20, 3])
+    # dimensions = (10, 10, 30)
+    # rotation = 45
+    # rec_cuboid = [RectangularCuboid(lower_base_centroid, dimensions, rotation)]
+    # # config_assistant._visualise_cuboid_bases_plotly(rec_cuboid)
+    # config_assistant._run_dash_app_cuboid_visualisation(rec_cuboid)
