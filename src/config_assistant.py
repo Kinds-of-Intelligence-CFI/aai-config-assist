@@ -120,58 +120,66 @@ class ConfigAssistant:
         # Initialise the item to be moved
         self.idx_item_to_move = 0
 
-        def get_custom_dcc_slider(pos):
-            slider = dcc.Slider(id="x-slider", min=0, max=40, step=0.1, value=pos, marks=None,
-                                tooltip={"placement": "top",
-                                         "always_visible": True,
-                                         "template": "x = {value}",
-                                         "style": {"fontSize": "15px"}})
-            return slider
-
         # Create a Dash application for more interactivity
         app = Dash(__name__)
         app.layout = html.Div([
             dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"}),
-            dcc.Slider(id="x-slider", min=0, max=40, step=0.1, value=0, marks=None,
+
+            dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
                        tooltip={"placement": "top",
                                 "always_visible": True,
                                 "template": "x = {value}",
                                 "style": {"fontSize": "15px"}}),
-            dcc.Slider(id="y-slider", min=0, max=40, step=0.1, value=0, marks=None,
+
+            dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
                        tooltip={"placement": "top",
                                 "always_visible": True,
-                                "template": "y = {value}",
+                                "template": "z = {value}",
                                 "style": {"fontSize": "15px"}}),
+
+            dcc.Slider(id="xz-rotation-slider", min=0, max=360, step=1, value=0, marks=None,
+                       tooltip={"placement": "top",
+                                "always_visible": True,
+                                "template": "xz rot = {value} deg",
+                                "style": {"fontSize": "15px"}}),
+
             html.Div(id='app_id')
         ])
 
         # Creates a callback mechanism for when one of the items is selected to be moved
         @callback(
             Output(component_id='x-slider', component_property="value"),
-            Output(component_id='y-slider', component_property="value"),
+            Output(component_id='z-slider', component_property="value"),
+            Output(component_id="xz-rotation-slider", component_property="value"),
             Input(component_id='aai-diagram', component_property='clickData'),
             prevent_initial_call=True
         )
         def update_sliders(point_clicked):
             """Updates the sliders when one of the items is selected to be moved."""
             if point_clicked is not None:
+                print("you have clicked an item")
                 self.idx_item_to_move = point_clicked['points'][0]["curveNumber"]
                 print(f"You have just clicked: {cuboids[self.idx_item_to_move].name}")
-                return cuboids[self.idx_item_to_move].center[0], cuboids[self.idx_item_to_move].center[1]
+                return (cuboids[self.idx_item_to_move].center[0],
+                        cuboids[self.idx_item_to_move].center[1],
+                        cuboids[self.idx_item_to_move].deg_rotation
+                        )
 
             else:
                 print("You have not clicked an item")
-                return 0, 0
+                return 0, 0, 0
 
         # Creates a callback mechanism for when the sliders are being used to move items
         @callback(
             Output(component_id='aai-diagram', component_property='figure'),
             Input(component_id="x-slider", component_property="value"),
-            Input(component_id="y-slider", component_property="value"),
+            Input(component_id="z-slider", component_property="value"),
+            Input(component_id="xz-rotation-slider", component_property="value"),
             prevent_initial_call=True
         )
         def update_plot(x_slider_value,
-                        y_slider_value):
+                        y_slider_value,
+                        xz_rotation):
             """Updates the plot when dash detects user interaction.
 
             Note:
@@ -181,12 +189,13 @@ class ConfigAssistant:
             # Update the cuboid center coordinates
             cuboids[idx_item_to_move].center[0] = x_slider_value
             cuboids[idx_item_to_move].center[1] = y_slider_value
+            cuboids[idx_item_to_move].deg_rotation = xz_rotation
 
             cuboids[idx_item_to_move].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
                 center=np.array([x_slider_value, y_slider_value]),
                 width=cuboids[idx_item_to_move].length,
                 height=cuboids[idx_item_to_move].width,
-                angle_deg=cuboids[idx_item_to_move].deg_rotation)
+                angle_deg=xz_rotation)
 
             print(f"You have just clicked: {cuboids[idx_item_to_move].name}")
             fig = self._visualise_cuboid_bases_plotly(cuboids)
