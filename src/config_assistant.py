@@ -1,5 +1,6 @@
 import yaml
 import os
+import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -379,7 +380,14 @@ class ConfigAssistant:
 
         item_name = item_name.split(" ")[0]
 
-        default_colour = item_colour_dict.get(item_name, (10, 10, 100))
+        try:
+            default_colour = item_colour_dict[item_name]
+        except KeyError:
+            # For now, we have chosen to deal with missing sizes AND unrecognised name by setting all size dims to 0
+            warnings.warn(f"The item {item_name} is not recognised and is missing a 'colors' field in the .yaml "
+                          f"configuration. Either add a 'colors' field for this item or add the item to the "
+                          f"default_colour_dict above.")
+            default_colour = (149, 53, 83)
 
         return default_colour
 
@@ -453,7 +461,12 @@ class ConfigAssistant:
                 "z": item_size_dict[item_name][2],
             }
         except KeyError:
-            raise Exception(f"The item {item_name} is not recognised. Please add it to the item_size_dict.")
+            # For now, we have chosen to deal with missing sizes AND unrecognised name by setting all size dims to 0
+            warnings.warn(f"The item {item_name} is not recognised and is missing a 'sizes' field in the .yaml "
+                          f"configuration. Either add a 'sizes' field for this item or add the item to the "
+                          f"default_size_dict above.")
+            default_size = {"x": 0, "y": 0, "z": 0}
+
         return default_size
 
     @staticmethod
