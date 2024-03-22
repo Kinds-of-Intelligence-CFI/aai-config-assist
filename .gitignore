@@ -2,7 +2,7 @@
 venv
 
 # Any file which starts with prefix "discard"
-discard*
+ignore*
 
 # Undesired files
 __pycache__

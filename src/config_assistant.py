@@ -291,12 +291,12 @@ class ConfigAssistant:
                 position = items["positions"][j]
                 rotation = items["rotations"][j] if "rotations" in items else 0
 
-                if "Agent" in name:
-                    size = {"x": 1, "y": 1, "z": 1}
-                    colour = {"r": 0, "g": 0, "b": 0}
-                else:
-                    size = items["sizes"][j]
-                    colour = items["colors"][j] if "colors" in items else None
+                size = items["sizes"][j] if "sizes" in items else self._get_default_item_size(name)
+                colour = items["colors"][j] if "colors" in items else None
+
+                # TODO: can also put default colours here (and stop doing it in visualiser, think about pros/cons)
+                #  and set an error message in both if the item is not recognised and decide whether or not
+                #  to fail gracefully: crash the app or give a default size and colour
 
                 # Transform some of the extracted data
                 xzy_lower_base_centroid = np.array([position["x"], position["z"], position["y"]])
@@ -319,6 +319,10 @@ class ConfigAssistant:
     def _get_default_item_colour(item_name):
         """Provides the default colour of a particular Animal-AI item.
 
+            Note:
+                - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
+                - Some default colours were not available on the official repo and were inferred from the images.
+
         Args:
             item_name (str): Name of the physical Animal-AI item.
 
@@ -327,20 +331,50 @@ class ConfigAssistant:
         """
         # These are placeholders until I get the exact colours for the Animal-AI items
         item_colour_dict = {
-            "GoodGoal": (0, 256, 0),
-            "GoodGoalBounce": (0, 256, 0),
-            "BadGoal": (256, 0, 0),
-            "BadGoalBounce": (256, 0, 0),
-            "GoodGoalMulti": (0, 256, 0),
-            "GoodGoalMultiBounce": (0, 256, 0),
-            "DeathZone": (256, 0, 0),
-            "HotZone": (255, 165, 0),
-            "CardBox1": (200, 200, 200),
-            "CardBox2": (200, 200, 200),
-            "UObject": (200, 200, 200),
-            "LObject": (200, 200, 200),
-            "LObject2": (200, 200, 200),
-            "WallTransparent": (50, 50, 50)
+            # General
+            "Agent": (0, 0, 0),  # Inferred
+
+            # Immovable objects
+            "CylinderTunnel": (255, 0, 255),
+            "CylinderTunnelTransparent": (255, 0, 255),
+            "Ramp": (255, 0, 255),
+            "Wall": (255, 0, 255),
+            "WallTransparent": (255, 0, 255),
+
+            # Movable objects (blocks)
+            "HeavyBlock": (90, 90, 90),  # Inferred
+            "LightBlock": (211, 211, 211),  # Inferred
+            "JBlock": (211, 211, 211),  # Inferred
+            "LBlock": (211, 211, 211),  # Inferred
+            "UBlock": (211, 211, 211),  # Inferred
+
+            # Signboard
+            "SignBoard": (222, 184, 135),  # Inferred
+
+            # Valenced dispensers
+            "SpawnerButton": (233, 255, 10),  # Inferred
+            "SpawnerDispenserTall": (255, 0, 255),
+            "SpawnerContainerShort": (255, 0, 255),
+            "SpawnerTree": (74, 153, 58),  # Inferred
+
+            # Valenced rewards
+            "GoodGoal": (0, 256, 0),  # Inferred
+            "GoodGoalBounce": (0, 256, 0),  # Inferred
+            "BadGoal": (256, 0, 0),  # Inferred
+            "BadGoalBounce": (256, 0, 0),  # Inferred
+            "GoodGoalMulti": (0, 256, 0),  # Inferred
+            "GoodGoalMultiBounce": (0, 256, 0),  # Inferred
+            "BadGoalMulti": (256, 0, 0),  # Inferred
+            "BadGoalMultiBounce": (256, 0, 0),  # Inferred
+            "DecayGoal": (0, 256, 0),  # Inferred
+            "DecoyGoal": (255, 255, 255),  # Inferred
+            "DecayGoalBounce": (0, 256, 0),  # Inferred
+            "GrowGoal": (0, 256, 0),  # Inferred
+            "ShrinkGoal": (0, 256, 0),  # Inferred
+
+            # Zones
+            "DeathZone": (256, 0, 0),  # Inferred
+            "HotZone": (255, 165, 0),  # Inferred
         }
 
         item_name = item_name.split(" ")[0]
@@ -348,6 +382,79 @@ class ConfigAssistant:
         default_colour = item_colour_dict.get(item_name, (10, 10, 100))
 
         return default_colour
+
+    @staticmethod
+    def _get_default_item_size(item_name):
+        """Provides the default colour of a particular Animal-AI item.
+
+            Note:
+                - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
+
+            Args:
+                item_name (str): Name of the physical Animal-AI item.
+
+            Returns:
+                (dict[str]): The red, green, blue (rgb) components of the default colour for the inputted item.
+        """
+
+        # For now all default sizes are the same but this allows for any default colours to be set if need be
+        item_size_dict = {
+            # General
+            "Agent": (1, 1, 1),
+
+            # Immovable objects
+            "CylinderTunnel": (1, 1, 1),
+            "CylinderTunnelTransparent": (1, 1, 1),
+            "Ramp": (1, 1, 1),
+            "Wall": (1, 1, 1),
+            "WallTransparent": (1, 1, 1),
+
+            # Movable objects (blocks)
+            "HeavyBlock": (1, 1, 1),  # Inferred
+            "LightBlock": (1, 1, 1),  # Inferred
+            "JBlock": (1, 1, 1),  # Inferred
+            "LBlock": (1, 1, 1),  # Inferred
+            "UBlock": (1, 1, 1),  # Inferred
+
+            # Signboard
+            "SignBoard": (1, 1, 1),  # Inferred
+
+            # Valenced dispensers
+            "SpawnerButton": (1, 1, 1),  # Inferred
+            "SpawnerDispenserTall": (1, 1, 1),
+            "SpawnerContainerShort": (1, 1, 1),
+            "SpawnerTree": (1, 1, 1),  # Inferred
+
+            # Valenced rewards
+            "GoodGoal": (1, 1, 1),  # Inferred
+            "GoodGoalBounce": (1, 1, 1),  # Inferred
+            "BadGoal": (1, 1, 1),  # Inferred
+            "BadGoalBounce": (1, 1, 1),  # Inferred
+            "GoodGoalMulti": (1, 1, 1),  # Inferred
+            "GoodGoalMultiBounce": (1, 1, 1),  # Inferred
+            "BadGoalMulti": (1, 1, 1),  # Inferred
+            "BadGoalMultiBounce": (1, 1, 1),  # Inferred
+            "DecayGoal": (1, 1, 1),  # Inferred
+            "DecoyGoal": (1, 1, 1),  # Inferred
+            "DecayGoalBounce": (1, 1, 1),  # Inferred
+            "GrowGoal": (1, 1, 1),  # Inferred
+            "ShrinkGoal": (1, 1, 1),  # Inferred
+
+            # Zones
+            "DeathZone": (1, 1, 1),  # Inferred
+            "HotZone": (1, 1, 1),  # Inferred
+        }
+
+        item_name = item_name.split(" ")[0]
+        try:
+            default_size = {
+                "x": item_size_dict[item_name][0],
+                "y": item_size_dict[item_name][1],
+                "z": item_size_dict[item_name][2],
+            }
+        except KeyError:
+            raise Exception(f"The item {item_name} is not recognised. Please add it to the item_size_dict.")
+        return default_size
 
     @staticmethod
     def _set_item_name_from(type_name, item_ix):
