@@ -121,31 +121,40 @@ class ConfigAssistant:
         # Initialise the item to be moved
         self.idx_item_to_move = 0
 
+        font_size = 17
+        font_family = "Helvetica"
+        background_colour = 'rgba(231,235,235,0.5)'
+
         # Create a Dash application for more interactivity
-        app = Dash(__name__)
+        app = Dash(__name__,)
         app.layout = html.Div([
-            dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"}),
+            html.Div([
+                dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"}),
+            ], style={'display': 'inline-block', 'width': '60%', 'verticalAlign': 'top'}),
 
-            dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
-                       tooltip={"placement": "top",
-                                "always_visible": True,
-                                "template": "x = {value}",
-                                "style": {"fontSize": "15px"}}),
+            html.Div([
+                dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
+                           tooltip={"placement": "top",
+                                    "always_visible": True,
+                                    "template": "x = {value}",
+                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
 
-            dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
-                       tooltip={"placement": "top",
-                                "always_visible": True,
-                                "template": "z = {value}",
-                                "style": {"fontSize": "15px"}}),
+                dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
+                           tooltip={"placement": "top",
+                                    "always_visible": True,
+                                    "template": "z = {value}",
+                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
 
-            dcc.Slider(id="xz-rotation-slider", min=0, max=360, step=1, value=0, marks=None,
-                       tooltip={"placement": "top",
-                                "always_visible": True,
-                                "template": "xz rot = {value} deg",
-                                "style": {"fontSize": "15px"}}),
+                dcc.Slider(id="xz-rotation-slider", min=0, max=360, step=1, value=0, marks=None,
+                           tooltip={"placement": "top",
+                                    "always_visible": True,
+                                    "template": "xz rot = {value} deg",
+                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
+            ], style={'display': 'inline-block', 'width': '40%', 'verticalAlign': 'bottom'}),
 
             html.Div(id='app_id')
-        ])
+
+        ], style={'backgroundColor': background_colour})
 
         # Creates a callback mechanism for when one of the items is selected to be moved
         @callback(
@@ -213,8 +222,8 @@ class ConfigAssistant:
         """
         # Configure the figure environment and add an arena rectangle
         fig = go.Figure()
-        fig.update_xaxes(range=[-2, 42], showgrid=False, zeroline=False, visible=True)
-        fig.update_yaxes(range=[-2, 42], showgrid=False, zeroline=False, visible=True)
+        fig.update_xaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True,)
+        fig.update_yaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True,)
 
         # To add an arena border
         fig.add_shape(type="rect",
@@ -234,6 +243,8 @@ class ConfigAssistant:
             rgb_colour = (colour_dict["r"],
                           colour_dict["g"],
                           colour_dict["b"]) if cuboid.colour is not None else self._get_default_item_colour(name)
+            # TODO: test whether commenting the if statement directly above would be safe considering that the item's
+            #  colour when/if the colour is always defined in the RectangularCuboid
 
             r, g, b = rgb_colour
             opa = 0.35
@@ -261,9 +272,36 @@ class ConfigAssistant:
                                      line=dict(color=line_col, width=line_width, ),
                                      fillcolor=f"rgba({r}, {g}, {b}, {opa})",
                                      name=name,
-                                     marker=dict(opacity=0)
+                                     marker=dict(opacity=0),
+                                     showlegend=True,
+                                     mode="lines",
                                      ),
                           )
+
+            # Customise the legend
+            fig.update_layout(
+                # width=1000,  # To make the figure square
+                # height=1000,  # To make the fiture square
+                # template="plotly_dark",
+                legend=dict(
+                    # itemwidth=100,
+                    x=15,  # Try -1, 0, 1
+                    y=1,  # Try -1, 0, 1
+                    traceorder='normal',
+                    font=dict(
+                        family='Helvetica',
+                        size=20,
+                        color='Black'
+                    ),
+                    # Customise the look of the legend
+                    bgcolor='rgba(231,235,235,0.5)',
+                    bordercolor='black',
+                    borderwidth=1,
+                    orientation='v',
+                    xanchor='left',
+                    yanchor='top',
+                )
+            )
 
         # Temporarily disabled for Dash app development
         # fig.show()
@@ -293,7 +331,7 @@ class ConfigAssistant:
                 rotation = items["rotations"][j] if "rotations" in items else 0
 
                 size = items["sizes"][j] if "sizes" in items else self._get_default_item_size(name)
-                colour = items["colors"][j] if "colors" in items else None
+                colour = items["colors"][j] if "colors" in items else self._get_default_item_colour(name)
 
                 # TODO: can also put default colours here (and stop doing it in visualiser, think about pros/cons)
                 #  and set an error message in both if the item is not recognised and decide whether or not
@@ -320,9 +358,9 @@ class ConfigAssistant:
     def _get_default_item_colour(item_name):
         """Provides the default colour of a particular Animal-AI item.
 
-            Note:
-                - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
-                - Some default colours were not available on the official repo and were inferred from the images.
+        Note:
+            - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
+            - Some default colours were not available on the official repo and were inferred from the images.
 
         Args:
             item_name (str): Name of the physical Animal-AI item.
@@ -381,7 +419,9 @@ class ConfigAssistant:
         item_name = item_name.split(" ")[0]
 
         try:
-            default_colour = item_colour_dict[item_name]
+            default_colour = {"r": item_colour_dict[item_name][0],
+                              "g": item_colour_dict[item_name][1],
+                              "b": item_colour_dict[item_name][2]}
         except KeyError:
             # For now, we have chosen to deal with missing sizes AND unrecognised name by setting all size dims to 0
             warnings.warn(f"The item {item_name} is not recognised and is missing a 'colors' field in the .yaml "
@@ -395,14 +435,14 @@ class ConfigAssistant:
     def _get_default_item_size(item_name):
         """Provides the default colour of a particular Animal-AI item.
 
-            Note:
-                - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
+        Note:
+            - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
 
-            Args:
-                item_name (str): Name of the physical Animal-AI item.
+        Args:
+            item_name (str): Name of the physical Animal-AI item.
 
-            Returns:
-                (dict[str]): The red, green, blue (rgb) components of the default colour for the inputted item.
+        Returns:
+            (dict[str]): The red, green, blue (rgb) components of the default colour for the inputted item.
         """
 
         # For now all default sizes are the same but this allows for any default colours to be set if need be
