@@ -8,6 +8,7 @@ from matplotlib.patches import Rectangle
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, Output, Input, State, callback
 
+from src.arena_config_dumper import ArenaConfigDumper
 from src.arena_config_loader import ArenaConfigLoader
 from src.geometry_helper import calculate_vertices_of_rotated_rectangle
 from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
@@ -26,6 +27,9 @@ class ConfigAssistant:
         self.config_data = self._load_config_data()
         self.physical_items = self._create_rectangular_cuboid_list()
         self.names_items_with_overlap = []
+
+        self.pass_mark = self.config_data["arenas"][0]["pass_mark"]
+        self.t = self.config_data["arenas"][0]["t"]
 
     def check_config_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
@@ -123,38 +127,49 @@ class ConfigAssistant:
         font_size = 17
         font_family = "Helvetica"
         background_colour = 'rgba(231,235,235,0.5)'
+        tooltip_placement = 'top'
 
         # Create a Dash application for more interactivity
-        app = Dash(__name__,)
+        app = Dash(__name__, )
         app.layout = html.Div([
             html.Div([
                 dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"}),
-            ], style={'display': 'inline-block', 'width': '60%', 'verticalAlign': 'top'}),
+            ], style={'display': 'inline-block', 'width': '60%', 'verticalAlign': 'middle'}),
 
             html.Div([
                 dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
-                           tooltip={"placement": "top",
+                           tooltip={"placement": tooltip_placement,
                                     "always_visible": True,
                                     "template": "x = {value}",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
 
                 dcc.Slider(id="y-slider", min=0, max=20, step=0.1, value=0, marks=None,
-                           tooltip={"placement": "top",
+                           tooltip={"placement": tooltip_placement,
                                     "always_visible": True,
                                     "template": "y = {value}",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
 
                 dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
-                           tooltip={"placement": "top",
+                           tooltip={"placement": tooltip_placement,
                                     "always_visible": True,
                                     "template": "z = {value}",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
 
                 dcc.Slider(id="xz-rotation-slider", min=0, max=360, step=1, value=0, marks=None,
-                           tooltip={"placement": "top",
+                           tooltip={"placement": tooltip_placement,
                                     "always_visible": True,
-                                    "template": "xz rot = {value} deg",
+                                    "template": "xz = {value} deg",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
+
+                dcc.Input(id="new-config-path",
+                          style={'width': '100%', "fontSize": f"{font_size}px", "fontFamily": font_family, },
+                          type="text",
+                          placeholder="example_configs/new_config.yaml"),
+
+                html.Div(html.Button('Generate new YAML config', id='new-config-path-button', n_clicks=0,
+                                     style={"fontSize": f"{font_size}px", "fontFamily": font_family, }), ),
+
+                html.Div(id='new-config-path-output', style={'whiteSpace': 'pre-line'}),
 
             ], style={'display': 'inline-block', 'width': '40%', 'verticalAlign': 'bottom'}),
 
@@ -225,6 +240,22 @@ class ConfigAssistant:
 
             return fig
 
+        # Creates a callback mechanism for dumping the current physical items to a new configuration file
+        arena = {"pass_mark": self.pass_mark, "t": self.t, "items": self.physical_items}
+        arena_config_dumper = ArenaConfigDumper([arena], destination_file_path="")
+
+        @callback(
+            Output(component_id='new-config-path-output', component_property="value"),
+            State(component_id="new-config-path", component_property="value"),
+            Input(component_id='new-config-path-button', component_property="n_clicks"),
+            prevent_initial_call=True
+        )
+        def dump_current_layout_to_config(new_config_path, n_clicks):
+            if n_clicks > 0:
+                arena_config_dumper.destination_file_path = new_config_path
+                arena_config_dumper.dump()
+                return ""  # Empty the string after the process has completed
+
         app.run(port=8000)
 
     def _visualise_cuboid_bases_plotly(self, cuboids):
@@ -235,8 +266,8 @@ class ConfigAssistant:
         """
         # Configure the figure environment and add an arena rectangle
         fig = go.Figure()
-        fig.update_xaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True,)
-        fig.update_yaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True,)
+        fig.update_xaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True, )
+        fig.update_yaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True, )
 
         # To add an arena border
         fig.add_shape(type="rect",
