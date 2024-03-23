@@ -34,7 +34,7 @@ class ConfigAssistant:
 
     def visualise_config(self):
         """Displays a 2d representation of the class configuration (seen from above)."""
-        cuboids = self.physical_items
+        cuboids = self.physical_items  # Not a copy but points to the same object
         self._run_dash_app_cuboid_visualisation(cuboids)
 
     def _load_config_data(self):
@@ -116,8 +116,7 @@ class ConfigAssistant:
         # Initial figure
         fig_init = self._visualise_cuboid_bases_plotly(cuboids)
 
-        # TODO: think about how to handle this more gracefully (not really a class
-        #  attribute)
+        # TODO: think about how to handle this more gracefully (not really a class attribute)
         # Initialise the item to be moved
         self.idx_item_to_move = 0
 
@@ -139,6 +138,12 @@ class ConfigAssistant:
                                     "template": "x = {value}",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
 
+                dcc.Slider(id="y-slider", min=0, max=20, step=0.1, value=0, marks=None,
+                           tooltip={"placement": "top",
+                                    "always_visible": True,
+                                    "template": "y = {value}",
+                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
+
                 dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
                            tooltip={"placement": "top",
                                     "always_visible": True,
@@ -150,6 +155,7 @@ class ConfigAssistant:
                                     "always_visible": True,
                                     "template": "xz rot = {value} deg",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
+
             ], style={'display': 'inline-block', 'width': '40%', 'verticalAlign': 'bottom'}),
 
             html.Div(id='app_id')
@@ -159,6 +165,7 @@ class ConfigAssistant:
         # Creates a callback mechanism for when one of the items is selected to be moved
         @callback(
             Output(component_id='x-slider', component_property="value"),
+            Output(component_id='y-slider', component_property="value"),
             Output(component_id='z-slider', component_property="value"),
             Output(component_id="xz-rotation-slider", component_property="value"),
             Input(component_id='aai-diagram', component_property='clickData'),
@@ -170,8 +177,9 @@ class ConfigAssistant:
                 print("you have clicked an item")
                 self.idx_item_to_move = point_clicked['points'][0]["curveNumber"]
                 print(f"You have just clicked: {cuboids[self.idx_item_to_move].name}")
-                return (cuboids[self.idx_item_to_move].center[0],
-                        cuboids[self.idx_item_to_move].center[1],
+                return (cuboids[self.idx_item_to_move].center[0],  # The x-direction
+                        cuboids[self.idx_item_to_move].center[2],  # The y-direction
+                        cuboids[self.idx_item_to_move].center[1],  # The z-direction
                         cuboids[self.idx_item_to_move].deg_rotation
                         )
 
@@ -183,12 +191,14 @@ class ConfigAssistant:
         @callback(
             Output(component_id='aai-diagram', component_property='figure'),
             Input(component_id="x-slider", component_property="value"),
+            Input(component_id="y-slider", component_property="value"),
             Input(component_id="z-slider", component_property="value"),
             Input(component_id="xz-rotation-slider", component_property="value"),
             prevent_initial_call=True
         )
         def update_plot(x_slider_value,
                         y_slider_value,
+                        z_slider_value,
                         xz_rotation):
             """Updates the plot when dash detects user interaction.
 
@@ -196,13 +206,16 @@ class ConfigAssistant:
                 - The function arguments come from the component property of the Input.
             """
             idx_item_to_move = self.idx_item_to_move
+
             # Update the cuboid center coordinates
+            # Note: when calling visualise_config, cuboids is the physical_items class attribute
             cuboids[idx_item_to_move].center[0] = x_slider_value
-            cuboids[idx_item_to_move].center[1] = y_slider_value
+            cuboids[idx_item_to_move].center[2] = y_slider_value
+            cuboids[idx_item_to_move].center[1] = z_slider_value
             cuboids[idx_item_to_move].deg_rotation = xz_rotation
 
             cuboids[idx_item_to_move].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
-                center=np.array([x_slider_value, y_slider_value]),
+                center=np.array([x_slider_value, z_slider_value]),
                 width=cuboids[idx_item_to_move].length,
                 height=cuboids[idx_item_to_move].width,
                 angle_deg=xz_rotation)
