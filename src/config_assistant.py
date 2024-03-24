@@ -214,7 +214,7 @@ class ConfigAssistant:
         def update_plot(x_slider_value,
                         y_slider_value,
                         z_slider_value,
-                        xz_rotation):
+                        xz_rotation,):
             """Updates the plot when dash detects user interaction.
 
             Note:
@@ -234,6 +234,8 @@ class ConfigAssistant:
                 width=cuboids[idx_item_to_move].length,
                 height=cuboids[idx_item_to_move].width,
                 angle_deg=xz_rotation)
+
+            self.check_config_overlap()
 
             print(f"You have just clicked: {cuboids[idx_item_to_move].name}")
             fig = self._visualise_cuboid_bases_plotly(cuboids)
