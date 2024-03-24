@@ -124,10 +124,17 @@ class ConfigAssistant:
         # Initialise the item to be moved
         self.idx_item_to_move = 0
 
+        # Some styling parameters
         font_size = 17
         font_family = "Helvetica"
         background_colour = 'rgba(231,235,235,0.5)'
         tooltip_placement = 'top'
+        margin_between_components = 12
+        margin_at_bottom_of_components = margin_between_components * 3
+        margin_left = 3
+        margin_right = 3
+        component_height = 21
+        border_radius = 3
 
         # Create a Dash application for more interactivity
         app = Dash(__name__, )
@@ -162,12 +169,36 @@ class ConfigAssistant:
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
 
                 dcc.Input(id="new-config-path",
-                          style={'width': '100%', "fontSize": f"{font_size}px", "fontFamily": font_family, },
+                          style={'width': '80%',
+                                 'height': component_height,
+                                 "fontSize": f"{font_size}px",
+                                 "fontFamily": font_family,
+                                 'marginBottom': margin_between_components,
+                                 'marginTop': margin_between_components,
+                                 'marginLeft': f"{margin_left}%",
+                                 'marginRight': f"{margin_right}%",
+                                 "border-style": "solid",
+                                 "border-width": 0.5,
+                                 "border-radius": border_radius,
+                                 },
                           type="text",
                           placeholder="example_configs/new_config.yaml"),
 
                 html.Div(html.Button('Generate new YAML config', id='new-config-path-button', n_clicks=0,
-                                     style={"fontSize": f"{font_size}px", "fontFamily": font_family, }), ),
+                                     style={'height': component_height,
+                                            "fontSize": f"{font_size}px",
+                                            "fontFamily": font_family,
+                                            'marginBottom': margin_at_bottom_of_components,
+                                            'marginTop': margin_between_components,
+                                            'marginLeft': f"{margin_left}%",
+                                            'marginRight': f"{margin_right}%",
+                                            "cursor": "pointer",
+                                            # Un-commenting these fields undesirably removes clicking animation
+                                            # "border-radius": border_radius,
+                                            # "border-width": 1,
+                                            # "background-color": "white",
+                                            },
+                                     ), ),
 
                 html.Div(id='new-config-path-output', style={'whiteSpace': 'pre-line'}),
 
@@ -256,6 +287,7 @@ class ConfigAssistant:
             if n_clicks > 0:
                 arena_config_dumper.destination_file_path = new_config_path
                 arena_config_dumper.dump()
+                print(f"You have generated a new config YAML file at {new_config_path}.")
                 return ""  # Empty the string after the process has completed
 
         app.run(port=8000)
