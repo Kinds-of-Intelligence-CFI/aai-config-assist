@@ -31,6 +31,11 @@ class ConfigAssistant:
         self.pass_mark = self.config_data["arenas"][0]["pass_mark"]
         self.t = self.config_data["arenas"][0]["t"]
 
+        # Get the name of all Animal-AI items
+        with open("definitions/item_default_colours.yaml", "r") as file:
+            self.all_aai_item_names = list(yaml.safe_load(file).keys())
+        print(self.all_aai_item_names)
+
     def check_config_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
         cuboids = self.physical_items
@@ -121,8 +126,12 @@ class ConfigAssistant:
         fig_init = self._visualise_cuboid_bases_plotly(cuboids)
 
         # TODO: think about how to handle this more gracefully (not really a class attribute)
+        #  Actually could be seen as the assistant/manager's current_idx_item_to_move attribute
+        #  Makes sense for the manager to hold this in memory and be able to share this with all the
+        #  workers (if you decide to go full OOP which may not be desirable).
         # Initialise the item to be moved
         self.idx_item_to_move = 0
+        self.num_auto_items_created = 0
 
         # Some styling parameters
         font_size = 17
@@ -144,6 +153,58 @@ class ConfigAssistant:
             ], style={'display': 'inline-block', 'width': '60%', 'verticalAlign': 'middle'}),
 
             html.Div([
+                dcc.Dropdown(self.all_aai_item_names, id='item-dropdown', style={"fontSize": f"{font_size}px",
+                                                                                 "fontFamily": font_family,
+                                                                                 'marginLeft': f"{margin_left - 1.5}%",
+                                                                                 'marginRight': f"{margin_right}%"
+                                                                                 }),
+
+                html.Div(id='item-dropdown-output', style={'marginBottom': margin_between_components,
+                                                           "fontSize": f"{font_size}px",
+                                                           "fontFamily": font_family,
+                                                           'marginLeft': f"{margin_left - 1.5}%",
+                                                           'marginRight': f"{margin_right}%"
+                                                           }),
+
+                dcc.Input(placeholder='Length (x)', type='text', value='', id="spawn-x",
+                          style={"fontSize": f"{font_size}px", "fontFamily": font_family,
+                                 'marginBottom': margin_between_components,
+                                 'marginTop': margin_between_components,
+                                 'marginLeft': f"{margin_left}%",
+                                 # 'marginRight': f"{margin_right}%",
+                                 }
+                          ),
+                dcc.Input(placeholder='Width (z)', type='text', value='', id="spawn-z",
+                          style={"fontSize": f"{font_size}px", "fontFamily": font_family,
+                                 'marginBottom': margin_between_components,
+                                 'marginTop': margin_between_components,
+                                 # 'marginLeft': f"{margin_left}%",
+                                 # 'marginRight': f"{margin_right}%",
+                                 }
+                          ),
+                dcc.Input(placeholder='Height (y)', type='text', value='', id="spawn-y",
+                          style={"fontSize": f"{font_size}px", "fontFamily": font_family,
+                                 'marginBottom': margin_between_components,
+                                 'marginTop': margin_between_components,
+                                 # 'marginLeft': f"{margin_left}%",
+                                 # 'marginRight': f"{margin_right}%",
+                                 }
+                          ),
+
+                html.Div(html.Button('Spawn new item', id='new-item-button', n_clicks=0,
+                                     style={'height': component_height,
+                                            "fontSize": f"{font_size}px",
+                                            "fontFamily": font_family,
+                                            'marginBottom': margin_between_components*2,
+                                            'marginTop': margin_between_components,
+                                            'marginLeft': f"{margin_left}%",
+                                            'marginRight': f"{margin_right}%",
+                                            "cursor": "pointer",
+                                            },
+                                     ), ),
+
+                html.Div(id='new-item-button-output', style={'whiteSpace': 'pre-line'}),
+
                 dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
                            tooltip={"placement": tooltip_placement,
                                     "always_visible": True,
@@ -234,23 +295,69 @@ class ConfigAssistant:
                 return 0, 0, 0
 
         # Creates a callback mechanism for when the sliders are being used to move items
+        # AND Creates a callback mechanism for spawning a new item into the arena and into the physical_items
+        # These share a callback because Dash can only support one callback per unique output (here, the arena diagram)
         @callback(
             Output(component_id='aai-diagram', component_property='figure'),
             Input(component_id="x-slider", component_property="value"),
             Input(component_id="y-slider", component_property="value"),
             Input(component_id="z-slider", component_property="value"),
             Input(component_id="xz-rotation-slider", component_property="value"),
+            State(component_id="item-dropdown", component_property="value"),
+            Input(component_id='new-item-button', component_property="n_clicks"),
+            State(component_id="spawn-x", component_property="value"),
+            State(component_id="spawn-z", component_property="value"),
+            State(component_id="spawn-y", component_property="value"),
             prevent_initial_call=True
         )
         def update_plot(x_slider_value,
                         y_slider_value,
                         z_slider_value,
-                        xz_rotation,):
+                        xz_rotation,
+                        item_dropdown_value,
+                        num_auto_items_created,
+                        spawn_x_dim,
+                        spawn_z_dim,
+                        spawn_y_dim,):
             """Updates the plot when dash detects user interaction.
 
             Note:
                 - The function arguments come from the component property of the Input.
             """
+            # Must perform the spawning before the slider adjustment to avoid mistakenly reacting to the sliders
+            # which the user may not have interacted with but will still be considered here as an input.
+            # To avoid this behaviour, the self.idx_item_to_move is changed to that of the new item, in this if-branch.
+            if num_auto_items_created != self.num_auto_items_created:
+                # A new auto item is being spawned
+                # Make the name something like {item_dropdown_value} + AUTO + n_clicks (shows which auto-spawn it was)
+                # that way it will conserve uniqueness while still working for the dumper which just needs the first
+                # word to be the same
+                spawned_lower_base_centroid = np.array([0, 0, 0])
+
+                # Fallback if user leaves the new item dimensions blank
+                if spawn_x_dim == "":
+                    spawn_x_dim = 1
+                if spawn_z_dim == "":
+                    spawn_z_dim = 1
+                if spawn_y_dim == "":
+                    spawn_y_dim = 1
+
+                # Convert the dimensions (either str from callback or int from blank dimension fallback)
+                spawned_dimensions = (float(spawn_x_dim), float(spawn_z_dim), float(spawn_y_dim))
+                spawned_rotation = 0
+                spawned_name = f"{item_dropdown_value} Auto {num_auto_items_created}"
+                spawned_colour = {"r": 1, "g": 1, "b": 1}
+                spawned_auto_cuboid = RectangularCuboid(lower_base_centroid=spawned_lower_base_centroid,
+                                                        dimensions=spawned_dimensions,
+                                                        rotation=spawned_rotation,
+                                                        name=spawned_name,
+                                                        colour=spawned_colour
+                                                        )
+                self.physical_items += [spawned_auto_cuboid]
+                self.num_auto_items_created = num_auto_items_created
+                self.idx_item_to_move = -1
+                print(f"You have just created: {spawned_name}")
+
             idx_item_to_move = self.idx_item_to_move
 
             # Update the cuboid center coordinates
@@ -266,9 +373,8 @@ class ConfigAssistant:
                 height=cuboids[idx_item_to_move].width,
                 angle_deg=xz_rotation)
 
+            print(f"The item currently being moved is: {cuboids[idx_item_to_move].name}")
             self.check_config_overlap()
-
-            print(f"You have just clicked: {cuboids[idx_item_to_move].name}")
             fig = self._visualise_cuboid_bases_plotly(cuboids)
 
             return fig
@@ -446,53 +552,8 @@ class ConfigAssistant:
         Returns:
             (tuple): The red, green, blue (rgb) components of the default colour for the inputted item.
         """
-        # These are placeholders until I get the exact colours for the Animal-AI items
-        item_colour_dict = {
-            # General
-            "Agent": (0, 0, 0),  # Inferred
-
-            # Immovable objects
-            "CylinderTunnel": (255, 0, 255),
-            "CylinderTunnelTransparent": (255, 0, 255),
-            "Ramp": (255, 0, 255),
-            "Wall": (255, 0, 255),
-            "WallTransparent": (255, 0, 255),
-
-            # Movable objects (blocks)
-            "HeavyBlock": (90, 90, 90),  # Inferred
-            "LightBlock": (211, 211, 211),  # Inferred
-            "JBlock": (211, 211, 211),  # Inferred
-            "LBlock": (211, 211, 211),  # Inferred
-            "UBlock": (211, 211, 211),  # Inferred
-
-            # Signboard
-            "SignBoard": (222, 184, 135),  # Inferred
-
-            # Valenced dispensers
-            "SpawnerButton": (233, 255, 10),  # Inferred
-            "SpawnerDispenserTall": (255, 0, 255),
-            "SpawnerContainerShort": (255, 0, 255),
-            "SpawnerTree": (74, 153, 58),  # Inferred
-
-            # Valenced rewards
-            "GoodGoal": (0, 256, 0),  # Inferred
-            "GoodGoalBounce": (0, 256, 0),  # Inferred
-            "BadGoal": (256, 0, 0),  # Inferred
-            "BadGoalBounce": (256, 0, 0),  # Inferred
-            "GoodGoalMulti": (0, 256, 0),  # Inferred
-            "GoodGoalMultiBounce": (0, 256, 0),  # Inferred
-            "BadGoalMulti": (256, 0, 0),  # Inferred
-            "BadGoalMultiBounce": (256, 0, 0),  # Inferred
-            "DecayGoal": (0, 256, 0),  # Inferred
-            "DecoyGoal": (255, 255, 255),  # Inferred
-            "DecayGoalBounce": (0, 256, 0),  # Inferred
-            "GrowGoal": (0, 256, 0),  # Inferred
-            "ShrinkGoal": (0, 256, 0),  # Inferred
-
-            # Zones
-            "DeathZone": (256, 0, 0),  # Inferred
-            "HotZone": (255, 165, 0),  # Inferred
-        }
+        with open(f"definitions/item_default_colours.yaml", "r") as file:
+            item_colour_dict = yaml.safe_load(file)
 
         item_name = item_name.split(" ")[0]
 
