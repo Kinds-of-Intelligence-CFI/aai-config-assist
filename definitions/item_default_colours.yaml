@@ -1,0 +1,64 @@
+# Note, the structure of the item definition:
+# item1_name: [r1, g1, b1]
+# item2_name: [r2, g1, b2]
+# ...
+# Above, rN, gN, bN are the red, green, and blue (RGB) component values of the N-th item with name itemN_name.
+
+# Note that all "&" symbols represent anchors to be used later on via aliases with the "*" symbol.
+# In other words, parameter values are saved as variables to be loaded at a later stage.
+# This way, changing a single colour value can directly impact the colour of multiple objects.
+
+# The following colours marked "Inferred" are placeholders until the exact colours are found.
+
+# Item definitions
+# General
+Agent: [0, 0, 0]  # Inferred
+
+# Immovable objects
+CylinderTunnel: &immovable_object_colour [255, 0, 255] # Creates an anchor (&) to be used as an alias (*) later
+CylinderTunnelTransparent: *immovable_object_colour
+Ramp: *immovable_object_colour
+Wall: *immovable_object_colour
+WallTransparent: *immovable_object_colour
+
+# Movable objects [blocks]
+HeavyBlock: [90, 90, 90]  # Inferred
+LightBlock: &non_heavy_block_colour [211, 211, 211]  # Inferred
+JBlock: *non_heavy_block_colour  # Inferred
+LBlock: *non_heavy_block_colour  # Inferred
+UBlock: *non_heavy_block_colour  # Inferred
+
+# Signboard
+SignBoard: [222, 184, 135]  # Inferred
+
+# Valenced dispensers
+SpawnerButton: [233, 255, 10]  # Inferred
+SpawnerDispenserTall: [255, 0, 255]
+SpawnerContainerShort: [255, 0, 255]
+SpawnerTree: [74, 153, 58]  # Inferred
+
+# Valenced rewards
+GoodGoal: &good_goal_colour [0, 256, 0] # Inferred
+GoodGoalBounce: *good_goal_colour  # Inferred
+BadGoal: &bad_goal_colour [256, 0, 0]  # Inferred
+BadGoalBounce: *bad_goal_colour  # Inferred
+GoodGoalMulti: *good_goal_colour  # Inferred
+GoodGoalMultiBounce: *good_goal_colour  # Inferred
+BadGoalMulti: *bad_goal_colour  # Inferred
+BadGoalMultiBounce: *bad_goal_colour  # Inferred
+DecayGoal: *good_goal_colour  # Inferred
+DecoyGoal: [255, 255, 255]  # Inferred
+DecayGoalBounce: *good_goal_colour  # Inferred
+GrowGoal: *good_goal_colour  # Inferred
+ShrinkGoal: *good_goal_colour  # Inferred
+
+# Zones
+DeathZone: *bad_goal_colour  # Inferred
+HotZone: [255, 165, 0]  # Inferred
+
+# If other default parameters need to be added to this YAML file in the future, the following structure can be employed
+# item1:
+#   colour: [r, g, b]
+#   size: [x, y, z]
+#   importance: i
+#   ...
