@@ -34,7 +34,7 @@ class ConfigAssistant:
         # Get the name of all Animal-AI items
         with open("definitions/item_default_colours.yaml", "r") as file:
             self.all_aai_item_names = list(yaml.safe_load(file).keys())
-        print(self.all_aai_item_names)
+        # print(self.all_aai_item_names)
 
     def check_config_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
@@ -153,6 +153,11 @@ class ConfigAssistant:
             ], style={'display': 'inline-block', 'width': '60%', 'verticalAlign': 'middle'}),
 
             html.Div([
+
+                html.H2("Place new item",
+                        id='heading-place-new-item',
+                        style={"fontFamily": font_family, "font-weight": "normal", 'marginLeft': f"{margin_left/3}%"}),
+
                 dcc.Dropdown(self.all_aai_item_names, id='item-dropdown', style={"fontSize": f"{font_size}px",
                                                                                  "fontFamily": font_family,
                                                                                  'marginLeft': f"{margin_left - 1.5}%",
@@ -195,7 +200,7 @@ class ConfigAssistant:
                                      style={'height': component_height,
                                             "fontSize": f"{font_size}px",
                                             "fontFamily": font_family,
-                                            'marginBottom': margin_between_components*2,
+                                            'marginBottom': margin_between_components * 2,
                                             'marginTop': margin_between_components,
                                             'marginLeft': f"{margin_left}%",
                                             'marginRight': f"{margin_right}%",
@@ -205,11 +210,17 @@ class ConfigAssistant:
 
                 html.Div(id='new-item-button-output', style={'whiteSpace': 'pre-line'}),
 
+                html.H2("Move item",
+                        id='heading-move-an-item',
+                        style={"fontFamily": font_family, "font-weight": "normal", 'marginLeft': f"{margin_left/3}%"}),
+
                 dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
                            tooltip={"placement": tooltip_placement,
                                     "always_visible": True,
                                     "template": "x = {value}",
-                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
+                                    "style": {"fontSize": f"{font_size}px",
+                                              "fontFamily": font_family,
+                                              }, }, ),
 
                 dcc.Slider(id="y-slider", min=0, max=20, step=0.1, value=0, marks=None,
                            tooltip={"placement": tooltip_placement,
@@ -229,13 +240,17 @@ class ConfigAssistant:
                                     "template": "xz = {value} deg",
                                     "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
 
+                html.H2("Generate new config",
+                        id='heading-generate-a-new-configuration-file',
+                        style={"fontFamily": font_family, "font-weight": "normal", 'marginLeft': f"{margin_left/3}%"}),
+
                 dcc.Input(id="new-config-path",
                           style={'width': '80%',
                                  'height': component_height,
                                  "fontSize": f"{font_size}px",
                                  "fontFamily": font_family,
                                  'marginBottom': margin_between_components,
-                                 'marginTop': margin_between_components,
+                                 # 'marginTop': margin_between_components,
                                  'marginLeft': f"{margin_left}%",
                                  'marginRight': f"{margin_right}%",
                                  "border-style": "solid",
@@ -318,7 +333,7 @@ class ConfigAssistant:
                         num_auto_items_created,
                         spawn_x_dim,
                         spawn_z_dim,
-                        spawn_y_dim,):
+                        spawn_y_dim, ):
             """Updates the plot when dash detects user interaction.
 
             Note:
@@ -358,22 +373,23 @@ class ConfigAssistant:
                 self.idx_item_to_move = -1
                 print(f"You have just created: {spawned_name}")
 
-            idx_item_to_move = self.idx_item_to_move
+            else:
+                # Update the cuboid center coordinates
+                # Note: when calling visualise_config, cuboids is the physical_items class attribute
+                cuboids[self.idx_item_to_move].center[0] = x_slider_value
+                cuboids[self.idx_item_to_move].center[2] = y_slider_value
+                cuboids[self.idx_item_to_move].center[1] = z_slider_value
+                cuboids[self.idx_item_to_move].deg_rotation = xz_rotation
 
-            # Update the cuboid center coordinates
-            # Note: when calling visualise_config, cuboids is the physical_items class attribute
-            cuboids[idx_item_to_move].center[0] = x_slider_value
-            cuboids[idx_item_to_move].center[2] = y_slider_value
-            cuboids[idx_item_to_move].center[1] = z_slider_value
-            cuboids[idx_item_to_move].deg_rotation = xz_rotation
-
-            cuboids[idx_item_to_move].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
-                center=np.array([x_slider_value, z_slider_value]),
-                width=cuboids[idx_item_to_move].length,
-                height=cuboids[idx_item_to_move].width,
+            # Note that the center parameter expects the 2D planar values
+            # AAI-x (cuboid[...].center[0]) and AAI-z (cuboid[...].center[1])
+            cuboids[self.idx_item_to_move].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
+                center=np.array([cuboids[self.idx_item_to_move].center[0], cuboids[self.idx_item_to_move].center[1]]),
+                width=cuboids[self.idx_item_to_move].length,
+                height=cuboids[self.idx_item_to_move].width,
                 angle_deg=xz_rotation)
 
-            print(f"The item currently being moved is: {cuboids[idx_item_to_move].name}")
+            print(f"The item currently being moved is: {cuboids[self.idx_item_to_move].name}")
             self.check_config_overlap()
             fig = self._visualise_cuboid_bases_plotly(cuboids)
 
@@ -654,6 +670,9 @@ class ConfigAssistant:
         return f"{type_name} {item_ix}"
 
 
+# TODO: remove the border and background on the x, y, z sliders to declutter the look
+# TODO: remove the _get_default_item_size
+# TODO: Change the default location of new objects to 0, 0; not to the 'last object moved' location
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
 
 if __name__ == "__main__":
