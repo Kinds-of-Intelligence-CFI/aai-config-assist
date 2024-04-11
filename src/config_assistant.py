@@ -361,7 +361,7 @@ class ConfigAssistant:
                 spawned_dimensions = (float(spawn_x_dim), float(spawn_z_dim), float(spawn_y_dim))
                 spawned_rotation = 0
                 spawned_name = f"{item_dropdown_value} Auto {num_auto_items_created}"
-                spawned_colour = {"r": 1, "g": 1, "b": 1}
+                spawned_colour = self._get_default_item_parameter(item_name=item_dropdown_value, param_name="colour")
                 spawned_auto_cuboid = RectangularCuboid(lower_base_centroid=spawned_lower_base_centroid,
                                                         dimensions=spawned_dimensions,
                                                         rotation=spawned_rotation,
@@ -594,8 +594,6 @@ class ConfigAssistant:
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
 
-
-# TODO: fix the fact that new objects spawning do not have the right colour
 
 # TODO: Implement raising appropriate exceptions when unrecognised items are encountered
 
