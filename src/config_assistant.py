@@ -126,10 +126,6 @@ class ConfigAssistant:
         # Initial figure
         fig_init = self._visualise_cuboid_bases_plotly(cuboids)
 
-        # TODO: think about how to handle this more gracefully (not really a class attribute)
-        #  Actually could be seen as the assistant/manager's current_idx_item_to_move attribute
-        #  Makes sense for the manager to hold this in memory and be able to share this with all the
-        #  workers (if you decide to go full OOP which may not be desirable).
         # Initialise the item to be moved
         self.idx_item_to_move = 0
         self.num_auto_items_created = 0
@@ -447,9 +443,11 @@ class ConfigAssistant:
             colour_dict = cuboid.colour
             rgb_colour = (colour_dict["r"],
                           colour_dict["g"],
-                          colour_dict["b"]) if cuboid.colour is not None else self._get_default_item_parameter(item_name=name, param_name="colour")
-            # TODO: test whether commenting the if statement directly above would be safe considering that the item's
-            #  colour when/if the colour is always defined in the RectangularCuboid
+                          colour_dict["b"]) if cuboid.colour is not None else (0, 0, 0)
+            # Note: all AAI items should be coloured upon generating the item cuboid list; this fallback is simply
+            # in place for non-AAI custom cuboids that may lack a colour attribute (see example main at file bottom).
+            # TODO: consider whether this is the best way to handle under-specified non-AAI items. Note that all of this
+            #  may be acceptable when/if responsibilities are separated between a checker and visualiser
 
             r, g, b = rgb_colour
             opa = 0.35
@@ -540,13 +538,8 @@ class ConfigAssistant:
                 position = items["positions"][j]
                 rotation = items["rotations"][j] if "rotations" in items else 0
 
-                # TODO: can use more pythonic approach with get or set_default functions here
                 size = items["sizes"][j] if "sizes" in items else self._get_default_item_parameter(item_name=name, param_name="size")
                 colour = items["colors"][j] if "colors" in items else self._get_default_item_parameter(item_name=name, param_name="colour")
-
-                # TODO: can also put default colours here (and stop doing it in visualiser, think about pros/cons)
-                #  and set an error message in both if the item is not recognised and decide whether or not
-                #  to fail gracefully: crash the app or give a default size and colour
 
                 # Transform some of the extracted data
                 xzy_lower_base_centroid = np.array([position["x"], position["z"], position["y"]])
@@ -603,17 +596,38 @@ class ConfigAssistant:
 
 
 # TODO: fix the fact that new objects spawning do not have the right colour
+
 # TODO: Implement raising appropriate exceptions when unrecognised items are encountered
+
 # TODO: Write many tests for all functionalities since it seems like this tool will be used a lot
+
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
+
 # TODO: remove the border and background on the x, y, z sliders to declutter the look
+
 # TODO: for the time being, the user can place a new None item if they have not selected an item from the dropdown
 #  address this more gracefully.
 
+# TODO: (line 450 in visualise cuboid method) the if statement is only useful when representing cuboids that are
+#  hand-created via the RectangularCuboid class (neither from a YAML config, nor from the interactive assistant) how
+#  then might we deal with this issue? Because now we may miss that a colour was not set upstream during the creation
+#  of the rectangular cuboid list, but we still need this not to crash when attempting to display a custom-made
+#  rectangular cuboid for testing. Because as of now, it is impossible to simply plot a cuboid.
+
+# TODO: (line 540, in create rectangular cuboid list, linked to above TODO) can also put default colours here (and
+#  stop doing it in visualiser, think about pros/cons) and set an error message in both if the item is not recognised
+#  and decide whether or not to fail gracefully: crash the app or give a default size and colour
+
+# TODO: (line 130 in run dash app) think about how to handle the idx_to_move more gracefully (not really a class
+#  attribute) Actually could be seen as the assistant/manager's current_idx_item_to_move attribute Makes sense for
+#  the manager to hold this in memory and be able to share this with all the workers (if you decide to go full OOP
+#  which may not be desirable).
+
 if __name__ == "__main__":
-    # # Checking and visualising an entire configuration file
     configuration_path = os.path.join("example_configs", "config.yaml")
     config_assistant = ConfigAssistant(configuration_path)
+
+    # Checking and visualising an entire configuration file
     config_assistant.check_config_overlap()
     config_assistant.visualise_config()
 
