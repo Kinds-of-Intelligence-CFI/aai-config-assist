@@ -371,6 +371,7 @@ class ConfigAssistant:
                 self.physical_items += [spawned_auto_cuboid]
                 self.num_auto_items_created = num_auto_items_created
                 self.idx_item_to_move = -1
+                xz_rotation = spawned_rotation
                 print(f"You have just created: {spawned_name}")
 
             else:
@@ -672,7 +673,6 @@ class ConfigAssistant:
 
 # TODO: remove the border and background on the x, y, z sliders to declutter the look
 # TODO: remove the _get_default_item_size
-# TODO: Change the default location of new objects to 0, 0; not to the 'last object moved' location
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
 
 if __name__ == "__main__":
