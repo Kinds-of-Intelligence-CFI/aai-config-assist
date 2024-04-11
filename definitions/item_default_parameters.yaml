@@ -1,0 +1,149 @@
+# Note, the structure of the item definitions:
+
+# item1_name:
+#  colour: [r1, g1, b1]
+#  size: [x1, y1, z1]
+
+# item2_name:
+#  colour: [r2, g1, b2]
+#  size: [x2, y2, z2]
+
+# Where rN, gN, bN are the red, green, and blue (RGB) component values of the item with name itemN_name.
+# Where xN, yN, zN are the x, y, and z component values of the item with name itemN_name
+
+# Note that all "&" symbols below represent YAML anchors to be used later on via aliases with the "*" symbol.
+# In other words, parameter values are saved as variables to be loaded at a later stage.
+# This way, changing a single colour value can directly impact the colour of multiple objects.
+
+# The following colours marked "Inferred" are placeholders until the exact colours are found.
+
+# General
+Agent:
+  colour: [0, 0, 0]  # Inferred
+  size: &universal_default_size [1, 1, 1] # Creates an anchor (&) to be used as an alias (*) later
+
+# Immovable objects
+CylinderTunnel:
+  colour: &immovable_object_colour [255, 0, 255]
+  size: *universal_default_size
+
+CylinderTunnelTransparent:
+  colour: *immovable_object_colour
+  size: *universal_default_size
+
+Ramp:
+  colour: *immovable_object_colour
+  size: *universal_default_size
+
+Wall:
+  colour: *immovable_object_colour
+  size: *universal_default_size
+
+WallTransparent:
+  colour: *immovable_object_colour
+  size: *universal_default_size
+
+# Movable objects (blocks)
+HeavyBlock:
+  colour: [90, 90, 90]  # Inferred
+  size: *universal_default_size
+
+LightBlock:
+  colour: &non_heavy_block_colour [211, 211, 211]  # Inferred
+  size: *universal_default_size
+
+JBlock:
+  colour: *non_heavy_block_colour  # Inferred
+  size: *universal_default_size
+
+LBlock:
+  colour: *non_heavy_block_colour  # Inferred
+  size: *universal_default_size
+
+UBlock:
+  colour: *non_heavy_block_colour  # Inferred
+  size: *universal_default_size
+
+# Signboards
+SignBoard:
+  colour: [222, 184, 135]  # Inferred
+  size: *universal_default_size
+
+# Valenced dispensers
+SpawnerButton:
+  colour: [233, 255, 10]  # Inferred
+  size: *universal_default_size
+
+SpawnerDispenserTall:
+  colour: [255, 0, 255]
+  size: *universal_default_size
+
+SpawnerContainerShort:
+  colour: [255, 0, 255]
+  size: *universal_default_size
+
+SpawnerTree:
+  colour: [74, 153, 58]  # Inferred
+  size: *universal_default_size
+
+# Valenced rewards
+GoodGoal:
+  colour: &good_goal_colour [0, 256, 0] # Inferred
+  size: *universal_default_size
+
+GoodGoalBounce:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+BadGoal:
+  colour: &bad_goal_colour [256, 0, 0]  # Inferred
+  size: *universal_default_size
+
+BadGoalBounce:
+  colour: *bad_goal_colour  # Inferred
+  size: *universal_default_size
+
+GoodGoalMulti:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+GoodGoalMultiBounce:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+BadGoalMulti:
+  colour: *bad_goal_colour  # Inferred
+  size: *universal_default_size
+
+BadGoalMultiBounce:
+  colour: *bad_goal_colour  # Inferred
+  size: *universal_default_size
+
+DecayGoal:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+DecoyGoal:
+  colour: [255, 255, 255]  # Inferred
+  size: *universal_default_size
+
+DecayGoalBounce:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+GrowGoal:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+ShrinkGoal:
+  colour: *good_goal_colour  # Inferred
+  size: *universal_default_size
+
+# Zones
+DeathZone:
+  colour: *bad_goal_colour  # Inferred
+  size: *universal_default_size
+
+HotZone:
+  colour: [255, 165, 0]  # Inferred
+  size: *universal_default_size

@@ -32,7 +32,7 @@ class ConfigAssistant:
         self.t = self.config_data["arenas"][0]["t"]
 
         # Get the name of all Animal-AI items
-        with open("definitions/item_default_colours.yaml", "r") as file:
+        with open("definitions/item_default_parameters.yaml", "r") as file:
             self.all_aai_item_names = list(yaml.safe_load(file).keys())
         # print(self.all_aai_item_names)
 
@@ -156,7 +156,8 @@ class ConfigAssistant:
 
                 html.H2("Place new item",
                         id='heading-place-new-item',
-                        style={"fontFamily": font_family, "font-weight": "normal", 'marginLeft': f"{margin_left/3}%"}),
+                        style={"fontFamily": font_family, "font-weight": "normal",
+                               'marginLeft': f"{margin_left / 3}%"}),
 
                 dcc.Dropdown(self.all_aai_item_names, id='item-dropdown', style={"fontSize": f"{font_size}px",
                                                                                  "fontFamily": font_family,
@@ -212,7 +213,8 @@ class ConfigAssistant:
 
                 html.H2("Move item",
                         id='heading-move-an-item',
-                        style={"fontFamily": font_family, "font-weight": "normal", 'marginLeft': f"{margin_left/3}%"}),
+                        style={"fontFamily": font_family, "font-weight": "normal",
+                               'marginLeft': f"{margin_left / 3}%"}),
 
                 dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
                            tooltip={"placement": tooltip_placement,
@@ -242,7 +244,8 @@ class ConfigAssistant:
 
                 html.H2("Generate new config",
                         id='heading-generate-a-new-configuration-file',
-                        style={"fontFamily": font_family, "font-weight": "normal", 'marginLeft': f"{margin_left/3}%"}),
+                        style={"fontFamily": font_family, "font-weight": "normal",
+                               'marginLeft': f"{margin_left / 3}%"}),
 
                 dcc.Input(id="new-config-path",
                           style={'width': '80%',
@@ -531,7 +534,7 @@ class ConfigAssistant:
                 position = items["positions"][j]
                 rotation = items["rotations"][j] if "rotations" in items else 0
 
-                size = items["sizes"][j] if "sizes" in items else self._get_default_item_size(name)
+                size = items["sizes"][j] if "sizes" in items else {"x": 1, "y": 1, "z": 1, }
                 colour = items["colors"][j] if "colors" in items else self._get_default_item_colour(name)
 
                 # TODO: can also put default colours here (and stop doing it in visualiser, think about pros/cons)
@@ -567,23 +570,23 @@ class ConfigAssistant:
             item_name (str): Name of the physical Animal-AI item.
 
         Returns:
-            (tuple): The red, green, blue (rgb) components of the default colour for the inputted item.
+            (dict[str]): The red, green, blue (rgb) components of the default colour for the inputted item.
         """
-        with open(f"definitions/item_default_colours.yaml", "r") as file:
-            item_colour_dict = yaml.safe_load(file)
+        with open(f"definitions/item_default_parameters.yaml", "r") as file:
+            item_defaults_dict = yaml.safe_load(file)
 
         item_name = item_name.split(" ")[0]
 
         try:
-            default_colour = {"r": item_colour_dict[item_name][0],
-                              "g": item_colour_dict[item_name][1],
-                              "b": item_colour_dict[item_name][2]}
+            default_colour = {"r": item_defaults_dict[item_name]["colour"][0],
+                              "g": item_defaults_dict[item_name]["colour"][1],
+                              "b": item_defaults_dict[item_name]["colour"][2]}
         except KeyError:
-            # For now, we have chosen to deal with missing sizes AND unrecognised name by setting all size dims to 0
+            # For now, we have chosen to deal with missing colour AND unrecognised name by setting colour to white
             warnings.warn(f"The item {item_name} is not recognised and is missing a 'colors' field in the .yaml "
                           f"configuration. Either add a 'colors' field for this item or add the item to the "
                           f"default_colour_dict above.")
-            default_colour = (149, 53, 83)
+            default_colour = {"r": 255, "g": 255, "b": 255}
 
         return default_colour
 
@@ -598,70 +601,25 @@ class ConfigAssistant:
             item_name (str): Name of the physical Animal-AI item.
 
         Returns:
-            (dict[str]): The red, green, blue (rgb) components of the default colour for the inputted item.
+            (dict[str]): The x, y, z components of the default size for the inputted item.
         """
-
-        # For now all default sizes are the same but this allows for any default colours to be set if need be
-        item_size_dict = {
-            # General
-            "Agent": (1, 1, 1),
-
-            # Immovable objects
-            "CylinderTunnel": (1, 1, 1),
-            "CylinderTunnelTransparent": (1, 1, 1),
-            "Ramp": (1, 1, 1),
-            "Wall": (1, 1, 1),
-            "WallTransparent": (1, 1, 1),
-
-            # Movable objects (blocks)
-            "HeavyBlock": (1, 1, 1),  # Inferred
-            "LightBlock": (1, 1, 1),  # Inferred
-            "JBlock": (1, 1, 1),  # Inferred
-            "LBlock": (1, 1, 1),  # Inferred
-            "UBlock": (1, 1, 1),  # Inferred
-
-            # Signboard
-            "SignBoard": (1, 1, 1),  # Inferred
-
-            # Valenced dispensers
-            "SpawnerButton": (1, 1, 1),  # Inferred
-            "SpawnerDispenserTall": (1, 1, 1),
-            "SpawnerContainerShort": (1, 1, 1),
-            "SpawnerTree": (1, 1, 1),  # Inferred
-
-            # Valenced rewards
-            "GoodGoal": (1, 1, 1),  # Inferred
-            "GoodGoalBounce": (1, 1, 1),  # Inferred
-            "BadGoal": (1, 1, 1),  # Inferred
-            "BadGoalBounce": (1, 1, 1),  # Inferred
-            "GoodGoalMulti": (1, 1, 1),  # Inferred
-            "GoodGoalMultiBounce": (1, 1, 1),  # Inferred
-            "BadGoalMulti": (1, 1, 1),  # Inferred
-            "BadGoalMultiBounce": (1, 1, 1),  # Inferred
-            "DecayGoal": (1, 1, 1),  # Inferred
-            "DecoyGoal": (1, 1, 1),  # Inferred
-            "DecayGoalBounce": (1, 1, 1),  # Inferred
-            "GrowGoal": (1, 1, 1),  # Inferred
-            "ShrinkGoal": (1, 1, 1),  # Inferred
-
-            # Zones
-            "DeathZone": (1, 1, 1),  # Inferred
-            "HotZone": (1, 1, 1),  # Inferred
-        }
+        with open(f"definitions/item_default_parameters.yaml", "r") as file:
+            item_defaults_dict = yaml.safe_load(file)
 
         item_name = item_name.split(" ")[0]
+
+        param = "size"
+
         try:
-            default_size = {
-                "x": item_size_dict[item_name][0],
-                "y": item_size_dict[item_name][1],
-                "z": item_size_dict[item_name][2],
-            }
+            default_size = {"x": item_defaults_dict[item_name][param][0],
+                            "y": item_defaults_dict[item_name][param][1],
+                            "z": item_defaults_dict[item_name][param][2]}
         except KeyError:
-            # For now, we have chosen to deal with missing sizes AND unrecognised name by setting all size dims to 0
-            warnings.warn(f"The item {item_name} is not recognised and is missing a 'sizes' field in the .yaml "
-                          f"configuration. Either add a 'sizes' field for this item or add the item to the "
-                          f"default_size_dict above.")
-            default_size = {"x": 0, "y": 0, "z": 0}
+            # For now, we have chosen to deal with missing colour AND unrecognised name by setting colour to white
+            warnings.warn(f"The item {item_name} is not recognised and is missing a 'colors' field in the .yaml "
+                          f"configuration. Either add a 'colors' field for this item or add the item to the "
+                          f"default_colour_dict above.")
+            default_size = {"x": 1, "y": 1, "z": 1}
 
         return default_size
 
@@ -671,9 +629,15 @@ class ConfigAssistant:
         return f"{type_name} {item_ix}"
 
 
-# TODO: remove the border and background on the x, y, z sliders to declutter the look
-# TODO: remove the _get_default_item_size
+# TODO: make the item_defaults_dict a class attribute of the configuration assistant so that you do not have to do
+#  opening and closing over and over
+# TODO: Update how _get_default_size is implemented (taking into consideration that you need to start checking
+#  whether a requested item is in a list of 'defaults'; else, you may want to let the user know
+# TODO: fix the fact that new objects spawning do not have the right colour
+# TODO: Implement raising appropriate exceptions when unrecognised items are encountered
+# TODO: Write many tests for all functionalities since it seems like this tool will be used a lot
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
+# TODO: remove the border and background on the x, y, z sliders to declutter the look
 
 if __name__ == "__main__":
     # # Checking and visualising an entire configuration file
