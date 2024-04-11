@@ -526,6 +526,11 @@ class ConfigAssistant:
 
         # For every item type
         for i, items in enumerate(item_types):
+            # Check whether the item type is valid
+            if items["name"] not in self.all_aai_item_names:
+                raise Exception(f"The name {items['name']} that you have provided "
+                                f"is not in the default items list.")
+
             num_items = len(items["positions"])
 
             # For every item in the item type
