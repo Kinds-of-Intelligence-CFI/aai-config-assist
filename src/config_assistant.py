@@ -23,6 +23,12 @@ class ConfigAssistant:
         Args:
             config_path (str): Path to YAML Animal-AI configuration file.
         """
+        # Get the default item parameters
+        with open("definitions/item_default_parameters.yaml", "r") as file:
+            self.default_item_parameters = yaml.safe_load(file)
+
+        self.all_aai_item_names = list(self.default_item_parameters.keys())
+
         self.config_path = config_path
         self.config_data = self._load_config_data()
         self.physical_items = self._create_rectangular_cuboid_list()
@@ -30,11 +36,6 @@ class ConfigAssistant:
 
         self.pass_mark = self.config_data["arenas"][0]["pass_mark"]
         self.t = self.config_data["arenas"][0]["t"]
-
-        # Get the name of all Animal-AI items
-        with open("definitions/item_default_parameters.yaml", "r") as file:
-            self.all_aai_item_names = list(yaml.safe_load(file).keys())
-        # print(self.all_aai_item_names)
 
     def check_config_overlap(self):
         """Displays a log of possible overlaps to the terminal."""
@@ -105,7 +106,7 @@ class ConfigAssistant:
             colour_dict = cuboid.colour
             rgb_colour = (colour_dict["r"] / 256,
                           colour_dict["g"] / 256,
-                          colour_dict["b"] / 256) if cuboid.colour is not None else self._get_default_item_colour(name)
+                          colour_dict["b"] / 256) if cuboid.colour is not None else self._get_default_item_parameter(item_name=name, param_name="colour")
 
             # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
             bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
@@ -446,7 +447,7 @@ class ConfigAssistant:
             colour_dict = cuboid.colour
             rgb_colour = (colour_dict["r"],
                           colour_dict["g"],
-                          colour_dict["b"]) if cuboid.colour is not None else self._get_default_item_colour(name)
+                          colour_dict["b"]) if cuboid.colour is not None else self._get_default_item_parameter(item_name=name, param_name="colour")
             # TODO: test whether commenting the if statement directly above would be safe considering that the item's
             #  colour when/if the colour is always defined in the RectangularCuboid
 
@@ -534,8 +535,9 @@ class ConfigAssistant:
                 position = items["positions"][j]
                 rotation = items["rotations"][j] if "rotations" in items else 0
 
-                size = items["sizes"][j] if "sizes" in items else {"x": 1, "y": 1, "z": 1, }
-                colour = items["colors"][j] if "colors" in items else self._get_default_item_colour(name)
+                # TODO: can use more pythonic approach with get or set_default functions here
+                size = items["sizes"][j] if "sizes" in items else self._get_default_item_parameter(item_name=name, param_name="size")
+                colour = items["colors"][j] if "colors" in items else self._get_default_item_parameter(item_name=name, param_name="colour")
 
                 # TODO: can also put default colours here (and stop doing it in visualiser, think about pros/cons)
                 #  and set an error message in both if the item is not recognised and decide whether or not
@@ -558,70 +560,36 @@ class ConfigAssistant:
 
         return rec_cuboids
 
-    @staticmethod
-    def _get_default_item_colour(item_name):
-        """Provides the default colour of a particular Animal-AI item.
+    def _get_default_item_parameter(self, item_name, param_name):
+        """Provides the default parameter value of a particular Animal-AI item.
 
         Note:
             - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
-            - Some default colours were not available on the official repo and were inferred from the images.
+            - Some default values were not available on the official repo and were inferred from the images.
 
         Args:
             item_name (str): Name of the physical Animal-AI item.
+            param_name (str): Parameter type that is being requested (colour or size for the time being)
 
         Returns:
-            (dict[str]): The red, green, blue (rgb) components of the default colour for the inputted item.
+            (dict[str]): The components of the default colour for the inputted item.
         """
-        with open(f"definitions/item_default_parameters.yaml", "r") as file:
-            item_defaults_dict = yaml.safe_load(file)
-
         item_name = item_name.split(" ")[0]
 
-        try:
-            default_colour = {"r": item_defaults_dict[item_name]["colour"][0],
-                              "g": item_defaults_dict[item_name]["colour"][1],
-                              "b": item_defaults_dict[item_name]["colour"][2]}
-        except KeyError:
-            # For now, we have chosen to deal with missing colour AND unrecognised name by setting colour to white
-            warnings.warn(f"The item {item_name} is not recognised and is missing a 'colors' field in the .yaml "
-                          f"configuration. Either add a 'colors' field for this item or add the item to the "
-                          f"default_colour_dict above.")
-            default_colour = {"r": 255, "g": 255, "b": 255}
-
-        return default_colour
-
-    @staticmethod
-    def _get_default_item_size(item_name):
-        """Provides the default colour of a particular Animal-AI item.
-
-        Note:
-            - Copied the default values from official Animal-AI repository at Arena-Objects.yaml.
-
-        Args:
-            item_name (str): Name of the physical Animal-AI item.
-
-        Returns:
-            (dict[str]): The x, y, z components of the default size for the inputted item.
-        """
-        with open(f"definitions/item_default_parameters.yaml", "r") as file:
-            item_defaults_dict = yaml.safe_load(file)
-
-        item_name = item_name.split(" ")[0]
-
-        param = "size"
+        param_name_to_keys = {
+            "colour": ["r", "g", "b"],
+            "size": ["x", "y", "z"],
+        }
+        param_keys = param_name_to_keys[param_name]
 
         try:
-            default_size = {"x": item_defaults_dict[item_name][param][0],
-                            "y": item_defaults_dict[item_name][param][1],
-                            "z": item_defaults_dict[item_name][param][2]}
+            default_values = self.default_item_parameters[item_name][param_name]
         except KeyError:
-            # For now, we have chosen to deal with missing colour AND unrecognised name by setting colour to white
-            warnings.warn(f"The item {item_name} is not recognised and is missing a 'colors' field in the .yaml "
-                          f"configuration. Either add a 'colors' field for this item or add the item to the "
-                          f"default_colour_dict above.")
-            default_size = {"x": 1, "y": 1, "z": 1}
+            # Eventually, could implement a custom exception to avoid repeating KeyError
+            raise KeyError(f"The item {item_name}'s {param_name} value is not defined in the default definitions. "
+                           f"Please add the value to the definitions to move on without errors.")
 
-        return default_size
+        return dict(zip(param_keys, default_values))
 
     @staticmethod
     def _set_item_name_from(type_name, item_ix):
@@ -629,15 +597,13 @@ class ConfigAssistant:
         return f"{type_name} {item_ix}"
 
 
-# TODO: make the item_defaults_dict a class attribute of the configuration assistant so that you do not have to do
-#  opening and closing over and over
-# TODO: Update how _get_default_size is implemented (taking into consideration that you need to start checking
-#  whether a requested item is in a list of 'defaults'; else, you may want to let the user know
 # TODO: fix the fact that new objects spawning do not have the right colour
 # TODO: Implement raising appropriate exceptions when unrecognised items are encountered
 # TODO: Write many tests for all functionalities since it seems like this tool will be used a lot
 # TODO: eventually, can decouple the checking and plotting functionalities of this class
 # TODO: remove the border and background on the x, y, z sliders to declutter the look
+# TODO: for the time being, the user can place a new None item if they have not selected an item from the dropdown
+#  address this more gracefully.
 
 if __name__ == "__main__":
     # # Checking and visualising an entire configuration file
