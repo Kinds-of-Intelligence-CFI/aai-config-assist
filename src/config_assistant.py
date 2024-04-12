@@ -12,6 +12,7 @@ from src.arena_config_dumper import ArenaConfigDumper
 from src.arena_config_loader import ArenaConfigLoader
 from src.geometry_helper import calculate_vertices_of_rotated_rectangle
 from src.separating_axis_theorem import RectangularCuboid, apply_separating_axis_theorem
+from src.style_guide import StyleGuide
 
 
 class ConfigAssistant:
@@ -97,159 +98,94 @@ class ConfigAssistant:
         self.idx_item_to_move = 0
         self.num_auto_items_created = 0
 
-        # Some styling parameters
-        font_size = 17
-        font_family = "Helvetica"
-        background_colour = 'rgba(231,235,235,0.5)'
-        tooltip_placement = 'top'
-        margin_between_components = 12
-        margin_at_bottom_of_components = margin_between_components * 3
-        margin_left = 3
-        margin_right = 3
-        component_height = 21
-        border_radius = 3
+        style_guide = StyleGuide()
 
         # Create a Dash application for more interactivity
         app = Dash(__name__, )
         app.layout = html.Div([
             html.Div([
-                dcc.Graph(figure=fig_init, id='aai-diagram', style={"height": "100vh"}),
-            ], style={'display': 'inline-block', 'width': '60%', 'verticalAlign': 'middle'}),
+                dcc.Graph(figure=fig_init, id='aai-diagram', style=style_guide.aai_figure_style()),
+            ], style=style_guide.left_hand_section_style()),
 
             html.Div([
+                html.H2("Place new item", id='heading-place-new-item', style=style_guide.heading2_style()),
 
-                html.H2("Place new item",
-                        id='heading-place-new-item',
-                        style={"fontFamily": font_family, "font-weight": "normal",
-                               'marginLeft': f"{margin_left / 3}%"}),
+                dcc.Dropdown(self.all_aai_item_names, id='item-dropdown', style=style_guide.dropdown_style()),
 
-                dcc.Dropdown(self.all_aai_item_names, id='item-dropdown', style={"fontSize": f"{font_size}px",
-                                                                                 "fontFamily": font_family,
-                                                                                 'marginLeft': f"{margin_left - 1.5}%",
-                                                                                 'marginRight': f"{margin_right}%"
-                                                                                 }),
+                dcc.Input(placeholder='Length (x)',
+                          type='text',
+                          value='',
+                          id="spawn-x",
+                          style=style_guide.length_input_style()),
 
-                html.Div(id='item-dropdown-output', style={'marginBottom': margin_between_components,
-                                                           "fontSize": f"{font_size}px",
-                                                           "fontFamily": font_family,
-                                                           'marginLeft': f"{margin_left - 1.5}%",
-                                                           'marginRight': f"{margin_right}%"
-                                                           }),
-
-                dcc.Input(placeholder='Length (x)', type='text', value='', id="spawn-x",
-                          style={"fontSize": f"{font_size}px", "fontFamily": font_family,
-                                 'marginBottom': margin_between_components,
-                                 'marginTop': margin_between_components,
-                                 'marginLeft': f"{margin_left}%",
-                                 # 'marginRight': f"{margin_right}%",
-                                 }
-                          ),
-                dcc.Input(placeholder='Width (z)', type='text', value='', id="spawn-z",
-                          style={"fontSize": f"{font_size}px", "fontFamily": font_family,
-                                 'marginBottom': margin_between_components,
-                                 'marginTop': margin_between_components,
-                                 # 'marginLeft': f"{margin_left}%",
-                                 # 'marginRight': f"{margin_right}%",
-                                 }
-                          ),
-                dcc.Input(placeholder='Height (y)', type='text', value='', id="spawn-y",
-                          style={"fontSize": f"{font_size}px", "fontFamily": font_family,
-                                 'marginBottom': margin_between_components,
-                                 'marginTop': margin_between_components,
-                                 # 'marginLeft': f"{margin_left}%",
-                                 # 'marginRight': f"{margin_right}%",
-                                 }
+                dcc.Input(placeholder='Width (z)',
+                          type='text',
+                          value='',
+                          id="spawn-z",
+                          style=style_guide.width_input_style()
                           ),
 
-                html.Div(html.Button('Spawn new item', id='new-item-button', n_clicks=0,
-                                     style={'height': component_height,
-                                            "fontSize": f"{font_size}px",
-                                            "fontFamily": font_family,
-                                            'marginBottom': margin_between_components * 2,
-                                            'marginTop': margin_between_components,
-                                            'marginLeft': f"{margin_left}%",
-                                            'marginRight': f"{margin_right}%",
-                                            "cursor": "pointer",
-                                            },
-                                     ), ),
+                dcc.Input(placeholder='Height (y)',
+                          type='text',
+                          value='',
+                          id="spawn-y",
+                          style=style_guide.height_input_style()
+                          ),
 
-                html.Div(id='new-item-button-output', style={'whiteSpace': 'pre-line'}),
+                html.Button('Spawn new item',
+                            id='new-item-button',
+                            n_clicks=0,
+                            style=style_guide.button_style(),
+                            ),
 
-                html.H2("Move item",
-                        id='heading-move-an-item',
-                        style={"fontFamily": font_family, "font-weight": "normal",
-                               'marginLeft': f"{margin_left / 3}%"}),
+                html.H2("Move item", id='heading-move-an-item', style=style_guide.heading2_style()),
 
                 dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
-                           tooltip={"placement": tooltip_placement,
+                           tooltip={"placement": style_guide.tooltip_placement,
                                     "always_visible": True,
                                     "template": "x = {value}",
-                                    "style": {"fontSize": f"{font_size}px",
-                                              "fontFamily": font_family,
-                                              }, }, ),
+                                    "style": style_guide.slider_tooltip_style()}),
 
                 dcc.Slider(id="y-slider", min=0, max=20, step=0.1, value=0, marks=None,
-                           tooltip={"placement": tooltip_placement,
+                           tooltip={"placement": style_guide.tooltip_placement,
                                     "always_visible": True,
                                     "template": "y = {value}",
-                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }, }, ),
+                                    "style": style_guide.slider_tooltip_style()}),
 
                 dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
-                           tooltip={"placement": tooltip_placement,
+                           tooltip={"placement": style_guide.tooltip_placement,
                                     "always_visible": True,
                                     "template": "z = {value}",
-                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
+                                    "style": style_guide.slider_tooltip_style()}),
 
                 dcc.Slider(id="xz-rotation-slider", min=0, max=360, step=1, value=0, marks=None,
-                           tooltip={"placement": tooltip_placement,
+                           tooltip={"placement": style_guide.tooltip_placement,
                                     "always_visible": True,
                                     "template": "xz = {value} deg",
-                                    "style": {"fontSize": f"{font_size}px", "fontFamily": font_family, }}),
+                                    "style": style_guide.slider_tooltip_style()}, ),
 
                 html.H2("Generate new config",
                         id='heading-generate-a-new-configuration-file',
-                        style={"fontFamily": font_family, "font-weight": "normal",
-                               'marginLeft': f"{margin_left / 3}%"}),
+                        style=style_guide.heading2_style()),
 
                 dcc.Input(id="new-config-path",
-                          style={'width': '80%',
-                                 'height': component_height,
-                                 "fontSize": f"{font_size}px",
-                                 "fontFamily": font_family,
-                                 'marginBottom': margin_between_components,
-                                 # 'marginTop': margin_between_components,
-                                 'marginLeft': f"{margin_left}%",
-                                 'marginRight': f"{margin_right}%",
-                                 "border-style": "solid",
-                                 "border-width": 0.5,
-                                 "border-radius": border_radius,
-                                 },
+                          style=style_guide.new_config_path_input_style(),
                           type="text",
                           placeholder="example_configs/new_config.yaml"),
 
-                html.Div(html.Button('Generate new YAML config', id='new-config-path-button', n_clicks=0,
-                                     style={'height': component_height,
-                                            "fontSize": f"{font_size}px",
-                                            "fontFamily": font_family,
-                                            'marginBottom': margin_at_bottom_of_components,
-                                            'marginTop': margin_between_components,
-                                            'marginLeft': f"{margin_left}%",
-                                            'marginRight': f"{margin_right}%",
-                                            "cursor": "pointer",
-                                            # Un-commenting these fields undesirably removes clicking animation
-                                            # "border-radius": border_radius,
-                                            # "border-width": 1,
-                                            # "background-color": "white",
-                                            },
+                html.Div(html.Button('Generate new YAML config',
+                                     id='new-config-path-button',
+                                     n_clicks=0,
+                                     style=style_guide.new_config_generation_button_style(),
                                      ), ),
 
                 html.Div(id='new-config-path-output', style={'whiteSpace': 'pre-line'}),
 
-            ], style={'display': 'inline-block', 'width': '40%', 'verticalAlign': 'bottom'}),
+            ], style=style_guide.right_hand_section_style()),
 
             html.Div(id='app_id')
 
-        ], style={'backgroundColor': background_colour})
+        ], style={'backgroundColor': style_guide.background_colour})
 
         # Creates a callback mechanism for when one of the items is selected to be moved
         @callback(
@@ -401,7 +337,7 @@ class ConfigAssistant:
                       )
 
         # Make the axes equal to get a square arena
-        fig.update_yaxes(scaleanchor="x", scaleratio=1,)
+        fig.update_yaxes(scaleanchor="x", scaleratio=1, )
 
         for cuboid in cuboids:
             name = cuboid.name
@@ -445,7 +381,7 @@ class ConfigAssistant:
                 legend=dict(x=15,
                             y=1,
                             traceorder='normal',
-                            font=dict(family='Helvetica', size=20,color='Black'),
+                            font=dict(family='Helvetica', size=20, color='Black'),
                             bgcolor='rgba(231,235,235,0.5)',
                             bordercolor='black',
                             borderwidth=1,
