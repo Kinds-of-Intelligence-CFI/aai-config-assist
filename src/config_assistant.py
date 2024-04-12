@@ -382,7 +382,6 @@ class ConfigAssistant:
 
         app.run(port=8000)
 
-    # TODO: review this method
     def _visualise_cuboid_bases_plotly(self, cuboids):
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
 
@@ -394,46 +393,39 @@ class ConfigAssistant:
         fig.update_xaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True, )
         fig.update_yaxes(range=[-1, 41], showgrid=False, zeroline=False, visible=True, )
 
-        # To add an arena border
+        # Add an Arena border
         fig.add_shape(type="rect",
                       x0=0, y0=0, x1=40, y1=40,
                       line=dict(color=f"rgba({100}, {100}, {100}, {1})", width=1.5, dash=None),
                       fillcolor=f"rgba({255}, {224}, {130}, {0.1})"
                       )
-        # To make the axes equal (the cells square)
-        fig.update_yaxes(
-            scaleanchor="x",
-            scaleratio=1,
-        )
+
+        # Make the axes equal to get a square arena
+        fig.update_yaxes(scaleanchor="x", scaleratio=1,)
 
         for cuboid in cuboids:
             name = cuboid.name
-            colour_dict = cuboid.colour
-            rgb_colour = (colour_dict["r"],
-                          colour_dict["g"],
-                          colour_dict["b"]) if cuboid.colour is not None else (0, 0, 0)
+
             # Note: all AAI items should be coloured upon generating the item cuboid list; this fallback is simply
             # in place for non-AAI custom cuboids that may lack a colour attribute (see example main at file bottom).
-            # TODO: consider whether this is the best way to handle under-specified non-AAI items. Note that all of this
-            #  may be acceptable when/if responsibilities are separated between a checker and visualiser
+            if cuboid.colour is not None:
+                r, g, b = cuboid.colour["r"], cuboid.colour["g"], cuboid.colour["b"]
+            else:
+                r, g, b = 0, 0, 0
 
-            r, g, b = rgb_colour
-            opa = 0.35
-
-            # Concatenation because need to provide first element back to path for shape contour to be complete
+            # Concatenate because need to provide first element back to contour path for shape contour to be complete
             # See first example of https://plotly.com/python/shapes/
             x_path = np.concatenate(
                 (cuboid.lower_base_vertices[:, 0], np.reshape(cuboid.lower_base_vertices[0, 0], newshape=(1,))))
             y_path = np.concatenate(
                 (cuboid.lower_base_vertices[:, 1], np.reshape(cuboid.lower_base_vertices[0, 1], newshape=(1,))))
 
-            # If this an item with an overlap, make its border red and make its width thicker
             if name in self.names_items_with_overlap:
+                # Make overlapping item's border red and make its width thicker
                 line_col = f"rgba({256}, {0}, {0}, {1})"
                 line_width = 1.5
-
-            # Else, keep its border black and standard thickness
             else:
+                # Keep non-overlapping item's border black and standard thickness
                 line_col = f"rgba({0}, {0}, {0}, {1})"
                 line_width = 1
 
@@ -441,7 +433,7 @@ class ConfigAssistant:
                                      y=y_path,
                                      fill="toself",
                                      line=dict(color=line_col, width=line_width, ),
-                                     fillcolor=f"rgba({r}, {g}, {b}, {opa})",
+                                     fillcolor=f"rgba({r}, {g}, {b}, {0.35})",
                                      name=name,
                                      marker=dict(opacity=0),
                                      showlegend=True,
@@ -449,33 +441,19 @@ class ConfigAssistant:
                                      ),
                           )
 
-            # Customise the legend
             fig.update_layout(
-                # width=1000,  # To make the figure square
-                # height=1000,  # To make the fiture square
-                # template="plotly_dark",
-                legend=dict(
-                    # itemwidth=100,
-                    x=15,  # Try -1, 0, 1
-                    y=1,  # Try -1, 0, 1
-                    traceorder='normal',
-                    font=dict(
-                        family='Helvetica',
-                        size=20,
-                        color='Black'
-                    ),
-                    # Customise the look of the legend
-                    bgcolor='rgba(231,235,235,0.5)',
-                    bordercolor='black',
-                    borderwidth=1,
-                    orientation='v',
-                    xanchor='left',
-                    yanchor='top',
-                )
+                legend=dict(x=15,
+                            y=1,
+                            traceorder='normal',
+                            font=dict(family='Helvetica', size=20,color='Black'),
+                            bgcolor='rgba(231,235,235,0.5)',
+                            bordercolor='black',
+                            borderwidth=1,
+                            orientation='v',
+                            xanchor='left',
+                            yanchor='top',
+                            )
             )
-
-        # Temporarily disabled for Dash app development
-        # fig.show()
 
         return fig
 
