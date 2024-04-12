@@ -23,22 +23,22 @@ class ConfigAssistant:
         Args:
             config_path (str): Path to YAML Animal-AI configuration file.
         """
+        self.config_path = config_path
+
         # Get the default item parameters
         with open("definitions/item_default_parameters.yaml", "r") as file:
             self.default_item_parameters = yaml.safe_load(file)
-
         self.all_aai_item_names = list(self.default_item_parameters.keys())
 
-        self.config_path = config_path
+        # Load and process the configuration data
         self.config_data = self._load_config_data()
         self.physical_items = self._create_rectangular_cuboid_list()
         self.names_items_with_overlap = []
-
         self.pass_mark = self.config_data["arenas"][0]["pass_mark"]
         self.t = self.config_data["arenas"][0]["t"]
 
     def check_config_overlap(self):
-        """Displays a log of possible overlaps to the terminal."""
+        """Displays a log of possible overlaps in the class configuration to the terminal."""
         cuboids = self.physical_items
         self.names_items_with_overlap = self._check_overlaps_between_cuboids(cuboids)
 
@@ -59,7 +59,7 @@ class ConfigAssistant:
 
     @staticmethod
     def _check_overlaps_between_cuboids(cuboids):
-        """Displays a log of possible overlaps to the terminal.
+        """Displays a log of possible overlaps in the cuboids list to the terminal.
 
         Args:
             cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
@@ -83,40 +83,7 @@ class ConfigAssistant:
 
         return items_with_overlap
 
-    def _visualise_cuboid_bases_matplotlib(self, cuboids):
-        """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
-
-        Args:
-            cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
-        """
-        fig = plt.figure()
-        plt.xlim(0, 40.5)
-        plt.ylim(0, 40.5)
-        currentAxis = plt.gca()
-
-        for cuboid in cuboids:
-            center_of_rotation = tuple(cuboid.center[:2])
-
-            # See RectangularCuboid class definition to understand why these permutations may seem contradictory
-            width = cuboid.length
-            height = cuboid.width
-
-            name = cuboid.name
-            anti_cw_rotation = - cuboid.deg_rotation
-            colour_dict = cuboid.colour
-            rgb_colour = (colour_dict["r"] / 256,
-                          colour_dict["g"] / 256,
-                          colour_dict["b"] / 256) if cuboid.colour is not None else self._get_default_item_parameter(item_name=name, param_name="colour")
-
-            # Bottom left coordinates PRIOR TO ROTATION are needed for matplotlib.patches (get from centroid, as below)
-            bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
-
-            currentAxis.add_patch(Rectangle(xy=bottom_left, width=width, height=height, edgecolor="k",
-                                            lw=1, alpha=0.3, rotation_point=center_of_rotation,
-                                            angle=anti_cw_rotation, facecolor=rgb_colour))
-            plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
-        plt.show()
-
+    # TODO: review this method
     def _run_dash_app_cuboid_visualisation(self, cuboids):
         """Launches Dash application to visualise cuboids.
 
@@ -415,6 +382,7 @@ class ConfigAssistant:
 
         app.run(port=8000)
 
+    # TODO: review this method
     def _visualise_cuboid_bases_plotly(self, cuboids):
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
 
@@ -511,15 +479,54 @@ class ConfigAssistant:
 
         return fig
 
+    def _visualise_cuboid_bases_matplotlib(self, cuboids):
+        """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances (Deprecated).
+
+        Args:
+            cuboids (list[RectangularCuboid]): The RectangularCuboid instances to be visualised.
+        """
+        warnings.warn(f"Please note that you are calling the {self._visualise_cuboid_bases_matplotlib.__name__}"
+                      f" method which is the previous version of the newer plotting method "
+                      f"{self._visualise_cuboid_bases_plotly.__name__}.", DeprecationWarning)
+
+        plt.figure()
+        plt.xlim(0, 40.5)
+        plt.ylim(0, 40.5)
+        currentAxis = plt.gca()
+
+        for cuboid in cuboids:
+            center_of_rotation = tuple(cuboid.center[:2])
+
+            # See RectangularCuboid class definition to understand why these permutations may seem contradictory
+            width = cuboid.length
+            height = cuboid.width
+
+            name = cuboid.name
+            anti_cw_rotation = - cuboid.deg_rotation
+            colour_dict = cuboid.colour
+            if cuboid.colour is not None:
+                rgb_colour = (colour_dict["r"] / 256,
+                              colour_dict["g"] / 256,
+                              colour_dict["b"] / 256)
+            else:
+                rgb_colour = self._get_default_item_parameter(item_name=name, param_name="colour")
+
+            # Bottom left coordinates prior to rotation are needed for matplotlib.patches (get from centroid, as below)
+            bottom_left = center_of_rotation + np.array([-0.5 * width, -0.5 * height])
+
+            currentAxis.add_patch(Rectangle(xy=bottom_left, width=width, height=height, edgecolor="k",
+                                            lw=1, alpha=0.3, rotation_point=center_of_rotation,
+                                            angle=anti_cw_rotation, facecolor=rgb_colour))
+            plt.text(x=bottom_left[0] + 0.5 * width, y=bottom_left[1] + 0.5 * height, s=f"{name}")
+        plt.show()
+
     def _create_rectangular_cuboid_list(self):
         """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.
 
         Returns:
-            (list): The RectangularCuboid instances.
+            (list[RectangularCuboid]): The RectangularCuboid instances.
         """
         rec_cuboids = []
-
-        # Extract the item_types from the configuration file and omit the agent
         item_types = self.config_data["arenas"][0]["items"]
 
         # For every item type
@@ -528,7 +535,6 @@ class ConfigAssistant:
             if items["name"] not in self.all_aai_item_names:
                 raise Exception(f"The name {items['name']} that you have provided "
                                 f"is not in the default items list.")
-
             num_items = len(items["positions"])
 
             # For every item in the item type
@@ -537,11 +543,10 @@ class ConfigAssistant:
                 name = self._set_item_name_from(type_name=items["name"], item_ix=j)
                 position = items["positions"][j]
                 rotation = items["rotations"][j] if "rotations" in items else 0
+                size = items["sizes"][j] if "sizes" in items else self._get_default_item_parameter(name, "size")
+                colour = items["colors"][j] if "colors" in items else self._get_default_item_parameter(name, "colour")
 
-                size = items["sizes"][j] if "sizes" in items else self._get_default_item_parameter(item_name=name, param_name="size")
-                colour = items["colors"][j] if "colors" in items else self._get_default_item_parameter(item_name=name, param_name="colour")
-
-                # Transform some of the extracted data
+                # Transform parts of the extracted data
                 xzy_lower_base_centroid = np.array([position["x"], position["z"], position["y"]])
                 xzy_dimensions = (size["x"], size["z"], size["y"])
 
@@ -574,10 +579,9 @@ class ConfigAssistant:
         """
         item_name = item_name.split(" ")[0]
 
-        param_name_to_keys = {
-            "colour": ["r", "g", "b"],
-            "size": ["x", "y", "z"],
-        }
+        param_name_to_keys = {"colour": ["r", "g", "b"],
+                              "size": ["x", "y", "z"],
+                              }
         param_keys = param_name_to_keys[param_name]
 
         try:
@@ -594,8 +598,6 @@ class ConfigAssistant:
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
 
-
-# TODO: Implement raising appropriate exceptions when unrecognised items are encountered
 
 # TODO: Write many tests for all functionalities since it seems like this tool will be used a lot
 
