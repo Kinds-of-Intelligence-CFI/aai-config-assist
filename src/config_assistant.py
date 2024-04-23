@@ -93,15 +93,24 @@ class ConfigAssistant:
         """
 
         # Initialise the item to be moved
-        self.idx_item_to_move = 0
+        # TODO: 1. Do these truly need to be class instances (how could the callback methods have access to these
+        #  without them being class instances (surely there is another type of input that you can give to
+        #  the callbacks) 2. Look at good practices for dealing with many callbacks with the same output object.
+        self.idx_item_to_move = [0]
         self.num_auto_items_created = 0
         fig_init = self._visualise_cuboid_bases_plotly(cuboids)
 
-        # Create a Dash application for more interactivity
-        app = Dash(__name__,)
+        app = Dash(__name__, )
         app.layout = set_up_app_layout(fig_init, self.all_aai_item_names)
 
-        # Creates a callback mechanism for when one of the items is selected to be moved
+        self._update_sliders_callback(cuboids)
+        self._update_plot_callback(cuboids)
+        self._dump_current_layout_to_config_callback()
+
+        app.run(port=8000)
+
+    def _update_sliders_callback(self, cuboids):
+        """Creates a callback mechanism for when one of the items is selected to be moved."""
         @callback(
             Output(component_id='x-slider', component_property="value"),
             Output(component_id='y-slider', component_property="value"),
@@ -110,25 +119,29 @@ class ConfigAssistant:
             Input(component_id='aai-diagram', component_property='clickData'),
             prevent_initial_call=True
         )
-        def update_sliders(point_clicked):
+        def _update_sliders(point_clicked):
             """Updates the sliders when one of the items is selected to be moved."""
             if point_clicked is not None:
                 print("you have clicked an item")
-                self.idx_item_to_move = point_clicked['points'][0]["curveNumber"]
-                print(f"You have just clicked: {cuboids[self.idx_item_to_move].name}")
-                return (cuboids[self.idx_item_to_move].center[0],  # The x-direction
-                        cuboids[self.idx_item_to_move].center[2],  # The y-direction
-                        cuboids[self.idx_item_to_move].center[1],  # The z-direction
-                        cuboids[self.idx_item_to_move].deg_rotation
+                self.idx_item_to_move[0] = point_clicked['points'][0]["curveNumber"]
+                print(f"You have just clicked: {cuboids[self.idx_item_to_move[0]].name}")
+                return (cuboids[self.idx_item_to_move[0]].center[0],  # The x-direction
+                        cuboids[self.idx_item_to_move[0]].center[2],  # The y-direction
+                        cuboids[self.idx_item_to_move[0]].center[1],  # The z-direction
+                        cuboids[self.idx_item_to_move[0]].deg_rotation
                         )
 
             else:
                 print("You have not clicked an item")
                 return 0, 0, 0
 
-        # Creates a callback mechanism for when the sliders are being used to move items
-        # AND Creates a callback mechanism for spawning a new item into the arena and into the physical_items
-        # These share a callback because Dash can only support one callback per unique output (here, the arena diagram)
+    def _update_plot_callback(self, cuboids):
+        """Creates a callback mechanism for when the sliders are being used to move items.
+
+        Note:
+            Creates a callback mechanism for spawning a new item into the arena and into the physical_items
+            These share a callback because Dash only supports one callback per unique output (here, the arena).
+        """
         @callback(
             Output(component_id='aai-diagram', component_property='figure'),
             Input(component_id="x-slider", component_property="value"),
@@ -142,7 +155,7 @@ class ConfigAssistant:
             State(component_id="spawn-y", component_property="value"),
             prevent_initial_call=True
         )
-        def update_plot(x_slider_value,
+        def _update_plot(x_slider_value,
                         y_slider_value,
                         z_slider_value,
                         xz_rotation,
@@ -178,7 +191,8 @@ class ConfigAssistant:
                 spawned_dimensions = (float(spawn_x_dim), float(spawn_z_dim), float(spawn_y_dim))
                 spawned_rotation = 0
                 spawned_name = f"{item_dropdown_value} Auto {num_auto_items_created}"
-                spawned_colour = self._get_default_item_parameter(item_name=item_dropdown_value, param_name="colour")
+                spawned_colour = self._get_default_item_parameter(item_name=item_dropdown_value,
+                                                                  param_name="colour")
                 spawned_auto_cuboid = RectangularCuboid(lower_base_centroid=spawned_lower_base_centroid,
                                                         dimensions=spawned_dimensions,
                                                         rotation=spawned_rotation,
@@ -187,33 +201,35 @@ class ConfigAssistant:
                                                         )
                 self.physical_items += [spawned_auto_cuboid]
                 self.num_auto_items_created = num_auto_items_created
-                self.idx_item_to_move = -1
+                self.idx_item_to_move = [-1]
                 xz_rotation = spawned_rotation
                 print(f"You have just created: {spawned_name}")
 
             else:
                 # Update the cuboid center coordinates
                 # Note: when calling visualise_config, cuboids is the physical_items class attribute
-                cuboids[self.idx_item_to_move].center[0] = x_slider_value
-                cuboids[self.idx_item_to_move].center[2] = y_slider_value
-                cuboids[self.idx_item_to_move].center[1] = z_slider_value
-                cuboids[self.idx_item_to_move].deg_rotation = xz_rotation
+                cuboids[self.idx_item_to_move[0]].center[0] = x_slider_value
+                cuboids[self.idx_item_to_move[0]].center[2] = y_slider_value
+                cuboids[self.idx_item_to_move[0]].center[1] = z_slider_value
+                cuboids[self.idx_item_to_move[0]].deg_rotation = xz_rotation
 
             # Note that the center parameter expects the 2D planar values
             # AAI-x (cuboid[...].center[0]) and AAI-z (cuboid[...].center[1])
-            cuboids[self.idx_item_to_move].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
-                center=np.array([cuboids[self.idx_item_to_move].center[0], cuboids[self.idx_item_to_move].center[1]]),
-                width=cuboids[self.idx_item_to_move].length,
-                height=cuboids[self.idx_item_to_move].width,
+            cuboids[self.idx_item_to_move[0]].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
+                center=np.array(
+                    [cuboids[self.idx_item_to_move[0]].center[0], cuboids[self.idx_item_to_move[0]].center[1]]),
+                width=cuboids[self.idx_item_to_move[0]].length,
+                height=cuboids[self.idx_item_to_move[0]].width,
                 angle_deg=xz_rotation)
 
-            print(f"The item currently being moved is: {cuboids[self.idx_item_to_move].name}")
+            print(f"The item currently being moved is: {cuboids[self.idx_item_to_move[0]].name}")
             self.check_config_overlap()
             fig = self._visualise_cuboid_bases_plotly(cuboids)
 
             return fig
 
-        # Creates a callback mechanism for dumping the current physical items to a new configuration file
+    def _dump_current_layout_to_config_callback(self):
+        """Creates a callback mechanism for dumping the current physical items to a new configuration file."""
         arena = {"pass_mark": self.pass_mark, "t": self.t, "items": self.physical_items}
         arena_config_dumper = ArenaConfigDumper([arena], destination_file_path="")
 
@@ -223,14 +239,12 @@ class ConfigAssistant:
             Input(component_id='new-config-path-button', component_property="n_clicks"),
             prevent_initial_call=True
         )
-        def dump_current_layout_to_config(new_config_path, n_clicks):
+        def _dump_current_layout_to_config(new_config_path, n_clicks):
             if n_clicks > 0:
                 arena_config_dumper.destination_file_path = new_config_path
                 arena_config_dumper.dump()
                 print(f"You have generated a new config YAML file at {new_config_path}.")
                 return ""  # Empty the string after the process has completed
-
-        app.run(port=8000)
 
     def _visualise_cuboid_bases_plotly(self, cuboids):
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
@@ -426,6 +440,9 @@ class ConfigAssistant:
         """Sets a name for an item from its type and index (e.g. if there are several walls)."""
         return f"{type_name} {item_ix}"
 
+
+# TODO: Think about modularising app callbacks (to app_callbacks.py) THOUGH remember that they require instance
+#  variables that you would not have in another module. Think about how to deal with that.
 
 # TODO: Write many tests for all functionalities since it seems like this tool will be used a lot
 
