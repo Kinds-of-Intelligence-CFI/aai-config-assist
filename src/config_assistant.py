@@ -96,21 +96,23 @@ class ConfigAssistant:
         # TODO: 1. Do these truly need to be class instances (how could the callback methods have access to these
         #  without them being class instances (surely there is another type of input that you can give to
         #  the callbacks) 2. Look at good practices for dealing with many callbacks with the same output object.
-        self.idx_item_to_move = [0]
-        self.num_auto_items_created = 0
+        idx_item_to_move = [0]
+        num_auto_items_displayed = [0]
         fig_init = self._visualise_cuboid_bases_plotly(cuboids)
 
         app = Dash(__name__, )
         app.layout = set_up_app_layout(fig_init, self.all_aai_item_names)
 
-        self._update_sliders_callback(cuboids)
-        self._update_plot_callback(cuboids)
-        self._dump_current_layout_to_config_callback()
+        self._update_sliders_callback(cuboids, idx_item_to_move)
+        self._update_plot_callback(cuboids, idx_item_to_move, num_auto_items_displayed)
+        self._dump_current_layout_to_config_callback(cuboids, pass_mark=self.pass_mark, t=self.t)
 
         app.run(port=8000)
 
-    def _update_sliders_callback(self, cuboids):
+    @staticmethod
+    def _update_sliders_callback(cuboids, idx_item_to_move):
         """Creates a callback mechanism for when one of the items is selected to be moved."""
+
         @callback(
             Output(component_id='x-slider', component_property="value"),
             Output(component_id='y-slider', component_property="value"),
@@ -119,29 +121,30 @@ class ConfigAssistant:
             Input(component_id='aai-diagram', component_property='clickData'),
             prevent_initial_call=True
         )
-        def _update_sliders(point_clicked):
+        def _update_sliders(point_clicked, _idx_item_to_move=idx_item_to_move):
             """Updates the sliders when one of the items is selected to be moved."""
             if point_clicked is not None:
                 print("you have clicked an item")
-                self.idx_item_to_move[0] = point_clicked['points'][0]["curveNumber"]
-                print(f"You have just clicked: {cuboids[self.idx_item_to_move[0]].name}")
-                return (cuboids[self.idx_item_to_move[0]].center[0],  # The x-direction
-                        cuboids[self.idx_item_to_move[0]].center[2],  # The y-direction
-                        cuboids[self.idx_item_to_move[0]].center[1],  # The z-direction
-                        cuboids[self.idx_item_to_move[0]].deg_rotation
+                _idx_item_to_move[0] = point_clicked['points'][0]["curveNumber"]
+                print(f"You have just clicked: {cuboids[_idx_item_to_move[0]].name}")
+                return (cuboids[_idx_item_to_move[0]].center[0],  # The x-direction
+                        cuboids[_idx_item_to_move[0]].center[2],  # The y-direction
+                        cuboids[_idx_item_to_move[0]].center[1],  # The z-direction
+                        cuboids[_idx_item_to_move[0]].deg_rotation
                         )
 
             else:
                 print("You have not clicked an item")
                 return 0, 0, 0
 
-    def _update_plot_callback(self, cuboids):
+    def _update_plot_callback(self, cuboids, idx_item_to_move, num_auto_items_displayed):
         """Creates a callback mechanism for when the sliders are being used to move items.
 
         Note:
             Creates a callback mechanism for spawning a new item into the arena and into the physical_items
             These share a callback because Dash only supports one callback per unique output (here, the arena).
         """
+
         @callback(
             Output(component_id='aai-diagram', component_property='figure'),
             Input(component_id="x-slider", component_property="value"),
@@ -156,14 +159,17 @@ class ConfigAssistant:
             prevent_initial_call=True
         )
         def _update_plot(x_slider_value,
-                        y_slider_value,
-                        z_slider_value,
-                        xz_rotation,
-                        item_dropdown_value,
-                        num_auto_items_created,
-                        spawn_x_dim,
-                        spawn_z_dim,
-                        spawn_y_dim, ):
+                         y_slider_value,
+                         z_slider_value,
+                         xz_rotation,
+                         item_dropdown_value,
+                         num_auto_items_created,
+                         spawn_x_dim,
+                         spawn_z_dim,
+                         spawn_y_dim,
+                         _cuboids=cuboids,
+                         _idx_item_to_move=idx_item_to_move,
+                         _num_auto_items_displayed=num_auto_items_displayed):
             """Updates the plot when dash detects user interaction.
 
             Note:
@@ -171,8 +177,8 @@ class ConfigAssistant:
             """
             # Must perform the spawning before the slider adjustment to avoid mistakenly reacting to the sliders
             # which the user may not have interacted with but will still be considered here as an input.
-            # To avoid this behaviour, the self.idx_item_to_move is changed to that of the new item, in this if-branch.
-            if num_auto_items_created != self.num_auto_items_created:
+            # To avoid this behaviour, the idx_item_to_move is changed to that of the new item, in this if-branch.
+            if num_auto_items_created != _num_auto_items_displayed[0]:
                 # A new auto item is being spawned
                 # Make the name something like {item_dropdown_value} + AUTO + n_clicks (shows which auto-spawn it was)
                 # that way it will conserve uniqueness while still working for the dumper which just needs the first
@@ -199,38 +205,43 @@ class ConfigAssistant:
                                                         name=spawned_name,
                                                         colour=spawned_colour
                                                         )
-                self.physical_items += [spawned_auto_cuboid]
-                self.num_auto_items_created = num_auto_items_created
-                self.idx_item_to_move = [-1]
+                # TODO: Strange behaviour whereby simply writing cuboids += [spawned...] does not work. Not sure why.
+                #  Doing temp = cuboids AND temp += [spawned...] worked
+                #  But since I was encountering this issue in numerous places, I went with this local var approach
+                #  Will have to think about this as an independent issue at some point.
+                _cuboids += [spawned_auto_cuboid]
+                _num_auto_items_displayed[0] = num_auto_items_created
+                _idx_item_to_move[0] = -1
                 xz_rotation = spawned_rotation
                 print(f"You have just created: {spawned_name}")
 
             else:
                 # Update the cuboid center coordinates
                 # Note: when calling visualise_config, cuboids is the physical_items class attribute
-                cuboids[self.idx_item_to_move[0]].center[0] = x_slider_value
-                cuboids[self.idx_item_to_move[0]].center[2] = y_slider_value
-                cuboids[self.idx_item_to_move[0]].center[1] = z_slider_value
-                cuboids[self.idx_item_to_move[0]].deg_rotation = xz_rotation
+                _cuboids[_idx_item_to_move[0]].center[0] = x_slider_value
+                _cuboids[_idx_item_to_move[0]].center[2] = y_slider_value
+                _cuboids[_idx_item_to_move[0]].center[1] = z_slider_value
+                _cuboids[_idx_item_to_move[0]].deg_rotation = xz_rotation
 
             # Note that the center parameter expects the 2D planar values
             # AAI-x (cuboid[...].center[0]) and AAI-z (cuboid[...].center[1])
-            cuboids[self.idx_item_to_move[0]].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
+            _cuboids[_idx_item_to_move[0]].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
                 center=np.array(
-                    [cuboids[self.idx_item_to_move[0]].center[0], cuboids[self.idx_item_to_move[0]].center[1]]),
-                width=cuboids[self.idx_item_to_move[0]].length,
-                height=cuboids[self.idx_item_to_move[0]].width,
+                    [_cuboids[_idx_item_to_move[0]].center[0], _cuboids[_idx_item_to_move[0]].center[1]]),
+                width=_cuboids[_idx_item_to_move[0]].length,
+                height=_cuboids[_idx_item_to_move[0]].width,
                 angle_deg=xz_rotation)
 
-            print(f"The item currently being moved is: {cuboids[self.idx_item_to_move[0]].name}")
+            print(f"The item currently being moved is: {_cuboids[_idx_item_to_move[0]].name}")
             self.check_config_overlap()
-            fig = self._visualise_cuboid_bases_plotly(cuboids)
+            fig = self._visualise_cuboid_bases_plotly(_cuboids)
 
             return fig
 
-    def _dump_current_layout_to_config_callback(self):
+    @staticmethod
+    def _dump_current_layout_to_config_callback(cuboids, pass_mark, t):
         """Creates a callback mechanism for dumping the current physical items to a new configuration file."""
-        arena = {"pass_mark": self.pass_mark, "t": self.t, "items": self.physical_items}
+        arena = {"pass_mark": pass_mark, "t": t, "items": cuboids}
         arena_config_dumper = ArenaConfigDumper([arena], destination_file_path="")
 
         @callback(
@@ -467,6 +478,15 @@ class ConfigAssistant:
 #  attribute) Actually could be seen as the assistant/manager's current_idx_item_to_move attribute Makes sense for
 #  the manager to hold this in memory and be able to share this with all the workers (if you decide to go full OOP
 #  which may not be desirable).
+
+# TODO: Think about the problem of global vs local variables in the callbacks. That is, I can only access the variables
+#  such as idx_item_to_move and num_auto_items_displayed by passing them once to the wrapper method, then a second time
+#  to the inner callback method (with a different name to not shadow the global (=passed to wrapper) variable.
+
+# TODO: Think about the issue of using lists to denote idx_item_to_move and num_auto_items_displayed; yes, it solves
+#  the problem of the variables pointing to the same entity so that the correct variables are updated. But does this
+#  introduce strange side effects whereby nothing is truly encapsulated? Is it desirable that I am modifying a variable
+#  that is linked to the same object as a variable from the outer scope. Consider this issue more closely.
 
 if __name__ == "__main__":
     configuration_path = os.path.join("example_configs", "config.yaml")
