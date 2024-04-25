@@ -1,4 +1,4 @@
-from src.rectangular_cuboid import RectangularCuboid
+from src.structures.rectangular_cuboid import RectangularCuboid
 
 
 class Arena:

@@ -1,4 +1,4 @@
-class ArenaConfigDumper:
+class Dumper:
     """Custom dumper for the Animal-AI (A-AI) arena configurations.
 
     Note:
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     arenas = [arena1, ]
 
     destination_path = f"example_configs/auto_updated_config.yaml"
-    arena_config_dumper = ArenaConfigDumper(arenas, destination_path)
+    arena_config_dumper = Dumper(arenas, destination_path)
     arena_config_dumper.dump()
 
     print("Exit ok")

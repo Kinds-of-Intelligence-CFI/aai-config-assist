@@ -1,8 +1,8 @@
 import numpy as np
 
-from src.arena import Arena
-from src.rectangular_cuboid import RectangularCuboid
-from src.physical_item_helper import set_item_name_from, get_default_item_parameter
+from src.structures.arena import Arena
+from src.structures.rectangular_cuboid import RectangularCuboid
+from src.utils.physical_item_helper import set_item_name_from, get_default_item_parameter
 
 
 class Preprocessor:

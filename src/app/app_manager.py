@@ -1,25 +1,24 @@
 import yaml
 import numpy as np
-import plotly.graph_objects as go
 from dash import Dash, Output, Input, State, callback
 
-from src.loader import Loader
-from src.preprocessor import Preprocessor
-from src.checker import Checker
-from src.visualiser import Visualiser
-from src.arena_config_dumper import ArenaConfigDumper
-from src.geometry_helper import calculate_vertices_of_rotated_rectangle
-from src.app_setup import set_up_app_layout
-from src.rectangular_cuboid import RectangularCuboid
-from src.physical_item_helper import get_default_item_parameter
+from src.processing.loader import Loader
+from src.processing.preprocessor import Preprocessor
+from src.core.checker import Checker
+from src.core.visualiser import Visualiser
+from src.processing.dumper import Dumper
+from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
+from src.app.setup import set_up_app_layout
+from src.structures.rectangular_cuboid import RectangularCuboid
+from src.utils.physical_item_helper import get_default_item_parameter
 
 
-class ApplicationManager:
+class AppManager:
     def __init__(self, config_path: str):
         self.config_path = config_path
 
         # Get the default item parameters
-        with open("definitions/item_default_parameters.yaml", "r") as file:
+        with open("src/app/item_default_parameters.yaml", "r") as file:
             self.default_item_parameters = yaml.safe_load(file)
         self.all_aai_item_names = list(self.default_item_parameters.keys())
 
@@ -198,7 +197,7 @@ class ApplicationManager:
     def _dump_current_layout_to_config_callback(cuboids, pass_mark, t):
         """Creates a callback mechanism for dumping the current physical items to a new configuration file."""
         arena = {"pass_mark": pass_mark, "t": t, "items": cuboids}
-        arena_config_dumper = ArenaConfigDumper([arena], destination_file_path="")
+        arena_config_dumper = Dumper([arena], destination_file_path="")
 
         @callback(
             Output(component_id='new-config-path-output', component_property="value"),
@@ -215,7 +214,7 @@ class ApplicationManager:
 
 
 def application_manager_example():
-    application_manager = ApplicationManager("example_configs/config.yaml")
+    application_manager = AppManager("example_configs/config.yaml")
     application_manager.run_app()
 
 

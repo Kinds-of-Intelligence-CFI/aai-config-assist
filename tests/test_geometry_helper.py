@@ -2,7 +2,7 @@ import unittest
 
 import numpy
 
-from src.geometry_helper import *
+from src.utils.geometry_helper import *
 
 # Run in terminal to get per test breakdown: python -m unittest -v tests/test_geometry_helper.py
 

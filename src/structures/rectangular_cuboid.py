@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.geometry_helper import calculate_vertices_of_rotated_rectangle
+from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
 
 
 class RectangularCuboid:

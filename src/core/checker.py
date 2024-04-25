@@ -1,7 +1,7 @@
 import numpy as np
 
-from src.rectangular_cuboid import RectangularCuboid
-from src.separating_axis_theorem import apply_separating_axis_theorem
+from src.structures.rectangular_cuboid import RectangularCuboid
+from src.core.separating_axis_theorem import apply_separating_axis_theorem
 
 
 class Checker:

@@ -2,7 +2,7 @@ import numpy as np
 import plotly.graph_objects as go
 import matplotlib.figure
 
-from src.rectangular_cuboid import RectangularCuboid
+from src.structures.rectangular_cuboid import RectangularCuboid
 
 
 class Visualiser:

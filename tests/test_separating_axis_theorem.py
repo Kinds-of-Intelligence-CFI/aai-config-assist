@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from src.separating_axis_theorem import *
+from src.utils.geometry_helper import *
+from src.core.separating_axis_theorem import *
 
 
 # Run in terminal to get per test breakdown: python -m unittest -v tests/separating_axis_theorem.py

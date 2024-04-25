@@ -1,6 +1,6 @@
 import yaml
 
-from src.arena_config_loader import ArenaConfigLoader
+from src.processing.arena_config_loader import ArenaConfigLoader
 
 
 class Loader:

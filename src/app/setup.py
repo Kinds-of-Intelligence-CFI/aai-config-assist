@@ -1,4 +1,4 @@
-from src.app_style_guide import AppStyleGuide
+from src.app.style_guide import AppStyleGuide
 from dash import dcc, html
 
 

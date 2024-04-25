@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.geometry_helper import *
+from src.utils.geometry_helper import *
 
 
 def apply_separating_axis_theorem(rec_cuboid1, rec_cuboid2, verbose=True, overlap_decimals=3):
@@ -120,7 +120,7 @@ def get_potential_separation_axes(deg_angle):
 # TODO: put the examples from below into the docstrings (in the correct doctest format)
 
 if __name__ == "__main__":
-    from src.rectangular_cuboid import RectangularCuboid
+    from src.structures.rectangular_cuboid import RectangularCuboid
     # Rectangular Cuboid 1
     center1 = np.array([2, 3.5, 5])
     dimensions1 = (1, 2, 3)
