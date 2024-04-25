@@ -1,12 +1,9 @@
 import unittest
 
-import numpy as np
-
-from src.utils.geometry_helper import *
 from src.core.separating_axis_theorem import *
 
 
-# Run in terminal to get per test breakdown: python -m unittest -v tests/separating_axis_theorem.py
+# Run in terminal to get per test breakdown: python -m unittest -v tests/core/separating_axis_theorem.py
 
 class TestSeparatingAxisTheorem(unittest.TestCase):
     def test_get_potential_separation_axes_when_theta_is_0(self):
