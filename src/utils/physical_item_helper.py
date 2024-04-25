@@ -18,7 +18,12 @@ def get_default_item_parameter(item_name: str, param_name: str, default_item_par
     param_name_to_keys = {"colour": ["r", "g", "b"],
                           "size": ["x", "y", "z"],
                           }
-    param_keys = param_name_to_keys[param_name]
+
+    try:
+        param_keys = param_name_to_keys[param_name]
+    except KeyError:
+        raise KeyError(f"The parameter name {param_name} is not defined in the default definitions. "
+                       f"Please add this category to the definitions to move on without errors.")
 
     try:
         default_values = default_item_parameters[item_name][param_name]

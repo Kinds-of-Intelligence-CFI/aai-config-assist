@@ -18,7 +18,7 @@ class AppManager:
         self.config_path = config_path
 
         # Get the default item parameters
-        with open("src/app/item_default_parameters.yaml", "r") as file:
+        with open("src/definitions/item_default_parameters.yaml", "r") as file:
             self.default_item_parameters = yaml.safe_load(file)
         self.all_aai_item_names = list(self.default_item_parameters.keys())
 
