@@ -1,3 +1,8 @@
+from typing import List, Dict
+
+from src.structures.arena import Arena
+
+
 class Dumper:
     """Custom dumper for the Animal-AI (A-AI) arena configurations.
 
@@ -11,27 +16,27 @@ class Dumper:
 
     """
 
-    def __init__(self, arenas, destination_file_path):
+    def __init__(self, arenas: List[Arena], destination_file_path: str) -> None:
         self.arenas = arenas
         self.destination_file_path = destination_file_path
 
-    def dump(self):
+    def dump(self) -> None:
         overall_str = f"{self._get_complete_config_str(level=0)}"
         with open(self.destination_file_path, "w") as file:
             file.write(overall_str)
 
-    def _get_complete_config_str(self, level):
+    def _get_complete_config_str(self, level: int) -> str:
         """Gets the complete string representation of the updated yaml configuration."""
         result = self._get_heading_str(level) + "\n"
         for ix, arena in enumerate(self.arenas):
             result += self._get_arena_config_str(ix, level + 1)
             return result
 
-    def _get_heading_str(self, level):
+    def _get_heading_str(self, level: int) -> str:
         """Gets the string representation of the overall arena configuration tag and arenas attribute."""
         return self._indent("!ArenaConfig", level) + "\n" + self._indent("arenas:", level)
 
-    def _get_arena_config_str(self, ix, level):
+    def _get_arena_config_str(self, ix: int, level: int) -> str:
         """Gets the string representation of the updated arena at index ix inside the arenas class attribute."""
         result = (self._indent(f"{ix}: !Arena", level) + "\n"
                   + self._get_arena_settings_str(ix, level + 1) + "\n"
@@ -39,15 +44,15 @@ class Dumper:
                   )
         return result
 
-    def _get_arena_settings_str(self, ix, level):
+    def _get_arena_settings_str(self, ix: int, level: int) -> str:
         """Gets the string representation of all the arena config attributes other than items (pass_mark, t)."""
-        pass_mark = self.arenas[ix]["pass_mark"]
-        t = self.arenas[ix]["t"]
+        pass_mark = self.arenas[ix].pass_mark
+        t = self.arenas[ix].t
         return self._indent(f"pass_mark: {pass_mark}", level) + "\n" + self._indent(f"t: {t}", level)
 
-    def _get_arena_items_str(self, ix, level):
+    def _get_arena_items_str(self, ix: int, level: int) -> str:
         """Gets the string representation of all the items in the configuration."""
-        items = self.arenas[ix]["items"]
+        items = self.arenas[ix].physical_items
         items_grouped_per_type = self._rearrange_items_per_type(items)
         result = self._indent("items:", level) + "\n"
         for item_type_dict in items_grouped_per_type:
@@ -55,15 +60,15 @@ class Dumper:
             result += self._get_item_type_str(item_type_dict, level + 1)
         return result
 
-    def _get_item_type_str(self, item_type_dict, level):
+    def _get_item_type_str(self, item_type_dict: Dict, level: int) -> str:
         """Gets the string representation of the A-AI style yaml configuration for an item type."""
         result = self._indent(f"name: {item_type_dict['name']}", level) + "\n"
 
-        def _add_item_section_to_result(item_section_title, result):
-            result += self._indent(f"{item_section_title}:", level) + "\n"
+        def _add_item_section_to_result(item_section_title: str, res: str) -> str:
+            res += self._indent(f"{item_section_title}:", level) + "\n"
             for arr in item_type_dict[f"{item_section_title}"]:
-                result += self._indent("- " + arr, level) + "\n"
-            return result
+                res += self._indent("- " + arr, level) + "\n"
+            return res
 
         result = _add_item_section_to_result("positions", result)
         result = _add_item_section_to_result("rotations", result)
@@ -73,22 +78,22 @@ class Dumper:
         return result
 
     @staticmethod
-    def _rearrange_items_per_type(items):
+    def _rearrange_items_per_type(items: List) -> List:
         """Rearranges the items from an item-by-item list to a by-type list with the correct output yaml format."""
 
-        def _get_new_item_structure(current_item_type):
+        def _get_new_item_structure(curr_item_type: str) -> Dict:
             """Gets the A-AI structure for a new item."""
-            return {"name": current_item_type,
+            return {"name": curr_item_type,
                     "positions": [],
                     "rotations": [],
                     "sizes": [],
                     "colors": []}
 
-        def _get_vector3_representation(a, b, c):
+        def _get_vector3_representation(a: float, b: float, c: float) -> str:
             """Gets the A-AI Vector3 representation of a triple."""
             return f"!Vector3 {{x: {a}, y: {b}, z: {c}}}"
 
-        def _get_rgb_representation(a, b, c):
+        def _get_rgb_representation(a: float, b: float, c: float) -> str:
             """Gets the A-AI RGB representation of a triple."""
             return f"!RGB {{r: {a}, g: {b}, b: {c}}}"
 
@@ -111,14 +116,13 @@ class Dumper:
         return result
 
     @staticmethod
-    def _indent(element, level):
+    def _indent(element: str, level: int) -> str:
         return "  " * level + element
 
 
-if __name__ == "__main__":
+def dumper_example() -> None:
     import numpy as np
     from dataclasses import dataclass
-
 
     @dataclass
     class DummyCuboid:
@@ -129,7 +133,6 @@ if __name__ == "__main__":
         width: float
         colour: dict[str, int]
         deg_rotation: float
-
 
     arena1 = {
         "pass_mark": 0,
@@ -168,7 +171,9 @@ if __name__ == "__main__":
     arena_config_dumper = Dumper(arenas, destination_path)
     arena_config_dumper.dump()
 
-    print("Exit ok")
+
+if __name__ == "__main__":
+    dumper_example()
 
 # TODO: problem: my auto tabbing system only works on the first line of the element we return
 #  it does not automatically indent the whole block

@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 import plotly.graph_objects as go
 import matplotlib.figure
@@ -7,8 +9,8 @@ from src.structures.rectangular_cuboid import RectangularCuboid
 
 class Visualiser:
     @staticmethod
-    def visualise_cuboid_bases(cuboids: list[RectangularCuboid],
-                               names_items_with_overlap: list[str]) -> matplotlib.figure.Figure:
+    def visualise_cuboid_bases(cuboids: List[RectangularCuboid],
+                               names_items_with_overlap: List[str]) -> matplotlib.figure.Figure:
         """Displays a 2d representation (x-z/length-width plane) of a list of RectangularCuboid instances.
 
         Args:

@@ -1,4 +1,7 @@
-def get_default_item_parameter(item_name: str, param_name: str, default_item_parameters: dict) -> dict:
+from typing import Dict
+
+
+def get_default_item_parameter(item_name: str, param_name: str, default_item_parameters: Dict) -> Dict:
     """Provides the default parameter value of a particular Animal-AI item.
 
     Note:
@@ -35,6 +38,6 @@ def get_default_item_parameter(item_name: str, param_name: str, default_item_par
     return dict(zip(param_keys, default_values))
 
 
-def set_item_name_from(type_name, item_ix):
+def set_item_name_from(type_name: str, item_ix: str) -> str:
     """Sets a name for an item from its type and index (e.g. if there are several walls)."""
     return f"{type_name} {item_ix}"

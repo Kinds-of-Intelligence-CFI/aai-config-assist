@@ -1,5 +1,8 @@
+from typing import Dict
+
+
 class AppStyleGuide:
-    def __init__(self):
+    def __init__(self) -> None:
         # Font
         self.font_size = "17px"
         self.font_family = "Helvetica"
@@ -18,13 +21,13 @@ class AppStyleGuide:
         self.display_type = 'inline-block'
         self.background_colour = 'rgba(231,235,235,0.5)'
 
-    def left_hand_section_style(self):
+    def left_hand_section_style(self) -> Dict:
         return {'display': self.display_type,
                 'width': self.width_percentage_left_hand_section,
                 'verticalAlign': 'middle'
                 }
 
-    def right_hand_section_style(self):
+    def right_hand_section_style(self) -> Dict:
         # Ensures that left and right hand side sections make up 100% of the total width
         left_width = int(self.width_percentage_left_hand_section.strip('%'))
         right_width = 100 - left_width
@@ -33,29 +36,29 @@ class AppStyleGuide:
                 'verticalAlign': 'bottom'}
 
     @staticmethod
-    def aai_figure_style():
+    def aai_figure_style() -> Dict:
         return {"height": "100vh"}
 
-    def heading2_style(self):
+    def heading2_style(self) -> Dict:
         return {"fontFamily": self.font_family,
                 "font-weight": "normal",
                 'marginLeft': f"{self.margin_left / 3}%"}
 
-    def dropdown_style(self):
+    def dropdown_style(self) -> Dict:
         return {"fontSize": self.font_size,
                 "fontFamily": self.font_family,
                 'marginLeft': f"{self.margin_left - 1.5}%",
                 'marginRight': f"{self.margin_right}%"
                 }
 
-    def size_input_style(self):
+    def size_input_style(self) -> Dict:
         return {"fontSize": self.font_size,
                 "fontFamily": self.font_family,
                 'marginBottom': self.margin_between_components,
                 'marginTop': self.margin_between_components,
                 }
 
-    def length_input_style(self):
+    def length_input_style(self) -> Dict:
         return {"fontSize": self.font_size,
                 "fontFamily": self.font_family,
                 'marginBottom': self.margin_between_components,
@@ -63,13 +66,13 @@ class AppStyleGuide:
                 'marginLeft': f"{self.margin_left}%",
                 }
 
-    def width_input_style(self):
+    def width_input_style(self) -> Dict:
         return self.size_input_style()
 
-    def height_input_style(self):
+    def height_input_style(self) -> Dict:
         return self.size_input_style()
 
-    def button_style(self):
+    def button_style(self) -> Dict:
         return {'height': self.component_height,
                 "fontSize": self.font_size,
                 "fontFamily": self.font_family,
@@ -80,12 +83,12 @@ class AppStyleGuide:
                 "cursor": "pointer",
                 }
 
-    def slider_tooltip_style(self):
+    def slider_tooltip_style(self) -> Dict:
         return {"fontSize": self.font_size,
                 "fontFamily": self.font_family,
                 }
 
-    def new_config_path_input_style(self):
+    def new_config_path_input_style(self) -> Dict:
         return {'width': '80%',
                 'height': self.component_height,
                 "fontSize": self.font_size,
@@ -98,7 +101,7 @@ class AppStyleGuide:
                 "border-radius": self.border_radius,
                 }
 
-    def new_config_generation_button_style(self):
+    def new_config_generation_button_style(self) -> Dict:
         return {'height': self.component_height,
                 "fontSize": self.font_size,
                 "fontFamily": self.font_family,

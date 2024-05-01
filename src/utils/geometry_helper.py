@@ -164,64 +164,68 @@ def round_up(val, num_decimals):
 # TODO: could put the examples from below into the docstrings (in the correct doctest format)
 
 if __name__ == "__main__":
-    print("* Calculating the rotated lower base vertices of a rectangle from center, width, height, and rotation (deg)")
-    centroid2 = np.array([0, 0])
-    height2 = 2
-    width2 = 2
-    rotation2 = 45
-    vertices2 = calculate_vertices_of_rotated_rectangle(center=centroid2, width=width2,
-                                                        height=height2, angle_deg=rotation2)
-    print(f"Shape of final vertices: {np.shape(vertices2)}")
-    print(f"Final vertices:\n{vertices2}")
-    print("")
+    def geometry_helper_example() -> None:
+        print("* Calculating the rotated lower base vertices of a rectangle from center, width, height, and rotation "
+              "(deg)")
+        centroid2 = np.array([0, 0])
+        height2 = 2
+        width2 = 2
+        rotation2 = 45
+        vertices2 = calculate_vertices_of_rotated_rectangle(center=centroid2, width=width2,
+                                                            height=height2, angle_deg=rotation2)
+        print(f"Shape of final vertices: {np.shape(vertices2)}")
+        print(f"Final vertices:\n{vertices2}")
+        print("")
 
-    print("* Calculating the lower_base_vertices of an axis-aligned rectangle from center, width, and height")
-    centroid1 = np.array([0, 0])
-    height1 = 2
-    width1 = 2
-    vertices1 = calculate_vertices_of_axis_aligned_rectangle(center=centroid1, width=width1, height=height1)
-    print(f"Shape of vertices: {np.shape(vertices1)}")
-    print(f"Vertices:\n{vertices1}")
-    print("")
+        print("* Calculating the lower_base_vertices of an axis-aligned rectangle from center, width, and height")
+        centroid1 = np.array([0, 0])
+        height1 = 2
+        width1 = 2
+        vertices1 = calculate_vertices_of_axis_aligned_rectangle(center=centroid1, width=width1, height=height1)
+        print(f"Shape of vertices: {np.shape(vertices1)}")
+        print(f"Vertices:\n{vertices1}")
+        print("")
 
-    print("* Rotating points in a 2d plane")
-    original_point = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
-    angle_degrees = 45
-    new_points = calculate_clockwise_rotated_2d_points(points=original_point, angle_deg=angle_degrees)
-    print(f"Shape of new points: {np.shape(new_points)}")
-    print(f"New points:\n{new_points}")
-    print("")
+        print("* Rotating points in a 2d plane")
+        original_point = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
+        angle_degrees = 45
+        new_points = calculate_clockwise_rotated_2d_points(points=original_point, angle_deg=angle_degrees)
+        print(f"Shape of new points: {np.shape(new_points)}")
+        print(f"New points:\n{new_points}")
+        print("")
 
-    print("* Normalise an axis vector")
-    axis = np.array([1, -1])
-    normalised_axis = normalise_vector(axis)
-    print(f"Normalised axis 0th component: {normalised_axis[0]}")
-    print(f"Manually normalised axis 0th component: {(normalised_axis / np.linalg.norm(normalised_axis))[0]}")
-    # TODO: strangely, approximation of the float makes this check false, though the formula in the function is correct
-    print(f"Equality between normalised vecs: {normalised_axis == normalised_axis / np.linalg.norm(normalised_axis)}")
-    print("")
+        print("* Normalise an axis vector")
+        axis = np.array([1, -1])
+        normalised_axis = normalise_vector(axis)
+        print(f"Normalised axis 0th component: {normalised_axis[0]}")
+        print(f"Manually normalised axis 0th component: {(normalised_axis / np.linalg.norm(normalised_axis))[0]}")
+        # TODO: strangely, approximation of the float makes this check false, though the formula in the function is
+        #  correct
+        print(f"Equality between norm vecs: {normalised_axis == normalised_axis / np.linalg.norm(normalised_axis)}")
+        print("")
 
-    print("* Project a points onto an axis")
-    points = np.array([[4, 1], [4, 1], [5, 1], [6, 2], [-1, 5]])
-    new_axis = np.array([1, -1])
-    normalised_new_axis = normalise_vector(new_axis)
-    new_points = get_projected_distance_of_2d_points_onto_axis(points, normalised_new_axis)
-    print(f"New points: {new_points}")
-    print("")
+        print("* Project a points onto an axis")
+        points = np.array([[4, 1], [4, 1], [5, 1], [6, 2], [-1, 5]])
+        new_axis = np.array([1, -1])
+        normalised_new_axis = normalise_vector(new_axis)
+        new_points = get_projected_distance_of_2d_points_onto_axis(points, normalised_new_axis)
+        print(f"New points: {new_points}")
+        print("")
 
-    print("* Get min and max values of projected points onto an axis")
-    points = np.array([[4, 1], [4, 1], [5, 1], [6, 2], [-1, 5]])
-    new_axis = np.array([1, -1])
-    normalised_new_axis = normalise_vector(new_axis)
-    min_val, max_val = get_min_max_projections(points, normalised_new_axis)
-    print(f"Min and max vals: {min_val, max_val}")
-    print("")
+        print("* Get min and max values of projected points onto an axis")
+        points = np.array([[4, 1], [4, 1], [5, 1], [6, 2], [-1, 5]])
+        new_axis = np.array([1, -1])
+        normalised_new_axis = normalise_vector(new_axis)
+        min_val, max_val = get_min_max_projections(points, normalised_new_axis)
+        print(f"Min and max vals: {min_val, max_val}")
+        print("")
 
-    print("* Determine the overlap between two segments")
-    segment1 = np.array([-1, 2])
-    segment2 = np.array([-3, 1])
-    overlap = determine_overlap_between_aligned_segments(segment1, segment2)
-    print(f"Overlap: {overlap}")
+        print("* Determine the overlap between two segments")
+        segment1 = np.array([-1, 2])
+        segment2 = np.array([-3, 1])
+        overlap = determine_overlap_between_aligned_segments(segment1, segment2)
+        print(f"Overlap: {overlap}")
 
+    geometry_helper_example()
     import doctest
     doctest.testmod()

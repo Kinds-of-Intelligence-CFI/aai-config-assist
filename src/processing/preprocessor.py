@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 import numpy as np
 
 from src.structures.arena import Arena
@@ -6,14 +8,16 @@ from src.utils.physical_item_helper import set_item_name_from, get_default_item_
 
 
 class Preprocessor:
-    def __init__(self, default_item_parameters: dict, all_aai_item_names: list[str]) -> None:
+    def __init__(self,
+                 default_item_parameters: Dict,
+                 all_aai_item_names: List[str]) -> None:
         # TODO: could choose not to make these attributes and simply pass them to create_arena_list and private method
         #  to avoid the need for class attributes.
         self.default_items_params = default_item_parameters
         self.all_aai_item_names = all_aai_item_names
 
     def create_arenas_list(self,
-                           raw_arenas_dict: dict) -> list[Arena]:
+                           raw_arenas_dict: Dict) -> List[Arena]:
         preprocessed_arenas_list = []
         raw_arenas = raw_arenas_dict["arenas"]
 
@@ -29,8 +33,7 @@ class Preprocessor:
 
         return preprocessed_arenas_list
 
-    def _create_rectangular_cuboid_list(self,
-                                        raw_physical_items: dict) -> list[RectangularCuboid]:
+    def _create_rectangular_cuboid_list(self, raw_physical_items: Dict) -> List[RectangularCuboid]:
         """Creates a list of RectangularCuboid instances corresponding to the objects in the configuration data.
 
         Returns:

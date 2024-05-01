@@ -1,3 +1,5 @@
+from typing import List, Set
+
 import numpy as np
 
 from src.structures.rectangular_cuboid import RectangularCuboid
@@ -6,7 +8,7 @@ from src.core.separating_axis_theorem import apply_separating_axis_theorem
 
 class Checker:
     @staticmethod
-    def check_overlaps_between_cuboids(cuboids: list[RectangularCuboid]) -> set[str]:
+    def check_overlaps_between_cuboids(cuboids: List[RectangularCuboid]) -> Set[str]:
         """Displays a log of possible overlaps in the cuboids list to the terminal.
 
         Args:

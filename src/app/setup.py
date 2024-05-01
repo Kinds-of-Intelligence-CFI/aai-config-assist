@@ -1,8 +1,12 @@
-from src.app.style_guide import AppStyleGuide
+from typing import List
+
+import matplotlib.figure
 from dash import dcc, html
 
+from src.app.style_guide import AppStyleGuide
 
-def set_up_app_layout(fig_init, aai_item_names):
+
+def set_up_app_layout(fig_init: matplotlib.figure.Figure, aai_item_names: List[str]) -> html.Div:
     style_guide = AppStyleGuide()
     layout = html.Div([
         _set_up_left_hand_section(fig_init, style_guide),
@@ -12,14 +16,14 @@ def set_up_app_layout(fig_init, aai_item_names):
     return layout
 
 
-def _set_up_left_hand_section(fig_init, style_guide):
+def _set_up_left_hand_section(fig_init: matplotlib.figure.Figure, style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         dcc.Graph(figure=fig_init, id='aai-diagram', style=style_guide.aai_figure_style()),
     ], style=style_guide.left_hand_section_style())
     return layout
 
 
-def _set_up_right_hand_section(aai_item_names, style_guide):
+def _set_up_right_hand_section(aai_item_names: List[str], style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         _set_up_new_item_layout(aai_item_names, style_guide),
         _set_up_move_item_layout(style_guide),
@@ -28,7 +32,7 @@ def _set_up_right_hand_section(aai_item_names, style_guide):
     return layout
 
 
-def _set_up_new_item_layout(aai_item_names, style_guide):
+def _set_up_new_item_layout(aai_item_names: List[str], style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         html.H2("Place new item", id='heading-place-new-item', style=style_guide.heading2_style()),
 
@@ -52,12 +56,12 @@ def _set_up_new_item_layout(aai_item_names, style_guide):
                   id="spawn-y",
                   style=style_guide.height_input_style()),
 
-        html.Button('Spawn new item', id='new-item-button', n_clicks=0, style=style_guide.button_style(),)
+        html.Button('Spawn new item', id='new-item-button', n_clicks=0, style=style_guide.button_style(), )
     ])
     return layout
 
 
-def _set_up_move_item_layout(style_guide):
+def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         html.H2("Move item", id='heading-move-an-item', style=style_guide.heading2_style()),
 
@@ -83,12 +87,12 @@ def _set_up_move_item_layout(style_guide):
                    tooltip={"placement": style_guide.tooltip_placement,
                             "always_visible": True,
                             "template": "xz = {value} deg",
-                            "style": style_guide.slider_tooltip_style()},)
+                            "style": style_guide.slider_tooltip_style()}, )
     ])
     return layout
 
 
-def _set_up_generate_config_layout(style_guide):
+def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         html.H2("Generate new config",
                 id='heading-generate-a-new-configuration-file',

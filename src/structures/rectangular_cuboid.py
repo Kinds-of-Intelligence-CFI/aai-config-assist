@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 import numpy as np
 
 from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
@@ -18,7 +20,7 @@ class RectangularCuboid:
                  dimensions: tuple,
                  rotation: float,
                  name: str = "Cuboid",
-                 colour: dict = None) -> None:
+                 colour: Optional[Dict] = None) -> None:
         """Constructs an instance of RectangularCuboid.
 
         Args:

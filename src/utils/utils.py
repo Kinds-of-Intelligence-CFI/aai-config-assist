@@ -2,7 +2,7 @@ import errno
 import os
 
 
-def try_mkdir(path):
+def try_mkdir(path: str) -> None:
     try:
         os.mkdir(path)
     except OSError as e:

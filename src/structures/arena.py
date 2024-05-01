@@ -1,3 +1,5 @@
+from typing import List
+
 from src.structures.rectangular_cuboid import RectangularCuboid
 
 
@@ -5,8 +7,8 @@ class Arena:
     def __init__(self,
                  pass_mark: float,
                  t: float,
-                 physical_items: list[RectangularCuboid],
-                 overlapping_items: list[str]) -> None:
+                 physical_items: List[RectangularCuboid],
+                 overlapping_items: List[str]) -> None:
         self.pass_mark = pass_mark
         self.t = t
         self.physical_items = physical_items

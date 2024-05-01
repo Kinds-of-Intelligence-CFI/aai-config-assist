@@ -1,9 +1,15 @@
+from typing import Tuple
+
 import numpy as np
 
 from src.utils.geometry_helper import *
+from src.structures.rectangular_cuboid import RectangularCuboid
 
 
-def apply_separating_axis_theorem(rec_cuboid1, rec_cuboid2, verbose=True, overlap_decimals=3):
+def apply_separating_axis_theorem(rec_cuboid1: RectangularCuboid,
+                                  rec_cuboid2: RectangularCuboid,
+                                  verbose: str = True,
+                                  overlap_decimals: int = 3) -> np.array:
     """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
 
     The mtv will be the 0 vector if the rectangles do not overlap.
@@ -86,7 +92,7 @@ def apply_separating_axis_theorem(rec_cuboid1, rec_cuboid2, verbose=True, overla
     return mtv
 
 
-def get_potential_separation_axes(deg_angle):
+def get_potential_separation_axes(deg_angle: float) -> Tuple:
     """Computes the potential separation axes from the angle of rotation of a rectangle.
 
     We will define the separation axes (with all angles in degrees) as:
@@ -117,9 +123,7 @@ def get_potential_separation_axes(deg_angle):
     return ax1, ax2
 
 
-# TODO: put the examples from below into the docstrings (in the correct doctest format)
-
-if __name__ == "__main__":
+def separating_axis_theorem_example() -> None:
     from src.structures.rectangular_cuboid import RectangularCuboid
     # Rectangular Cuboid 1
     center1 = np.array([2, 3.5, 5])
@@ -129,7 +133,7 @@ if __name__ == "__main__":
     colour1 = {"r": 0, "g": 100, "b": 50}
     rectangular_cuboid1 = RectangularCuboid(center1, dimensions1, rotation1, name1, )
     print(f"Rectangular cuboid 1 vertices:\n{rectangular_cuboid1.lower_base_vertices}\n")
-    
+
     # Rectangular Cuboid 2
     center2 = np.array([2, 3.5, 5])
     dimensions2 = (2, 2, 3)
@@ -154,3 +158,7 @@ if __name__ == "__main__":
     dimensions = (2, 2, 3)
     rotation = 45
     rec_cuboid = RectangularCuboid(lower_base_centroid, dimensions, rotation)
+
+
+if __name__ == "__main__":
+    separating_axis_theorem_example()

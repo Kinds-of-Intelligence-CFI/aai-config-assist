@@ -1,10 +1,13 @@
+from typing import Any, Dict, Hashable
+
 import yaml
 import os
 
 
 class ArenaConfigLoader(yaml.SafeLoader):
     """Loader with custom constructors for the custom tags (e.g. !ArenaConfig) in the configuration YAMLs."""
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.add_constructor('!Arena', self.construct_arena)
         self.add_constructor('!ArenaConfig', self.construct_arena_config)
@@ -13,27 +16,27 @@ class ArenaConfigLoader(yaml.SafeLoader):
         self.add_constructor('!RGB', self.construct_rgb)
 
     @staticmethod
-    def construct_arena(loader, node):
+    def construct_arena(loader: yaml.Loader, node: yaml.MappingNode) -> Dict[Hashable, Any]:
         return loader.construct_mapping(node)
 
     @staticmethod
-    def construct_arena_config(loader, node):
+    def construct_arena_config(loader: yaml.Loader, node: yaml.MappingNode) -> Dict[Hashable, Any]:
         return loader.construct_mapping(node)
 
     @staticmethod
-    def construct_item(loader, node):
+    def construct_item(loader: yaml.Loader, node: yaml.MappingNode) -> Dict[Hashable, Any]:
         return loader.construct_mapping(node)
 
     @staticmethod
-    def construct_vector3(loader, node):
+    def construct_vector3(loader: yaml.Loader, node: yaml.MappingNode) -> Dict[Hashable, Any]:
         return loader.construct_mapping(node)
 
     @staticmethod
-    def construct_rgb(loader, node):
+    def construct_rgb(loader: yaml.Loader, node: yaml.MappingNode) -> Dict[Hashable, Any]:
         return loader.construct_mapping(node)
 
 
-if __name__ == "__main__":
+def arena_config_loader_example():
     import pprint
 
     # Load a configuration yaml file
@@ -46,3 +49,7 @@ if __name__ == "__main__":
 
     print("\n* Configuration items without the Agent item:")
     pprint.pprint([element for element in config_data["arenas"][0]["items"] if element["name"] != "Agent"])
+
+
+if __name__ == "__main__":
+    arena_config_loader_example()
