@@ -165,7 +165,7 @@ def round_up(val: float, num_decimals: int) -> float:
         (float): The rounded number.
     """
     factor = 10 ** num_decimals
-    new_val = np.ceil(val * factor)/factor
+    new_val = np.ceil(val * factor) / factor
     return new_val
 
 
@@ -231,6 +231,7 @@ if __name__ == "__main__":
         segment2 = np.array([-3, 1])
         overlap = determine_overlap_between_aligned_segments(segment1, segment2)
         print(f"Overlap: {overlap}")
+
 
     geometry_helper_example()
     import doctest

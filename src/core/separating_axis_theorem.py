@@ -1,15 +1,16 @@
 from typing import Tuple
 
 import numpy as np
+import numpy.typing as npt
 
-from src.utils.geometry_helper import *
 from src.structures.rectangular_cuboid import RectangularCuboid
+from src.utils.geometry_helper import *
 
 
 def apply_separating_axis_theorem(rec_cuboid1: RectangularCuboid,
                                   rec_cuboid2: RectangularCuboid,
                                   verbose: str = True,
-                                  overlap_decimals: int = 3) -> np.array:
+                                  overlap_decimals: int = 3) -> npt.NDArray:
     """Determines whether two rectangles overlap and, if so, the minimum translation vector (mtv) to overcome overlap.
 
     The mtv will be the 0 vector if the rectangles do not overlap.
