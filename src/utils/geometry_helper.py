@@ -1,7 +1,13 @@
+from typing import Tuple
+
 import numpy as np
+import numpy.typing as npt
 
 
-def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
+def calculate_vertices_of_rotated_rectangle(center: npt.NDArray,
+                                            width: float,
+                                            height: float,
+                                            angle_deg: float) -> npt.NDArray:
     """Calculates the 4 vertex coordinates of a rectangle in the x-y plane rotated about its centroid.
 
     Args:
@@ -20,7 +26,7 @@ def calculate_vertices_of_rotated_rectangle(center, width, height, angle_deg):
     return rotated_vertices
 
 
-def calculate_vertices_of_axis_aligned_rectangle(center, width, height):
+def calculate_vertices_of_axis_aligned_rectangle(center: npt.NDArray, width: float, height: float) -> npt.NDArray:
     """Calculates the 4 vertex coordinates of a rectangle whose sides are aligned with the x and y axes.
 
     Args:
@@ -43,7 +49,9 @@ def calculate_vertices_of_axis_aligned_rectangle(center, width, height):
     return vertices
 
 
-def calculate_clockwise_rotated_2d_points(points, angle_deg, center_of_rotation=np.array([0, 0])):
+def calculate_clockwise_rotated_2d_points(points: npt.NDArray,
+                                          angle_deg: float,
+                                          center_of_rotation: npt.NDArray = np.array([0, 0])) -> npt.NDArray:
     """Calculates the new coordinates of 2d points rotated by a given angle about a center of rotation.
 
     Args:
@@ -72,7 +80,7 @@ def calculate_clockwise_rotated_2d_points(points, angle_deg, center_of_rotation=
     return rotated_points
 
 
-def determine_overlap_between_aligned_segments(segment1, segment2):
+def determine_overlap_between_aligned_segments(segment1: npt.NDArray, segment2: npt.NDArray) -> float:
     """Determines the overlap value between segments 1 and 2.
 
     Each segment is defined by a min and max value corresponding to their start and stop points on the same line.
@@ -90,7 +98,7 @@ def determine_overlap_between_aligned_segments(segment1, segment2):
     return overlap
 
 
-def get_min_max_projections(points, axis):
+def get_min_max_projections(points: npt.NDArray, axis: npt.NDArray) -> Tuple[float, float]:
     """Computes the minimum and maximum projection values of the inputted points onto an axis.
 
     This is equivalent to the boundaries of the total projection distance covered by a polygon when all of its
@@ -110,7 +118,7 @@ def get_min_max_projections(points, axis):
     return min_distance, max_distance
 
 
-def get_projected_distance_of_2d_points_onto_axis(points, axis):
+def get_projected_distance_of_2d_points_onto_axis(points: npt.NDArray, axis: npt.NDArray) -> npt.NDArray:
     """Compute the projected distance (the dot product) of a set of points onto an axis.
 
     Args:
@@ -128,7 +136,7 @@ def get_projected_distance_of_2d_points_onto_axis(points, axis):
     return projected_points
 
 
-def normalise_vector(vec):
+def normalise_vector(vec: npt.NDArray) -> npt.NDArray:
     """Normalises a vector.
 
     Args:
@@ -141,7 +149,7 @@ def normalise_vector(vec):
     return normalised_vec
 
 
-def round_up(val, num_decimals):
+def round_up(val: float, num_decimals: int) -> float:
     """Rounds up a number to a number of decimals.
 
     Args:
