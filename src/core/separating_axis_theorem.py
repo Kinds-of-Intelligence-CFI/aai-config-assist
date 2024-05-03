@@ -159,6 +159,9 @@ def separating_axis_theorem_example() -> None:
     rotation = 45
     rec_cuboid = RectangularCuboid(lower_base_centroid, dimensions, rotation)
 
+# TODO: Split SAT into multiple functions
+# TODO: Could move some algorithm-specific values to a configuration file
+
 
 if __name__ == "__main__":
     separating_axis_theorem_example()

@@ -161,8 +161,6 @@ def round_up(val, num_decimals):
     return new_val
 
 
-# TODO: could put the examples from below into the docstrings (in the correct doctest format)
-
 if __name__ == "__main__":
     def geometry_helper_example() -> None:
         print("* Calculating the rotated lower base vertices of a rectangle from center, width, height, and rotation "

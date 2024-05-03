@@ -111,3 +111,6 @@ class AppStyleGuide:
                 'marginRight': f"{self.margin_right}%",
                 "cursor": "pointer",
                 }
+
+# TODO: place all these defaults in a YAML definitions file
+#  (Maybe) Allow user to provide their own style guide and item defaults to the AppManager.

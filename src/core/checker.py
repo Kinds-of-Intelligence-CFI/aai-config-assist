@@ -32,3 +32,5 @@ class Checker:
                     items_with_overlap.add(item2.name)
 
         return items_with_overlap
+
+# TODO: eventually, IF efficiency becomes a problem (for now not at all), can do local rather than global overlap checks

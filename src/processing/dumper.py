@@ -174,11 +174,3 @@ def dumper_example() -> None:
 
 if __name__ == "__main__":
     dumper_example()
-
-# TODO: problem: my auto tabbing system only works on the first line of the element we return
-#  it does not automatically indent the whole block
-#  Maybe the key is to ONLY include the _indent function on blocks that are not multi-line
-#  So you have to call _indent every time the result will be on a single line and never if not
-#  Let's apply this simple algorithm to the above calls and see if that fixes things.
-#  Would probably have to formalise this procedure for future contributors to know how to add
-#  Revise TABBING SYSTEM!

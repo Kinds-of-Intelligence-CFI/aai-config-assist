@@ -55,13 +55,25 @@ class AppManager:
 
 
 def create_application_manager() -> AppManager:
-    # TODO: may consider implementing this factory function to instantiate all the AppManager's dependencies
     ...
 
 
 def application_manager_example() -> None:
     application_manager = AppManager("example_configs/config.yaml")
     application_manager.run_app()
+
+# TODO: Implement dependency injection
+# TODO: Dependency injection with factory of dependency instances
+#  user may want to edit item defaults and application style
+# TODO: may consider implementing factory function ('create_application_manager)
+#  to instantiate all the AppManager's dependencies
+# TODO: Move _get_fig_init to more appropriate location
+
+# TODO relevant to entire codebase:
+# TODO: Standardise documentation and example usages
+# TODO: Move magic number / path constants to dedicated configuration file in src
+# TODO: Think and implement error handling
+# TODO: Standardise single ' and double " for strings throughout codebase
 
 
 if __name__ == "__main__":

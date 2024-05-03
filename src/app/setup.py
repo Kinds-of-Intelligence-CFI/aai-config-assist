@@ -112,3 +112,5 @@ def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
         html.Div(id='new-config-path-output', style={'whiteSpace': 'pre-line'})
     ])
     return layout
+
+# TODO: remove magic numbers / hard-coded values e.g. min, max, step etc... -> Make user configurable

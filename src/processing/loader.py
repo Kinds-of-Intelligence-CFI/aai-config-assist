@@ -19,5 +19,3 @@ class Loader:
             config_data = yaml.load(file, Loader=ArenaConfigLoader)
         return config_data
 
-# TODO: could combine this class and the ArenaConfigLoader into the same python file OR could get rid of this file
-#  altogether if it simply clutters the codebase. Either case must resolve the conflict, and the naming clashes

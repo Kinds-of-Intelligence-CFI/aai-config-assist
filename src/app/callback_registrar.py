@@ -148,7 +148,8 @@ class CallbackRegistrar:
             print(f"The item currently being moved is: {cuboids[item_ix].name}")
 
             arena_ix = self.app_manager.curr_arena_ix
-            self.app_manager.arenas[arena_ix].overlapping_items = self.app_manager.checker.check_overlaps_between_cuboids(cuboids)
+            self.app_manager.arenas[
+                arena_ix].overlapping_items = self.app_manager.checker.check_overlaps_between_cuboids(cuboids)
             curr_overlapping_items = self.app_manager.arenas[arena_ix].overlapping_items
             fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids, curr_overlapping_items)
 
@@ -156,6 +157,7 @@ class CallbackRegistrar:
 
     def _register_dump_current_layout_to_config_callback(self) -> None:
         """Creates a callback mechanism for dumping the current physical items to a new configuration file."""
+
         @callback(
             Output(component_id='new-config-path-output', component_property="value"),
             State(component_id="new-config-path", component_property="value"),
@@ -181,3 +183,6 @@ class CallbackRegistrar:
                 arena_config_dumper.dump()
                 print(f"You have generated a new config YAML file at {new_config_path}.")
                 return ""  # Empty the string after the process has completed
+
+# TODO: Split long callback into 2,3 callbacks (e.g. with dash extension multiple callbacks with same output)
+# TODO: Error handling

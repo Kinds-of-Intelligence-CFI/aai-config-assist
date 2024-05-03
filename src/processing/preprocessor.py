@@ -11,8 +11,6 @@ class Preprocessor:
     def __init__(self,
                  default_item_parameters: Dict,
                  all_aai_item_names: List[str]) -> None:
-        # TODO: could choose not to make these attributes and simply pass them to create_arena_list and private method
-        #  to avoid the need for class attributes.
         self.default_items_params = default_item_parameters
         self.all_aai_item_names = all_aai_item_names
 
@@ -83,3 +81,7 @@ class Preprocessor:
                 rec_cuboids += [rec_cuboid]
 
         return rec_cuboids
+
+# TODO: could choose not to make these attributes and simply pass them to create_arena_list and private method
+#  to avoid the need for class attributes.
+# TODO: split the _create_rectangular_method
