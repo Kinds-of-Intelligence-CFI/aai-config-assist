@@ -15,7 +15,6 @@ class AppManager:
     ITEM_PARAMETERS_FILE_PATH = "src/definitions/item_default_parameters.yaml"
     INITIAL_ARENA_INDEX = 0
     INITIAL_ITEM_INDEX = 0
-    INITIAL_NUM_AUTO_ITEMS_DISPLAYED = 0
 
     def __init__(self, config_path: str) -> None:
         self.config_path = config_path
@@ -38,7 +37,6 @@ class AppManager:
 
         self.curr_arena_ix = self.INITIAL_ARENA_INDEX
         self.curr_item_to_move_ix = self.INITIAL_ARENA_INDEX
-        self.num_auto_items_displayed = self.INITIAL_NUM_AUTO_ITEMS_DISPLAYED
 
     def run_app(self) -> None:
         """Launches Dash application to visualise cuboids."""

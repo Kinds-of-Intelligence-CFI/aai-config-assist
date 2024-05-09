@@ -1,7 +1,7 @@
 from typing import Dict
 
 
-def get_default_item_parameter(item_name: str, param_name: str, default_item_parameters: Dict) -> Dict:
+def get_default_item_parameter(item_name: str, param_name: str, default_item_params: Dict) -> Dict:
     """Provides the default parameter value of a particular Animal-AI item.
 
     Note:
@@ -9,7 +9,7 @@ def get_default_item_parameter(item_name: str, param_name: str, default_item_par
         - Some default values were not available on the official repo and were inferred from the images.
 
     Args:
-        default_item_parameters (dict): Dictionary of default item parameters from physical items definitions.
+        default_item_params (dict): Dictionary of default item parameters from physical items definitions.
         item_name (str): Name of the physical Animal-AI item.
         param_name (str): Parameter type that is being requested (colour or size for the time being)
 
@@ -29,7 +29,7 @@ def get_default_item_parameter(item_name: str, param_name: str, default_item_par
                        f"Please add this category to the definitions to move on without errors.")
 
     try:
-        default_values = default_item_parameters[item_name][param_name]
+        default_values = default_item_params[item_name][param_name]
     except KeyError:
         # Eventually, could implement a custom exception to avoid repeating KeyError
         raise KeyError(f"The item {item_name}'s {param_name} value is not defined in the default definitions. "
