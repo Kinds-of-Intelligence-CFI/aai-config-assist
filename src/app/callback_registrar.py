@@ -54,11 +54,10 @@ class CallbackRegistrar:
                 self.app_manager.curr_item_to_move_ix = point_clicked['points'][0]["curveNumber"]
                 ix = self.app_manager.curr_item_to_move_ix
                 print(f"You have just clicked: {cuboids[ix].name}")
-                return (cuboids[ix].center[0],  # The x-direction
-                        cuboids[ix].center[2],  # The y-direction
-                        cuboids[ix].center[1],  # The z-direction
-                        cuboids[ix].deg_rotation  # x-z rotation
-                        )
+                return (cuboids[ix].center_x,
+                        cuboids[ix].center_y,
+                        cuboids[ix].center_z,
+                        cuboids[ix].deg_rotation)
             else:
                 print("You have not clicked an item")
                 return (self.DEFAULT_SLIDER_VALUE,) * 4
@@ -78,9 +77,9 @@ class CallbackRegistrar:
                           xz_rotation: float) -> matplotlib.figure.Figure:
             cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
             item_ix = self.app_manager.curr_item_to_move_ix
-            cuboids[item_ix].center[0] = x_slider_value
-            cuboids[item_ix].center[2] = y_slider_value
-            cuboids[item_ix].center[1] = z_slider_value
+            cuboids[item_ix].center_x = x_slider_value
+            cuboids[item_ix].center_y = y_slider_value
+            cuboids[item_ix].center_z = z_slider_value
             cuboids[item_ix].deg_rotation = xz_rotation
             fig = self._update_pre_plotting_attributes(cuboids, item_ix, xz_rotation)
             return fig
@@ -175,7 +174,7 @@ class CallbackRegistrar:
     def _update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation):
         # Note: center param expects x, and z center coordinates
         cuboids[item_ix].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
-            center=np.array([cuboids[item_ix].center[0], cuboids[item_ix].center[1]]),
+            center=np.array([cuboids[item_ix].center_x, cuboids[item_ix].center_z]),
             width=cuboids[item_ix].length,
             height=cuboids[item_ix].width,
             angle_deg=xz_rotation)

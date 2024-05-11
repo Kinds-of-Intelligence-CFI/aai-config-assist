@@ -1,6 +1,10 @@
-from typing import List, Dict
+from typing import TYPE_CHECKING, List,  Dict, Union
+
+if TYPE_CHECKING:
+    import numpy as np
 
 from src.structures.arena import Arena
+from src.structures.rectangular_cuboid import RectangularCuboid
 
 
 class Dumper:
@@ -15,7 +19,6 @@ class Dumper:
             method. Rather, every time an element is added to the overall_str, the _indent method must be employed.
 
     """
-
     def __init__(self, arenas: List[Arena], destination_file_path: str) -> None:
         self.arenas = arenas
         self.destination_file_path = destination_file_path
@@ -78,7 +81,7 @@ class Dumper:
         return result
 
     @staticmethod
-    def _rearrange_items_per_type(items: List) -> List:
+    def _rearrange_items_per_type(items: List[RectangularCuboid]) -> List:
         """Rearranges the items from an item-by-item list to a by-type list with the correct output yaml format."""
 
         def _get_new_item_structure(curr_item_type: str) -> Dict:
@@ -105,10 +108,10 @@ class Dumper:
             name = item.name.split(" ")[0]
             if name not in result:
                 result[name] = _get_new_item_structure(item.name.split(" ")[0])
-            result[name]["positions"] += [_get_vector3_representation(item.center[0], item.center[2], item.center[1], )]
             result[name]["rotations"] += [str(item.deg_rotation)]
+            result[name]["positions"] += [_get_vector3_representation(item.center_x, item.center_y, item.center_z,)]
             result[name]["sizes"] += [_get_vector3_representation(item.length, item.height, item.width)]
-            result[name]["colors"] += [_get_rgb_representation(item.colour["r"], item.colour["g"], item.colour["b"])]
+            result[name]["colors"] += [_get_rgb_representation(item.colour_red, item.colour_green, item.colour_blue)]
 
         # Convert result dict into simply a list of its values
         result = list(result.values())

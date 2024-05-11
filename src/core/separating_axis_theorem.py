@@ -25,8 +25,8 @@ def apply_separating_axis_theorem(rec_cuboid1: RectangularCuboid,
         (np.ndarray): The minimum translation vector to overcome overlap between the two cuboids (0 vec, if no overlap)
     """
     # Check whether the items overlap in the depth-direction
-    depth_segment1 = np.array([rec_cuboid1.center[2], rec_cuboid1.center[2] + rec_cuboid1.height])
-    depth_segment2 = np.array([rec_cuboid2.center[2], rec_cuboid2.center[2] + rec_cuboid2.height])
+    depth_segment1 = np.array([rec_cuboid1.center_y, rec_cuboid1.center_y + rec_cuboid1.height])
+    depth_segment2 = np.array([rec_cuboid2.center_y, rec_cuboid2.center_y + rec_cuboid2.height])
     depth_overlap = determine_overlap_between_aligned_segments(depth_segment1, depth_segment2)
 
     if np.isclose(a=depth_overlap, b=0):
