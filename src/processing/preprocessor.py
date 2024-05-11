@@ -66,7 +66,7 @@ class Preprocessor:
                     colour = get_default_item_parameter(name, "colour", self.default_items_params)
 
                 # Transform parts of the extracted data
-                xzy_lower_base_centroid = np.array([position["x"], position["z"], position["y"]])
+                xzy_lower_base_centroid = np.array([position["x"], position["z"], position["y"]], dtype=float)
                 xzy_dimensions = (size["x"], size["z"], size["y"])
 
                 # Instantiate a RectangularCuboid with the extracted and transformed data
