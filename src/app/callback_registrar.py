@@ -18,6 +18,14 @@ from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
 
 
 class CallbackRegistrar:
+    DEFAULT_SLIDER_VALUE = 0
+    DEFAULT_SPAWNED_ITEM_SIZE = 1
+    DEFAULT_SPAWNED_ITEM_ROTATION = 0
+    DEFAULT_SPAWNED_LOCATION_X = 0
+    DEFAULT_SPAWNED_LOCATION_Y = 0
+    DEFAULT_SPAWNED_LOCATION_Z = 0
+    SPAWNED_ITEM_NAME_IDENTIFIER = "AUTO"
+
     def __init__(self, app_manager: AppManager) -> None:
         self.app_manager = app_manager
 
@@ -53,7 +61,7 @@ class CallbackRegistrar:
                         )
             else:
                 print("You have not clicked an item")
-                return 0, 0, 0, 0
+                return (self.DEFAULT_SLIDER_VALUE,) * 4
 
     def _register_move_cuboids_callback(self) -> None:
         @callback(
@@ -93,19 +101,21 @@ class CallbackRegistrar:
                         spawn_z_dim: float,
                         spawn_y_dim: float) -> matplotlib.figure.Figure:
             cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
-            spawned_lower_base_centroid = np.array([0, 0, 0])
+            spawned_lower_base_centroid = np.array([self.DEFAULT_SPAWNED_LOCATION_X,
+                                                    self.DEFAULT_SPAWNED_LOCATION_Z,
+                                                    self.DEFAULT_SPAWNED_LOCATION_Y], dtype=float)
 
             # Fallback if user leaves the new item dimensions blank
             if spawn_x_dim == "":
-                spawn_x_dim = 1
+                spawn_x_dim = self.DEFAULT_SPAWNED_ITEM_SIZE
             if spawn_z_dim == "":
-                spawn_z_dim = 1
+                spawn_z_dim = self.DEFAULT_SPAWNED_ITEM_SIZE
             if spawn_y_dim == "":
-                spawn_y_dim = 1
+                spawn_y_dim = self.DEFAULT_SPAWNED_ITEM_SIZE
 
             # Convert the dimensions (either str from callback or int from blank dimension fallback)
             spawned_dimensions = (float(spawn_x_dim), float(spawn_z_dim), float(spawn_y_dim))
-            spawned_rotation = 0
+            spawned_rotation = self.DEFAULT_SPAWNED_ITEM_ROTATION
             spawned_name = f"{item_dropdown_value} Auto {num_spawn_button_clicks}"
             spawned_colour = get_default_item_parameter(item_name=item_dropdown_value,
                                                         param_name="colour",
@@ -170,9 +180,13 @@ class CallbackRegistrar:
             height=cuboids[item_ix].width,
             angle_deg=xz_rotation)
 
+    def _generate_spawn_name(self, item_dropdown_value: str, num_spawn_button_clicks: int) -> str:
+        return f"{item_dropdown_value} {self.SPAWNED_ITEM_NAME_IDENTIFIER} {num_spawn_button_clicks}"
+
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
-# TODO: Get rid of magic numbers and strings
+# TODO: Get rid of magic numbers and strings (e.g. which index corresponds to the x, y, or z component: that's also
+#  magic)
 # TODO: Could encapsulate the following lines into a wrapper function
 #  (that only gets called once at init or when the current arena changes to not repeat this at each dump).
 #  In dump current layout to config
