@@ -15,6 +15,12 @@ class RectangularCuboid:
         - The only rotation possible for this object is a height-wise, "yaw"-type rotation of the lower base rectangle.
         - The lower base face is always parallel to the 2d plane made up of the 1st and 2nd dimensions of the 3d space.
     """
+    X_INDEX = 0
+    Z_INDEX = 1
+    Y_INDEX = 2
+    RED_COMPONENT_INDEX = "r"
+    GREEN_COMPONENT_INDEX = "g"
+    BLUE_COMPONENT_INDEX = "b"
 
     def __init__(self,
                  lower_base_centroid: npt.NDArray,
@@ -32,9 +38,9 @@ class RectangularCuboid:
             colour (dict or None): Colour of the item, e.g. {"r": 256, "g": 256, "b": 0}.
         """
         self.center = lower_base_centroid
-        self.length = dimensions[0]
-        self.width = dimensions[1]
-        self.height = dimensions[2]
+        self.length = dimensions[self.X_INDEX]
+        self.width = dimensions[self.Z_INDEX]
+        self.height = dimensions[self.Y_INDEX]
         self.deg_rotation = rotation
         self.name = name
         self.colour = colour
@@ -48,3 +54,39 @@ class RectangularCuboid:
                                                                            width=self.length,
                                                                            height=self.width,
                                                                            angle_deg=self.deg_rotation)
+
+    @property
+    def center_x(self):
+        return self.center[self.X_INDEX]
+
+    @center_x.setter
+    def center_x(self, value):
+        self.center[self.X_INDEX] = value
+
+    @property
+    def center_z(self):
+        return self.center[self.Z_INDEX]
+
+    @center_z.setter
+    def center_z(self, value):
+        self.center[self.Z_INDEX] = value
+
+    @property
+    def center_y(self):
+        return self.center[self.Y_INDEX]
+
+    @center_y.setter
+    def center_y(self, value):
+        self.center[self.Y_INDEX] = value
+
+    @property
+    def colour_red(self):
+        return self.colour[self.RED_COMPONENT_INDEX]
+
+    @property
+    def colour_green(self):
+        return self.colour[self.GREEN_COMPONENT_INDEX]
+
+    @property
+    def colour_blue(self):
+        return self.colour[self.BLUE_COMPONENT_INDEX]
