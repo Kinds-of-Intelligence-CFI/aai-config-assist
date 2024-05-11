@@ -31,12 +31,24 @@ class RectangularCuboid:
         """Constructs an instance of RectangularCuboid.
 
         Args:
-            lower_base_centroid (np.ndarray): The length, width, and height coordinates of the lower base's centroid.
+            lower_base_centroid (np.ndarray): The length (AAI-x), width (AAI-z), and height (AAI-y) coordinates of the
+                lower base's centroid.
             dimensions (tuple): The length (AAI-x), width (AAI-z), and height (AAI-y) of the cuboid.
             rotation (float): The clockwise angle of rotation of the rectangle, given in degrees.
             name (str): Name of the item.
             colour (dict or None): Colour of the item, e.g. {"r": 256, "g": 256, "b": 0}.
         """
+        # TODO: Decide on way to address necessity for float array for AAI sliders not to auto adjust
+        #  this is a temporary fix to catch non-float arrays.
+        #  perhaps eventually we can distinguish between an AAIRectangularCuboid and a base RectangularCuboid
+        #  whereby the AAI one requires floating dtype for the lower_base_centroid; to avoid having this strict
+        #  enforcement for a generic cuboid that could be non-AAI. Could also handle more gracefully here by
+        #  checking for incorrect type and auto changing. But will stick to this for now to realise which parts
+        #  of the code are constructing RectangularCuboid objects with non-float arg for lower_base_centroid param.
+        if lower_base_centroid.dtype != np.float_:
+            arr_dtype = lower_base_centroid.dtype
+            raise Exception(f"The lower_base_centroid variable should be an array of floats. You are using {arr_dtype}")
+
         self.center = lower_base_centroid
         self.length = dimensions[self.X_INDEX]
         self.width = dimensions[self.Z_INDEX]
