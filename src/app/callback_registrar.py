@@ -24,7 +24,7 @@ class CallbackRegistrar:
     DEFAULT_SPAWNED_LOCATION_X = 0
     DEFAULT_SPAWNED_LOCATION_Y = 0
     DEFAULT_SPAWNED_LOCATION_Z = 0
-    SPAWNED_ITEM_NAME_IDENTIFIER = "AUTO"
+    SPAWNED_ITEM_NAME_IDENTIFIER = "Auto"
 
     def __init__(self, app_manager: AppManager) -> None:
         self.app_manager = app_manager
@@ -115,7 +115,7 @@ class CallbackRegistrar:
             # Convert the dimensions (either str from callback or int from blank dimension fallback)
             spawned_dimensions = (float(spawn_x_dim), float(spawn_z_dim), float(spawn_y_dim))
             spawned_rotation = self.DEFAULT_SPAWNED_ITEM_ROTATION
-            spawned_name = f"{item_dropdown_value} Auto {num_spawn_button_clicks}"
+            spawned_name = f"{item_dropdown_value} {self.SPAWNED_ITEM_NAME_IDENTIFIER} {num_spawn_button_clicks}"
             spawned_colour = get_default_item_parameter(item_name=item_dropdown_value,
                                                         param_name="colour",
                                                         default_item_params=self.app_manager.default_item_parameters)
