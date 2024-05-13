@@ -1,13 +1,13 @@
 # To avoid circular imports
 from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
-
-import matplotlib.figure
+import os
 
 if TYPE_CHECKING:
     from src.app.app_manager import AppManager
 
 import numpy as np
+import matplotlib.figure
 from dash import Output, Input, State, callback
 
 from src.processing.dumper import Dumper
@@ -15,6 +15,7 @@ from src.utils.physical_item_helper import get_default_item_parameter
 from src.structures.rectangular_cuboid import RectangularCuboid
 from src.structures.arena import Arena
 from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
+from src.utils.utils import create_directory_if_not_exists
 
 
 class CallbackRegistrar:
@@ -145,6 +146,8 @@ class CallbackRegistrar:
             # All of these are being read only and not overwritten which is why we can create new vars.
             # Think mutability problem and requirement for AppManager instance attributes to be
             # updated during the callbacks.
+            create_directory_if_not_exists(os.path.dirname(new_config_path))
+
             curr_arena = self.app_manager.arenas[self.app_manager.curr_arena_ix]
             pass_mark = curr_arena.pass_mark
             t = curr_arena.t
