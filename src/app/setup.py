@@ -5,6 +5,48 @@ from dash import dcc, html
 
 from src.app.style_guide import AppStyleGuide
 
+DEFAULT_BUTTON_NUMBER_CLICKS = 0
+
+SPAWN_SECTION_TITLE = "Place new item"
+SPAWN_LENGTH_TEXT = "Length (x)"
+SPAWN_WIDTH_TEXT = "Width (z)"
+SPAWN_HEIGHT_TEXT = "Height (y)"
+SPAWN_BUTTON_TEXT = "Spawn new item"
+
+MOVE_ITEM_SECTION_TITLE = "Move item"
+
+MIN_X_SLIDER = 0
+MAX_X_SLIDER = 40
+STEP_X_SLIDER = 1
+DEFAULT_X_SLIDER = 0
+
+MIN_Z_SLIDER = MIN_X_SLIDER
+MAX_Z_SLIDER = MAX_X_SLIDER
+STEP_Z_SLIDER = STEP_X_SLIDER
+DEFAULT_Z_SLIDER = DEFAULT_X_SLIDER
+
+MIN_Y_SLIDER = 0
+MAX_Y_SLIDER = 20
+STEP_Y_SLIDER = 0.1
+DEFAULT_Y_SLIDER = 0
+
+MIN_ROTATION_SLIDER = 0
+MAX_ROTATION_SLIDER = 360
+STEP_ROTATION_SLIDER = 1
+DEFAULT_ROTATION_SLIDER = 0
+
+NEW_CONFIG_SECTION_TITLE = "Generate new config"
+NEW_CONFIG_DEFAULT_PATH = "example_configs/new_config.yaml"
+NEW_CONFIG_BUTTON_TEXT = "Generate new YAML config"
+
+SLIDER_TOOLTIP_ALWAYS_VISIBLE = True
+SLIDER_X_TEMPLATE = "x = {value}"
+SLIDER_Y_TEMPLATE = "y = {value}"
+SLIDER_Z_TEMPLATE = "z = {value}"
+SLIDER_XZ_TEMPLATE = "xz = {value}"
+
+# TODO: decide how to constant management across the whole library (and apply the decision to these constants too)
+
 
 def set_up_app_layout(fig_init: matplotlib.figure.Figure, aai_item_names: List[str]) -> html.Div:
     style_guide = AppStyleGuide()
@@ -34,59 +76,82 @@ def _set_up_right_hand_section(aai_item_names: List[str], style_guide: AppStyleG
 
 def _set_up_new_item_layout(aai_item_names: List[str], style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
-        html.H2("Place new item", id='heading-place-new-item', style=style_guide.heading2_style()),
+        html.H2(SPAWN_SECTION_TITLE, id='heading-place-new-item', style=style_guide.heading2_style()),
 
         dcc.Dropdown(aai_item_names, id='item-dropdown', style=style_guide.dropdown_style()),
 
-        dcc.Input(placeholder='Length (x)',
+        dcc.Input(placeholder=SPAWN_LENGTH_TEXT,
                   type='text',
                   value='',
                   id="spawn-x",
                   style=style_guide.length_input_style()),
 
-        dcc.Input(placeholder='Width (z)',
+        dcc.Input(placeholder=SPAWN_WIDTH_TEXT,
                   type='text',
                   value='',
                   id="spawn-z",
                   style=style_guide.width_input_style()),
 
-        dcc.Input(placeholder='Height (y)',
+        dcc.Input(placeholder=SPAWN_HEIGHT_TEXT,
                   type='text',
                   value='',
                   id="spawn-y",
                   style=style_guide.height_input_style()),
 
-        html.Button('Spawn new item', id='new-item-button', n_clicks=0, style=style_guide.button_style(), )
+        html.Button(SPAWN_BUTTON_TEXT,
+                    id='new-item-button',
+                    n_clicks=DEFAULT_BUTTON_NUMBER_CLICKS,
+                    style=style_guide.button_style(), )
     ])
     return layout
 
 
 def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
-        html.H2("Move item", id='heading-move-an-item', style=style_guide.heading2_style()),
+        html.H2(MOVE_ITEM_SECTION_TITLE, id='heading-move-an-item', style=style_guide.heading2_style()),
 
-        dcc.Slider(id="x-slider", min=0, max=40, step=1, value=0, marks=None,
+        dcc.Slider(id="x-slider",
+                   min=MIN_X_SLIDER,
+                   max=MAX_X_SLIDER,
+                   step=STEP_X_SLIDER,
+                   value=DEFAULT_X_SLIDER,
+                   marks=None,
                    tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": True,
-                            "template": "x = {value}",
+                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                            "template": SLIDER_X_TEMPLATE,
                             "style": style_guide.slider_tooltip_style()}),
 
-        dcc.Slider(id="y-slider", min=0, max=20, step=0.1, value=0, marks=None,
+        dcc.Slider(id="y-slider",
+                   min=MIN_Y_SLIDER,
+                   max=MAX_Y_SLIDER,
+                   step=STEP_Y_SLIDER,
+                   value=DEFAULT_Y_SLIDER,
+                   marks=None,
                    tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": True,
-                            "template": "y = {value}",
+                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                            "template": SLIDER_Y_TEMPLATE,
                             "style": style_guide.slider_tooltip_style()}),
 
-        dcc.Slider(id="z-slider", min=0, max=40, step=1, value=0, marks=None,
+        dcc.Slider(id="z-slider",
+                   min=MIN_Z_SLIDER,
+                   max=MAX_Z_SLIDER,
+                   step=STEP_Z_SLIDER,
+                   value=DEFAULT_Z_SLIDER,
+                   marks=None,
                    tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": True,
-                            "template": "z = {value}",
+                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                            "template": SLIDER_Z_TEMPLATE,
                             "style": style_guide.slider_tooltip_style()}),
 
-        dcc.Slider(id="xz-rotation-slider", min=0, max=360, step=1, value=0, marks=None,
+        dcc.Slider(id="xz-rotation-slider",
+                   min=MIN_ROTATION_SLIDER,
+                   max=MAX_ROTATION_SLIDER,
+                   step=STEP_ROTATION_SLIDER,
+                   value=DEFAULT_ROTATION_SLIDER,
+                   marks=None,
                    tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": True,
-                            "template": "xz = {value} deg",
+                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                            "template": SLIDER_XZ_TEMPLATE,
                             "style": style_guide.slider_tooltip_style()}, )
     ])
     return layout
@@ -94,23 +159,21 @@ def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
 
 def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
-        html.H2("Generate new config",
+        html.H2(NEW_CONFIG_SECTION_TITLE,
                 id='heading-generate-a-new-configuration-file',
                 style=style_guide.heading2_style()),
 
         dcc.Input(id="new-config-path",
                   style=style_guide.new_config_path_input_style(),
                   type="text",
-                  placeholder="example_configs/new_config.yaml"),
+                  placeholder=NEW_CONFIG_DEFAULT_PATH),
 
-        html.Div(html.Button('Generate new YAML config',
+        html.Div(html.Button(NEW_CONFIG_BUTTON_TEXT,
                              id='new-config-path-button',
-                             n_clicks=0,
+                             n_clicks=DEFAULT_BUTTON_NUMBER_CLICKS,
                              style=style_guide.new_config_generation_button_style(),
                              ), ),
 
         html.Div(id='new-config-path-output', style={'whiteSpace': 'pre-line'})
     ])
     return layout
-
-# TODO: remove magic numbers / hard-coded values e.g. min, max, step etc... -> Make user configurable
