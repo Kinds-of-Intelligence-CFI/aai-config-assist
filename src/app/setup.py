@@ -46,6 +46,8 @@ SLIDER_Y_TEMPLATE = "y = {value}"
 SLIDER_Z_TEMPLATE = "z = {value}"
 SLIDER_XZ_TEMPLATE = "xz = {value}"
 
+REMOVE_ITEM_BUTTON_TEXT = "Remove current item"
+
 
 # TODO: decide how to constant management across the whole library (and apply the decision to these constants too)
 
@@ -156,7 +158,13 @@ def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
                    tooltip={"placement": style_guide.tooltip_placement,
                             "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
                             "template": SLIDER_XZ_TEMPLATE,
-                            "style": style_guide.slider_tooltip_style()}, )
+                            "style": style_guide.slider_tooltip_style()}),
+
+        html.Button(REMOVE_ITEM_BUTTON_TEXT,
+                    id='remove-item-button',
+                    n_clicks=DEFAULT_BUTTON_NUMBER_CLICKS,
+                    style=style_guide.button_style()),
+
     ])
     return layout
 

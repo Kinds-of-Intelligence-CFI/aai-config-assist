@@ -1,6 +1,6 @@
 # To avoid circular imports
 from __future__ import annotations
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, List
 import os
 
 if TYPE_CHECKING:
@@ -11,10 +11,10 @@ import matplotlib.figure
 from dash import Output, Input, State, callback
 
 from src.processing.dumper import Dumper
-from src.utils.physical_item_helper import get_default_item_parameter
 from src.structures.rectangular_cuboid import RectangularCuboid
 from src.structures.arena import Arena
 from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
+from src.utils.physical_item_helper import get_default_item_parameter
 from src.utils.utils import create_directory_if_not_exists
 
 
@@ -35,12 +35,13 @@ class CallbackRegistrar:
         self._register_move_cuboids_callback()
         self._register_spawn_item_callback()
         self._register_dump_current_layout_to_config_callback()
+        self._register_remove_current_item_callback()
 
     def _register_update_sliders_callback(self) -> None:
         """Creates a callback mechanism for when one of the items is selected to be moved."""
 
         @callback(
-            Output(component_id='output-current-item', component_property="children"),
+            Output(component_id='output-current-item', component_property="children", allow_duplicate=True),
             Output(component_id='x-slider', component_property="value"),
             Output(component_id='y-slider', component_property="value"),
             Output(component_id='z-slider', component_property="value"),
@@ -164,21 +165,43 @@ class CallbackRegistrar:
                 print(f"You have generated a new config YAML file at {new_config_path}.")
                 return ""  # Empty the string after the process has completed
 
-    def _update_pre_plotting_attributes(self, cuboids, item_ix, xz_rotation):
+    def _register_remove_current_item_callback(self) -> None:
+        @callback(
+            Output(component_id="aai-diagram", component_property="figure", allow_duplicate=True),
+            Output(component_id='output-current-item', component_property="children", allow_duplicate=True),
+            Input(component_id="remove-item-button", component_property="n_clicks"),
+            prevent_initial_call=True
+        )
+        def _remove_current_item(num_remove_item_button_clicks: int) -> Tuple[matplotlib.figure.Figure, str]:
+            if num_remove_item_button_clicks > 0:
+                # Remove cuboid
+                curr_arena_ix = self.app_manager.curr_arena_ix
+                curr_item_ix = self.app_manager.curr_item_to_move_ix
+                cuboids_pre_removal = self.app_manager.arenas[curr_arena_ix].physical_items
+                self.app_manager.arenas[curr_arena_ix].physical_items = (cuboids_pre_removal[0:curr_item_ix] +
+                                                                         cuboids_pre_removal[curr_item_ix + 1:])
+                cuboids_post_removal = self.app_manager.arenas[curr_arena_ix].physical_items
+
+                # Regenerate arena figure
+                overlapping_items = self._update_curr_arena_overlapping_items(cuboids_post_removal)
+                fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids_post_removal, overlapping_items)
+                return fig, "No item selected"
+
+    def _update_pre_plotting_attributes(self, cuboids, item_ix, xz_rotation) -> matplotlib.figure.Figure:
         self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
         print(f"The item currently being moved is: {cuboids[item_ix].name}")
         curr_overlapping_items = self._update_curr_arena_overlapping_items(cuboids)
         fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids, curr_overlapping_items)
         return fig
 
-    def _update_curr_arena_overlapping_items(self, cuboids):
+    def _update_curr_arena_overlapping_items(self, cuboids) -> List[str]:
         arena_ix = self.app_manager.curr_arena_ix
         self.app_manager.arenas[
             arena_ix].overlapping_items = self.app_manager.checker.check_overlaps_between_cuboids(cuboids)
         return self.app_manager.arenas[arena_ix].overlapping_items
 
     @staticmethod
-    def _update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation):
+    def _update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation) -> None:
         # Note: center param expects x, and z center coordinates
         cuboids[item_ix].lower_base_vertices = calculate_vertices_of_rotated_rectangle(
             center=np.array([cuboids[item_ix].center_x, cuboids[item_ix].center_z]),
@@ -195,12 +218,25 @@ class CallbackRegistrar:
 
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
+
 # TODO: consider splitting the sliders callback into one callback for the current item board and one for the sliders
 #  or even one per sliders. Consider how you can do this callback waterfall whereby the click always causes all the
 #  others
+
 # TODO: Get rid of magic numbers and strings (e.g. which index corresponds to the x, y, or z component: that's also
 #  magic)
+
 # TODO: Could encapsulate the following lines into a wrapper function
 #  (that only gets called once at init or when the current arena changes to not repeat this at each dump).
 #  In dump current layout to config
+
+# TODO: should not set style (for _get_currently_selected_item...) in the CallbackRegistrar.
+#  should instead find a way to simply get the name of the item from the callback and leave the responsibility of
+#  displaying the information appropriately to the setup.py and style_guide.py.
+#  should really just have two HTML components. One that says "Current item" and another that says None by default
+#  and that is waiting for information from the callback who does nothing but pass the name of the current item,
+#  no display etc... it is not its responsibility. Anywhere there is a magic string e.g. "No item selected":
+#  make sure to draw that from a bank of constants (so it's centralised and there is no duplication and that
+#  responsibility is well separated).
+
 # TODO: Error handling
