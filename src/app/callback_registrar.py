@@ -20,7 +20,7 @@ from src.utils.utils import create_directory_if_not_exists
 
 class CallbackRegistrar:
     DEFAULT_SLIDER_VALUE = 0
-    DEFAULT_SPAWNED_ITEM_SIZE = 1
+    FALLBACK_ITEM_SIZE = 1
     DEFAULT_SPAWNED_ITEM_ROTATION = 0
     DEFAULT_SPAWNED_LOCATION_X = 0
     DEFAULT_SPAWNED_LOCATION_Y = 0
@@ -36,6 +36,7 @@ class CallbackRegistrar:
         self._register_spawn_item_callback()
         self._register_dump_current_layout_to_config_callback()
         self._register_remove_current_item_callback()
+        self._register_resize_current_item_callback()
 
     def _register_update_sliders_callback(self) -> None:
         """Creates a callback mechanism for when one of the items is selected to be moved."""
@@ -102,24 +103,15 @@ class CallbackRegistrar:
         )
         def _spawn_item(item_dropdown_value: str,
                         num_spawn_button_clicks: int,
-                        spawn_x_dim: float,
-                        spawn_z_dim: float,
-                        spawn_y_dim: float) -> matplotlib.figure.Figure:
+                        spawn_x_dim: str,
+                        spawn_z_dim: str,
+                        spawn_y_dim: str) -> matplotlib.figure.Figure:
             cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
             spawned_lower_base_centroid = np.array([self.DEFAULT_SPAWNED_LOCATION_X,
                                                     self.DEFAULT_SPAWNED_LOCATION_Z,
                                                     self.DEFAULT_SPAWNED_LOCATION_Y], dtype=float)
-
-            # Fallback if user leaves the new item dimensions blank
-            if spawn_x_dim == "":
-                spawn_x_dim = self.DEFAULT_SPAWNED_ITEM_SIZE
-            if spawn_z_dim == "":
-                spawn_z_dim = self.DEFAULT_SPAWNED_ITEM_SIZE
-            if spawn_y_dim == "":
-                spawn_y_dim = self.DEFAULT_SPAWNED_ITEM_SIZE
-
             # Convert the dimensions (either str from callback or int from blank dimension fallback)
-            spawned_dimensions = (float(spawn_x_dim), float(spawn_z_dim), float(spawn_y_dim))
+            spawned_dimensions = self._transform_str_to_float_dimensions(spawn_x_dim, spawn_z_dim, spawn_y_dim)
             spawned_rotation = self.DEFAULT_SPAWNED_ITEM_ROTATION
             spawned_name = f"{item_dropdown_value} {self.SPAWNED_ITEM_NAME_IDENTIFIER} {num_spawn_button_clicks}"
             spawned_colour = get_default_item_parameter(item_name=item_dropdown_value,
@@ -187,6 +179,46 @@ class CallbackRegistrar:
                 fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids_post_removal, overlapping_items)
                 return fig, "No item selected"
 
+    def _register_resize_current_item_callback(self) -> None:
+        @callback(
+            Output(component_id="aai-diagram", component_property="figure", allow_duplicate=True),
+            Input(component_id="resize-item-button", component_property="n_clicks"),
+            State(component_id="resize-x", component_property="value"),
+            State(component_id="resize-z", component_property="value"),
+            State(component_id="resize-y", component_property="value"),
+            prevent_initial_call=True
+        )
+        def _resize_current_item(num_resize_item_button_clicks: int,
+                                 resize_x_dim: str,
+                                 resize_z_dim: str,
+                                 resize_y_dim: str) -> matplotlib.figure.Figure:
+            if num_resize_item_button_clicks > 0:
+
+                resize_x_dim, resize_z_dim, resize_y_dim = self._transform_str_to_float_dimensions(resize_x_dim,
+                                                                                                   resize_z_dim,
+                                                                                                   resize_y_dim)
+
+                # Resize the cuboid
+                curr_arena_ix = self.app_manager.curr_arena_ix
+                curr_item_ix = self.app_manager.curr_item_to_move_ix
+                cuboids_pre_edit = self.app_manager.arenas[curr_arena_ix].physical_items
+                center = cuboids_pre_edit[curr_item_ix].center
+                deg_rotation = cuboids_pre_edit[curr_item_ix].deg_rotation
+                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].length = resize_x_dim
+                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].width = resize_z_dim
+                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].height = resize_y_dim
+                new_vertices = calculate_vertices_of_rotated_rectangle(center=center[:2],
+                                                                       width=resize_x_dim,
+                                                                       height=resize_z_dim,
+                                                                       angle_deg=deg_rotation)
+                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].lower_base_vertices = new_vertices
+                cuboids_post_edit = self.app_manager.arenas[curr_arena_ix].physical_items
+
+                # Regenerate arena figure
+                overlapping_items = self._update_curr_arena_overlapping_items(cuboids_post_edit)
+                fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids_post_edit, overlapping_items)
+                return fig
+
     def _update_pre_plotting_attributes(self, cuboids, item_ix, xz_rotation) -> matplotlib.figure.Figure:
         self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
         print(f"The item currently being moved is: {cuboids[item_ix].name}")
@@ -216,6 +248,18 @@ class CallbackRegistrar:
     def _get_currently_selected_item_display_text(item_name: str) -> str:
         return f"Current item: {item_name}"
 
+    def _transform_str_to_float_dimensions(self,
+                                           number_text1: str,
+                                           number_text2: str,
+                                           number_text3: str) -> Tuple[float, ...]:
+        float_fallback_size = float(self.FALLBACK_ITEM_SIZE)
+        float_list = [float_fallback_size, float_fallback_size, float_fallback_size]
+        for index, number_text in enumerate([number_text1, number_text2, number_text3]):
+            if number_text != "":
+                float_list[index] = float(number_text)
+        return tuple(float_list)
+
+
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
 
@@ -240,3 +284,15 @@ class CallbackRegistrar:
 #  responsibility is well separated).
 
 # TODO: Error handling
+
+# TODO: look out for (maybe) combining implementations in removing and resizing callbacks which have some similarities
+
+# TODO: must improve implementation of the resize_current_item method. Two points to study:
+#  1. The fact that we can't use variables to denote the app manager's attributes (the objects won't be linked)
+#   perhaps there is a way around this to stop having such long expressions throughout the file but still be pointing
+#   to the correct object
+#  2. There has to be a more automated way of 'updating' all of the necessary attributes of a RectangularCuboid
+#   because multiple times I've had to 'reevaluate' the lower base vertices of the RectangularCuboid and it feels like
+#   that responsibility should remain with the cuboid itself when one of its attributes is changed. Think about this.
+
+# TODO: In general there should be a reflection about how to make callback design more seamless
