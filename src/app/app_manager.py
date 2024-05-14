@@ -1,3 +1,5 @@
+from typing import Union
+
 import matplotlib.figure
 import yaml
 from dash import Dash
@@ -16,20 +18,19 @@ class AppManager:
     INITIAL_ARENA_INDEX = 0
     INITIAL_ITEM_INDEX = 0
 
-    def __init__(self, config_path: str) -> None:
-        self.config_path = config_path
-
+    def __init__(self, config_path: Union[str, None] = None) -> None:
         # Get the default item parameters
         with open(self.ITEM_PARAMETERS_FILE_PATH, "r") as file:
             self.default_item_parameters = yaml.safe_load(file)
         self.all_aai_item_names = list(self.default_item_parameters.keys())
 
-        # Load the YAML data in
-        yaml_config_data = Loader.load_config_data(self.config_path)
-
-        # Transform the YAML data into convenient Python objects
         preprocessor = Preprocessor(self.default_item_parameters, self.all_aai_item_names)
-        self.arenas = preprocessor.create_arenas_list(yaml_config_data)
+
+        if config_path is None:
+            self.arenas = preprocessor.create_default_arenas_list()
+        else:
+            yaml_config_data = Loader.load_config_data(config_path)
+            self.arenas = preprocessor.create_arenas_list(yaml_config_data)
 
         # Instantiate required classes
         self.checker = Checker()
@@ -59,6 +60,7 @@ def create_application_manager() -> AppManager:
 def application_manager_example() -> None:
     application_manager = AppManager("example_configs/config.yaml")
     application_manager.run_app()
+
 
 # TODO: Implement dependency injection
 # TODO: Dependency injection with factory of dependency instances
