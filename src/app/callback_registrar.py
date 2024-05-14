@@ -40,6 +40,7 @@ class CallbackRegistrar:
         """Creates a callback mechanism for when one of the items is selected to be moved."""
 
         @callback(
+            Output(component_id='output-current-item', component_property="children"),
             Output(component_id='x-slider', component_property="value"),
             Output(component_id='y-slider', component_property="value"),
             Output(component_id='z-slider', component_property="value"),
@@ -47,21 +48,24 @@ class CallbackRegistrar:
             Input(component_id='aai-diagram', component_property='clickData'),
             prevent_initial_call=True
         )
-        def _update_sliders(point_clicked: Dict) -> Tuple[float, float, float, float]:
-            """Updates the sliders when one of the AAI arena items is clicked."""
+        def _update_sliders(point_clicked: Dict) -> Tuple[str, float, float, float, float]:
+            """Updates the current item indicator and sliders when one of the AAI arena items is clicked."""
             cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
 
             if point_clicked is not None:
                 self.app_manager.curr_item_to_move_ix = point_clicked['points'][0]["curveNumber"]
                 ix = self.app_manager.curr_item_to_move_ix
-                print(f"You have just clicked: {cuboids[ix].name}")
-                return (cuboids[ix].center_x,
+                return (self._get_currently_selected_item_display_text(cuboids[ix].name),
+                        cuboids[ix].center_x,
                         cuboids[ix].center_y,
                         cuboids[ix].center_z,
                         cuboids[ix].deg_rotation)
             else:
-                print("You have not clicked an item")
-                return (self.DEFAULT_SLIDER_VALUE,) * 4
+                return ("",
+                        self.DEFAULT_SLIDER_VALUE,
+                        self.DEFAULT_SLIDER_VALUE,
+                        self.DEFAULT_SLIDER_VALUE,
+                        self.DEFAULT_SLIDER_VALUE)
 
     def _register_move_cuboids_callback(self) -> None:
         @callback(
@@ -185,8 +189,15 @@ class CallbackRegistrar:
     def _generate_spawn_name(self, item_dropdown_value: str, num_spawn_button_clicks: int) -> str:
         return f"{item_dropdown_value} {self.SPAWNED_ITEM_NAME_IDENTIFIER} {num_spawn_button_clicks}"
 
+    @staticmethod
+    def _get_currently_selected_item_display_text(item_name: str) -> str:
+        return f"Current item: {item_name}"
+
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
+# TODO: consider splitting the sliders callback into one callback for the current item board and one for the sliders
+#  or even one per sliders. Consider how you can do this callback waterfall whereby the click always causes all the
+#  others
 # TODO: Get rid of magic numbers and strings (e.g. which index corresponds to the x, y, or z component: that's also
 #  magic)
 # TODO: Could encapsulate the following lines into a wrapper function

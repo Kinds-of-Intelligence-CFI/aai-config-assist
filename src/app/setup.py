@@ -14,6 +14,7 @@ SPAWN_HEIGHT_TEXT = "Height (y)"
 SPAWN_BUTTON_TEXT = "Spawn new item"
 
 MOVE_ITEM_SECTION_TITLE = "Move item"
+CURRENT_ITEM_TEXT = "Currently selected item: "
 
 MIN_X_SLIDER = 0
 MAX_X_SLIDER = 40
@@ -44,6 +45,7 @@ SLIDER_X_TEMPLATE = "x = {value}"
 SLIDER_Y_TEMPLATE = "y = {value}"
 SLIDER_Z_TEMPLATE = "z = {value}"
 SLIDER_XZ_TEMPLATE = "xz = {value}"
+
 
 # TODO: decide how to constant management across the whole library (and apply the decision to these constants too)
 
@@ -76,7 +78,7 @@ def _set_up_right_hand_section(aai_item_names: List[str], style_guide: AppStyleG
 
 def _set_up_new_item_layout(aai_item_names: List[str], style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
-        html.H2(SPAWN_SECTION_TITLE, id='heading-place-new-item', style=style_guide.heading2_style()),
+        html.H2(SPAWN_SECTION_TITLE, id='heading-place-new-item', style=style_guide.heading_style()),
 
         dcc.Dropdown(aai_item_names, id='item-dropdown', style=style_guide.dropdown_style()),
 
@@ -108,7 +110,9 @@ def _set_up_new_item_layout(aai_item_names: List[str], style_guide: AppStyleGuid
 
 def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
-        html.H2(MOVE_ITEM_SECTION_TITLE, id='heading-move-an-item', style=style_guide.heading2_style()),
+        html.H2(MOVE_ITEM_SECTION_TITLE, id='heading-move-an-item', style=style_guide.heading_style()),
+
+        _set_up_current_item_board_layout(style_guide),
 
         dcc.Slider(id="x-slider",
                    min=MIN_X_SLIDER,
@@ -157,11 +161,17 @@ def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
     return layout
 
 
+def _set_up_current_item_board_layout(style_guide: AppStyleGuide) -> html.Div:
+    return html.Div([
+        html.Plaintext(id='output-current-item', children='No item selected', style=style_guide.normal_text_style()),
+        ])
+
+
 def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         html.H2(NEW_CONFIG_SECTION_TITLE,
                 id='heading-generate-a-new-configuration-file',
-                style=style_guide.heading2_style()),
+                style=style_guide.heading_style()),
 
         dcc.Input(id="new-config-path",
                   style=style_guide.new_config_path_input_style(),

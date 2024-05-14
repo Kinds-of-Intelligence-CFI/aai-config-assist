@@ -39,10 +39,19 @@ class AppStyleGuide:
     def aai_figure_style() -> Dict:
         return {"height": "100vh"}
 
-    def heading2_style(self) -> Dict:
+    def heading_style(self) -> Dict:
         return {"fontFamily": self.font_family,
                 "font-weight": "normal",
-                'marginLeft': f"{self.margin_left / 3}%"}
+                "marginLeft": f"{self.margin_left / 3}%"
+                }
+
+    def normal_text_style(self) -> Dict:
+        return {"fontFamily": self.font_family,
+                "font-size": self.font_size,
+                "font-weight": "normal",
+                "marginLeft": f"{self.margin_left / 3}%",
+                'marginBottom': self.margin_between_components * 2
+                }
 
     def dropdown_style(self) -> Dict:
         return {"fontSize": self.font_size,
@@ -114,3 +123,5 @@ class AppStyleGuide:
 
 # TODO: place all these defaults in a YAML definitions file
 #  (Maybe) Allow user to provide their own style guide and item defaults to the AppManager.
+# TODO Remove magic numbers remaining by creating new variables (e.g. /3 and * 2) make specific vars and dims for those
+#  specific components
