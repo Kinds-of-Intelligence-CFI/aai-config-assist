@@ -113,58 +113,12 @@ def _set_up_new_item_layout(aai_item_names: List[str], style_guide: AppStyleGuid
 def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
         html.H2(MOVE_ITEM_SECTION_TITLE, id='heading-move-an-item', style=style_guide.heading_style()),
-
         _set_up_current_item_board_layout(style_guide),
-
-        dcc.Slider(id="x-slider",
-                   min=MIN_X_SLIDER,
-                   max=MAX_X_SLIDER,
-                   step=STEP_X_SLIDER,
-                   value=DEFAULT_X_SLIDER,
-                   marks=None,
-                   tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
-                            "template": SLIDER_X_TEMPLATE,
-                            "style": style_guide.slider_tooltip_style()}),
-
-        dcc.Slider(id="y-slider",
-                   min=MIN_Y_SLIDER,
-                   max=MAX_Y_SLIDER,
-                   step=STEP_Y_SLIDER,
-                   value=DEFAULT_Y_SLIDER,
-                   marks=None,
-                   tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
-                            "template": SLIDER_Y_TEMPLATE,
-                            "style": style_guide.slider_tooltip_style()}),
-
-        dcc.Slider(id="z-slider",
-                   min=MIN_Z_SLIDER,
-                   max=MAX_Z_SLIDER,
-                   step=STEP_Z_SLIDER,
-                   value=DEFAULT_Z_SLIDER,
-                   marks=None,
-                   tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
-                            "template": SLIDER_Z_TEMPLATE,
-                            "style": style_guide.slider_tooltip_style()}),
-
-        dcc.Slider(id="xz-rotation-slider",
-                   min=MIN_ROTATION_SLIDER,
-                   max=MAX_ROTATION_SLIDER,
-                   step=STEP_ROTATION_SLIDER,
-                   value=DEFAULT_ROTATION_SLIDER,
-                   marks=None,
-                   tooltip={"placement": style_guide.tooltip_placement,
-                            "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
-                            "template": SLIDER_XZ_TEMPLATE,
-                            "style": style_guide.slider_tooltip_style()}),
-
-        html.Button(REMOVE_ITEM_BUTTON_TEXT,
-                    id='remove-item-button',
-                    n_clicks=DEFAULT_BUTTON_NUMBER_CLICKS,
-                    style=style_guide.button_style()),
-
+        _set_up_x_slider_layout(style_guide),
+        _set_up_y_slider_layout(style_guide),
+        _set_up_z_slider_layout(style_guide),
+        _set_up_xz_slider_layout(style_guide),
+        _set_up_remove_current_item_button_layout(style_guide),
     ])
     return layout
 
@@ -172,7 +126,72 @@ def _set_up_move_item_layout(style_guide: AppStyleGuide) -> html.Div:
 def _set_up_current_item_board_layout(style_guide: AppStyleGuide) -> html.Div:
     return html.Div([
         html.Plaintext(id='output-current-item', children='No item selected', style=style_guide.normal_text_style()),
-        ])
+    ])
+
+
+def _set_up_remove_current_item_button_layout(style_guide: AppStyleGuide) -> html.Div:
+    return html.Div([html.Button(REMOVE_ITEM_BUTTON_TEXT,
+                                 id='remove-item-button',
+                                 n_clicks=DEFAULT_BUTTON_NUMBER_CLICKS,
+                                 style=style_guide.button_style()), ])
+
+
+def _set_up_x_slider_layout(style_guide: AppStyleGuide) -> html.Div:
+    return html.Div([dcc.Slider(id="x-slider",
+                                min=MIN_X_SLIDER,
+                                max=MAX_X_SLIDER,
+                                step=STEP_X_SLIDER,
+                                value=DEFAULT_X_SLIDER,
+                                marks=None,
+                                tooltip={"placement": style_guide.tooltip_placement,
+                                         "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                                         "template": SLIDER_X_TEMPLATE,
+                                         "style": style_guide.slider_tooltip_style()})
+                     ])
+
+
+def _set_up_y_slider_layout(style_guide: AppStyleGuide) -> html.Div:
+    return html.Div([dcc.Slider(id="y-slider",
+                                min=MIN_Y_SLIDER,
+                                max=MAX_Y_SLIDER,
+                                step=STEP_Y_SLIDER,
+                                value=DEFAULT_Y_SLIDER,
+                                marks=None,
+                                tooltip={"placement": style_guide.tooltip_placement,
+                                         "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                                         "template": SLIDER_Y_TEMPLATE,
+                                         "style": style_guide.slider_tooltip_style()}),
+                     ])
+
+
+def _set_up_z_slider_layout(style_guide: AppStyleGuide) -> html.Div:
+    return html.Div([dcc.Slider(id="z-slider",
+                                min=MIN_Z_SLIDER,
+                                max=MAX_Z_SLIDER,
+                                step=STEP_Z_SLIDER,
+                                value=DEFAULT_Z_SLIDER,
+                                marks=None,
+                                tooltip={"placement": style_guide.tooltip_placement,
+                                         "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                                         "template": SLIDER_Z_TEMPLATE,
+                                         "style": style_guide.slider_tooltip_style()}),
+
+                     ])
+
+
+def _set_up_xz_slider_layout(style_guide: AppStyleGuide) -> html.Div:
+    return html.Div([dcc.Slider(id="xz-rotation-slider",
+                                min=MIN_ROTATION_SLIDER,
+                                max=MAX_ROTATION_SLIDER,
+                                step=STEP_ROTATION_SLIDER,
+                                value=DEFAULT_ROTATION_SLIDER,
+                                marks=None,
+                                tooltip={"placement": style_guide.tooltip_placement,
+                                         "always_visible": SLIDER_TOOLTIP_ALWAYS_VISIBLE,
+                                         "template": SLIDER_XZ_TEMPLATE,
+                                         "style": style_guide.slider_tooltip_style()}),
+
+                     ])
 
 
 def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
@@ -195,3 +214,11 @@ def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
         html.Div(id='new-config-path-output', style={'whiteSpace': 'pre-line'})
     ])
     return layout
+
+# TODO: consider whether to make a function for setting up the slider layouts
+#  (to prepare for slider implementation changing)
+# TODO: consider whether this setup module should not be a class whereby the style_guide is an attribute to avoid
+#  passing it around very frequently. Even though, of course, this setup object wouldn't have a meaningful lifecycle
+#  with an evolving state, so could remain with a module, up for discussion.
+# TODO: in general, decide whether to split all layouts into single component functions or whether to combine certain
+#  components into single function layouts. Decide on a rule for how you are designing the setup code, in general.
