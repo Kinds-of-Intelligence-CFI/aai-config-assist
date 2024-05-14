@@ -11,6 +11,8 @@ def try_mkdir(path: str) -> None:
 
 
 def create_directory_if_not_exists(directory: str) -> None:
-    if not os.path.exists(directory):
-        os.makedirs(directory, exist_ok=True)
-        print(f"Directory '{directory}' did not exist and was created.")
+    if directory != "":
+        # If the directory name is not empty
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+            print(f"Directory '{directory}' did not exist and was created.")
