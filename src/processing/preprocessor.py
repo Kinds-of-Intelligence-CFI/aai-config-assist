@@ -8,11 +8,22 @@ from src.utils.physical_item_helper import set_item_name_from, get_default_item_
 
 
 class Preprocessor:
+    DEFAULT_PASS_MARK = 0
+    DEFAULT_T = 1000
+
     def __init__(self,
                  default_item_parameters: Dict,
                  all_aai_item_names: List[str]) -> None:
         self.default_items_params = default_item_parameters
         self.all_aai_item_names = all_aai_item_names
+
+    def create_default_arenas_list(self) -> List[Arena]:
+        default_arena = Arena(pass_mark=self.DEFAULT_PASS_MARK,
+                              t=self.DEFAULT_T,
+                              physical_items=[],
+                              overlapping_items=[])
+        default_arenas_list = [default_arena]
+        return default_arenas_list
 
     def create_arenas_list(self,
                            raw_arenas_dict: Dict) -> List[Arena]:
@@ -82,6 +93,6 @@ class Preprocessor:
 
         return rec_cuboids
 
+# TODO: further modularise the _create_rectangular_method
 # TODO: could choose not to make these attributes and simply pass them to create_arena_list and private method
 #  to avoid the need for class attributes.
-# TODO: split the _create_rectangular_method
