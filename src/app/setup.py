@@ -10,6 +10,7 @@ DEFAULT_BUTTON_NUMBER_CLICKS = 0
 CONFIG_PARAMS_SECTION_TITLE = "Set configuration parameters"
 PASS_MARK_TEXT = "Pass mark (1)"
 TIME_LIMIT_TEXT = "Time limit (1)"
+CONFIG_PARAMS_BUTTON_TEXT = "Set parameters"
 
 SPAWN_SECTION_TITLE = "Place new item"
 LENGTH_INPUT_TEXT = "Length (x)"
@@ -96,6 +97,11 @@ def _set_up_config_params_layout(style_guide: AppStyleGuide) -> html.Div:
                   value='',
                   id="time-limit",
                   style=style_guide.width_input_style()),
+
+        html.Button(CONFIG_PARAMS_BUTTON_TEXT,
+                    id='config-params-button',
+                    n_clicks=DEFAULT_BUTTON_NUMBER_CLICKS,
+                    style=style_guide.button_style())
     ])
     return layout
 
