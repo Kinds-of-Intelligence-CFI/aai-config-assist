@@ -31,6 +31,7 @@ class CallbackRegistrar:
         self.app_manager = app_manager
 
     def register_callbacks(self) -> None:
+        self._register_set_config_params_callback()
         self._register_update_sliders_callback()
         self._register_move_cuboids_callback()
         self._register_spawn_item_callback()
@@ -219,6 +220,25 @@ class CallbackRegistrar:
                 fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids_post_edit, overlapping_items)
                 return fig
 
+    def _register_set_config_params_callback(self) -> None:
+        # Combined pass mark and time limit callbacks to avoid bug where
+        #  only one callback fires, when multiple callbacks share an input.
+        @callback(
+            Input(component_id='config-params-button', component_property="n_clicks"),
+            State(component_id="pass-mark", component_property="value"),
+            State(component_id="time-limit", component_property="value"),
+            prevent_initial_call=True
+        )
+        def set_config_params(
+                num_set_config_params_button_click: int,
+                pass_mark: str,
+                time_limit: str) -> None:
+            if num_set_config_params_button_click > 0:
+                arena_ix = self.app_manager.curr_arena_ix
+                # TODO: check whether time limit and pass mark can be floats
+                self.app_manager.arenas[arena_ix].t = float(time_limit)
+                self.app_manager.arenas[arena_ix].pass_mark = float(pass_mark)
+
     def _update_pre_plotting_attributes(self, cuboids, item_ix, xz_rotation) -> matplotlib.figure.Figure:
         self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
         print(f"The item currently being moved is: {cuboids[item_ix].name}")
@@ -258,7 +278,6 @@ class CallbackRegistrar:
             if number_text != "":
                 float_list[index] = float(number_text)
         return tuple(float_list)
-
 
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
