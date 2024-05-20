@@ -7,6 +7,10 @@ from src.app.style_guide import AppStyleGuide
 
 DEFAULT_BUTTON_NUMBER_CLICKS = 0
 
+CONFIG_PARAMS_SECTION_TITLE = "Set configuration parameters"
+PASS_MARK_TEXT = "Pass mark (1)"
+TIME_LIMIT_TEXT = "Time limit (1)"
+
 SPAWN_SECTION_TITLE = "Place new item"
 LENGTH_INPUT_TEXT = "Length (x)"
 WIDTH_INPUT_TEXT = "Width (z)"
@@ -69,10 +73,30 @@ def _set_up_left_hand_section(fig_init: matplotlib.figure.Figure, style_guide: A
 
 def _set_up_right_hand_section(aai_item_names: List[str], style_guide: AppStyleGuide) -> html.Div:
     layout = html.Div([
+        _set_up_config_params_layout(style_guide),
         _set_up_new_item_layout(aai_item_names, style_guide),
         _set_up_move_item_layout(style_guide),
         _set_up_generate_config_layout(style_guide)
     ], style=style_guide.right_hand_section_style())
+    return layout
+
+
+def _set_up_config_params_layout(style_guide: AppStyleGuide) -> html.Div:
+    layout = html.Div([
+        html.H2(CONFIG_PARAMS_SECTION_TITLE, id='heading-set-config-params', style=style_guide.heading_style()),
+
+        dcc.Input(placeholder=PASS_MARK_TEXT,
+                  type='text',
+                  value='',
+                  id="pass-mark",
+                  style=style_guide.length_input_style()),
+
+        dcc.Input(placeholder=TIME_LIMIT_TEXT,
+                  type='text',
+                  value='',
+                  id="time-limit",
+                  style=style_guide.width_input_style()),
+    ])
     return layout
 
 
@@ -262,4 +286,3 @@ def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
 #  Dumping to YAML
 
 # TODO: decide how to constant management across the whole library (and apply the decision to these constants too)
-
