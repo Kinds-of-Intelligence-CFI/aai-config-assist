@@ -235,9 +235,9 @@ class CallbackRegistrar:
                 time_limit: str) -> None:
             if num_set_config_params_button_click > 0:
                 arena_ix = self.app_manager.curr_arena_ix
-                # TODO: check whether time limit and pass mark can be floats
-                self.app_manager.arenas[arena_ix].t = float(time_limit)
-                self.app_manager.arenas[arena_ix].pass_mark = float(pass_mark)
+                # TODO: check whether time limit and pass mark can be floats (or tell user they can't enter floats)
+                self.app_manager.arenas[arena_ix].t = int(time_limit)
+                self.app_manager.arenas[arena_ix].pass_mark = int(pass_mark)
 
     def _update_pre_plotting_attributes(self, cuboids, item_ix, xz_rotation) -> matplotlib.figure.Figure:
         self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
