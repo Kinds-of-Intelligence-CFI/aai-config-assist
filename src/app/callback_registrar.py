@@ -103,7 +103,12 @@ class CallbackRegistrar:
                         num_spawn_button_clicks: int,
                         spawn_x_dim: str,
                         spawn_z_dim: str,
-                        spawn_y_dim: str) -> matplotlib.figure.Figure:
+                        spawn_y_dim: str) -> Optional[matplotlib.figure.Figure]:
+            if item_dropdown_value is None:
+                print("Please select an item from the dropdown to place that item. "
+                      "No item was selected and so no item was placed.")
+                return None
+
             spawned_lower_base_centroid = np.array([self.DEFAULT_SPAWNED_LOCATION_X,
                                                     self.DEFAULT_SPAWNED_LOCATION_Z,
                                                     self.DEFAULT_SPAWNED_LOCATION_Y], dtype=float)
@@ -163,7 +168,7 @@ class CallbackRegistrar:
             if num_remove_item_button_clicks > 0:
                 # Remove cuboid
                 curr_item_ix = self.app_manager.curr_item_to_move_ix
-                self.cuboids = self.cuboids[:curr_item_ix] + self.cuboids[curr_item_ix+1:]
+                self.cuboids = self.cuboids[:curr_item_ix] + self.cuboids[curr_item_ix + 1:]
 
                 # Regenerate arena figure
                 overlapping_items = self._update_curr_arena_overlapping_items(self.cuboids)
@@ -184,7 +189,6 @@ class CallbackRegistrar:
                                  resize_z_dim: str,
                                  resize_y_dim: str) -> matplotlib.figure.Figure:
             if num_resize_item_button_clicks > 0:
-
                 resize_x_dim, resize_z_dim, resize_y_dim = self._transform_str_to_float_dimensions(resize_x_dim,
                                                                                                    resize_z_dim,
                                                                                                    resize_y_dim)
