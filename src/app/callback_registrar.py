@@ -53,16 +53,14 @@ class CallbackRegistrar:
         )
         def _update_sliders(point_clicked: Dict) -> Tuple[str, float, float, float, float]:
             """Updates the current item indicator and sliders when one of the AAI arena items is clicked."""
-            cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
-
             if point_clicked is not None:
                 self.app_manager.curr_item_to_move_ix = point_clicked['points'][0]["curveNumber"]
                 ix = self.app_manager.curr_item_to_move_ix
-                return (self._get_currently_selected_item_display_text(cuboids[ix].name),
-                        cuboids[ix].center_x,
-                        cuboids[ix].center_y,
-                        cuboids[ix].center_z,
-                        cuboids[ix].deg_rotation)
+                return (self._get_currently_selected_item_display_text(self.cuboids[ix].name),
+                        self.cuboids[ix].center_x,
+                        self.cuboids[ix].center_y,
+                        self.cuboids[ix].center_z,
+                        self.cuboids[ix].deg_rotation)
             else:
                 return ("",
                         self.DEFAULT_SLIDER_VALUE,
@@ -83,13 +81,12 @@ class CallbackRegistrar:
                           y_slider_value: float,
                           z_slider_value: float,
                           xz_rotation: float) -> matplotlib.figure.Figure:
-            cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
             item_ix = self.app_manager.curr_item_to_move_ix
-            cuboids[item_ix].center_x = x_slider_value
-            cuboids[item_ix].center_y = y_slider_value
-            cuboids[item_ix].center_z = z_slider_value
-            cuboids[item_ix].deg_rotation = xz_rotation
-            fig = self._update_pre_plotting_attributes(cuboids, item_ix, xz_rotation)
+            self.cuboids[item_ix].center_x = x_slider_value
+            self.cuboids[item_ix].center_y = y_slider_value
+            self.cuboids[item_ix].center_z = z_slider_value
+            self.cuboids[item_ix].deg_rotation = xz_rotation
+            fig = self._update_pre_plotting_attributes(self.cuboids, item_ix, xz_rotation)
             return fig
 
     def _register_spawn_item_callback(self) -> None:
@@ -107,7 +104,6 @@ class CallbackRegistrar:
                         spawn_x_dim: str,
                         spawn_z_dim: str,
                         spawn_y_dim: str) -> matplotlib.figure.Figure:
-            cuboids = self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items
             spawned_lower_base_centroid = np.array([self.DEFAULT_SPAWNED_LOCATION_X,
                                                     self.DEFAULT_SPAWNED_LOCATION_Z,
                                                     self.DEFAULT_SPAWNED_LOCATION_Y], dtype=float)
@@ -123,12 +119,12 @@ class CallbackRegistrar:
                                                     rotation=spawned_rotation,
                                                     name=spawned_name,
                                                     colour=spawned_colour)
-            cuboids += [spawned_auto_cuboid]
+            self.cuboids += [spawned_auto_cuboid]
             self.app_manager.curr_item_to_move_ix = -1
             item_ix = self.app_manager.curr_item_to_move_ix
             xz_rotation = spawned_rotation
             print(f"You have just created: {spawned_name}")
-            fig = self._update_pre_plotting_attributes(cuboids, item_ix, xz_rotation)
+            fig = self._update_pre_plotting_attributes(self.cuboids, item_ix, xz_rotation)
             return fig
 
     def _register_dump_current_layout_to_config_callback(self) -> None:
@@ -146,11 +142,9 @@ class CallbackRegistrar:
             # updated during the callbacks.
             create_directory_if_not_exists(os.path.dirname(new_config_path))
 
-            curr_arena = self.app_manager.arenas[self.app_manager.curr_arena_ix]
-            pass_mark = curr_arena.pass_mark
-            t = curr_arena.t
-            cuboids = curr_arena.physical_items
-            arena = Arena(pass_mark=pass_mark, t=t, physical_items=cuboids, overlapping_items=[""])
+            pass_mark = self.current_arena.pass_mark
+            t = self.current_arena.t
+            arena = Arena(pass_mark=pass_mark, t=t, physical_items=self.cuboids, overlapping_items=[""])
             arena_config_dumper = Dumper([arena], destination_file_path="")
             if n_clicks > 0:
                 arena_config_dumper.destination_file_path = new_config_path
@@ -168,16 +162,12 @@ class CallbackRegistrar:
         def _remove_current_item(num_remove_item_button_clicks: int) -> Tuple[matplotlib.figure.Figure, str]:
             if num_remove_item_button_clicks > 0:
                 # Remove cuboid
-                curr_arena_ix = self.app_manager.curr_arena_ix
                 curr_item_ix = self.app_manager.curr_item_to_move_ix
-                cuboids_pre_removal = self.app_manager.arenas[curr_arena_ix].physical_items
-                self.app_manager.arenas[curr_arena_ix].physical_items = (cuboids_pre_removal[0:curr_item_ix] +
-                                                                         cuboids_pre_removal[curr_item_ix + 1:])
-                cuboids_post_removal = self.app_manager.arenas[curr_arena_ix].physical_items
+                self.cuboids = self.cuboids[:curr_item_ix] + self.cuboids[curr_item_ix+1:]
 
                 # Regenerate arena figure
-                overlapping_items = self._update_curr_arena_overlapping_items(cuboids_post_removal)
-                fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids_post_removal, overlapping_items)
+                overlapping_items = self._update_curr_arena_overlapping_items(self.cuboids)
+                fig = self.app_manager.visualiser.visualise_cuboid_bases(self.cuboids, overlapping_items)
                 return fig, "No item selected"
 
     def _register_resize_current_item_callback(self) -> None:
@@ -198,26 +188,21 @@ class CallbackRegistrar:
                 resize_x_dim, resize_z_dim, resize_y_dim = self._transform_str_to_float_dimensions(resize_x_dim,
                                                                                                    resize_z_dim,
                                                                                                    resize_y_dim)
-
                 # Resize the cuboid
-                curr_arena_ix = self.app_manager.curr_arena_ix
-                curr_item_ix = self.app_manager.curr_item_to_move_ix
-                cuboids_pre_edit = self.app_manager.arenas[curr_arena_ix].physical_items
-                center = cuboids_pre_edit[curr_item_ix].center
-                deg_rotation = cuboids_pre_edit[curr_item_ix].deg_rotation
-                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].length = resize_x_dim
-                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].width = resize_z_dim
-                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].height = resize_y_dim
-                new_vertices = calculate_vertices_of_rotated_rectangle(center=center[:2],
+                # TODO: Perhaps resizing should be governed by the cuboid itself (RectangularCuboid.resize_base(...))
+                #  this way we can simply pass the dimensions that should be changed
+                self.current_item.length = resize_x_dim
+                self.current_item.width = resize_z_dim
+                self.current_item.height = resize_y_dim
+                new_vertices = calculate_vertices_of_rotated_rectangle(center=self.current_item.center[:2],
                                                                        width=resize_x_dim,
                                                                        height=resize_z_dim,
-                                                                       angle_deg=deg_rotation)
-                self.app_manager.arenas[curr_arena_ix].physical_items[curr_item_ix].lower_base_vertices = new_vertices
-                cuboids_post_edit = self.app_manager.arenas[curr_arena_ix].physical_items
+                                                                       angle_deg=self.current_item.deg_rotation)
+                self.current_item.lower_base_vertices = new_vertices
 
                 # Regenerate arena figure
-                overlapping_items = self._update_curr_arena_overlapping_items(cuboids_post_edit)
-                fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids_post_edit, overlapping_items)
+                overlapping_items = self._update_curr_arena_overlapping_items(self.cuboids)
+                fig = self.app_manager.visualiser.visualise_cuboid_bases(self.cuboids, overlapping_items)
                 return fig
 
     def _register_set_config_params_callback(self) -> None:
@@ -236,8 +221,8 @@ class CallbackRegistrar:
             if num_set_config_params_button_click > 0:
                 arena_ix = self.app_manager.curr_arena_ix
                 # TODO: check whether time limit and pass mark can be floats (or tell user they can't enter floats)
-                self.app_manager.arenas[arena_ix].t = int(time_limit)
-                self.app_manager.arenas[arena_ix].pass_mark = int(pass_mark)
+                self.current_arena.t = int(time_limit)
+                self.current_arena.pass_mark = int(pass_mark)
 
     def _update_pre_plotting_attributes(self, cuboids, item_ix, xz_rotation) -> matplotlib.figure.Figure:
         self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
@@ -278,6 +263,22 @@ class CallbackRegistrar:
             if number_text != "":
                 float_list[index] = float(number_text)
         return tuple(float_list)
+
+    @property
+    def current_arena(self) -> Arena:
+        return self.app_manager.arenas[self.app_manager.curr_arena_ix]
+
+    @property
+    def cuboids(self) -> List[RectangularCuboid]:
+        return self.current_arena.physical_items
+
+    @cuboids.setter
+    def cuboids(self, new_cuboids: List[RectangularCuboid]) -> None:
+        self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items = new_cuboids
+
+    @property
+    def current_item(self) -> RectangularCuboid:
+        return self.cuboids[self.app_manager.curr_item_to_move_ix]
 
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
