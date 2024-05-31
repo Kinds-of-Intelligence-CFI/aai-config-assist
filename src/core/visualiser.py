@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -6,9 +6,14 @@ import plotly.graph_objects as go
 import matplotlib.figure
 
 from src.structures.rectangular_cuboid import RectangularCuboid
+from src.utils.geometry_helper import calculate_vertices_of_rotated_l_block
+from src.utils.geometry_helper import calculate_vertices_of_rotated_u_block
+from src.utils.geometry_helper import calculate_vertices_of_rotated_j_block
 
 
 class Visualiser:
+    NON_RECTANGULAR_ITEMS = ["LBlock", "UBlock", "JBlock"]
+
     def visualise_cuboid_bases(self,
                                cuboids: List[RectangularCuboid],
                                names_items_with_overlap: List[str]) -> go.Figure:
@@ -28,7 +33,7 @@ class Visualiser:
             name = cuboid.name
             line_colour, line_width = self._get_contour_colour_and_width(name, names_items_with_overlap)
             fig = self._add_item_trace_onto_arena_figure(fig, x_path, y_path, line_colour, line_width, name, r, g, b)
-            fig = self._add_legend_to_arena_figure(fig)
+        fig = self._add_legend_to_arena_figure(fig)
         return fig
 
     @staticmethod
@@ -76,8 +81,23 @@ class Visualiser:
             r, g, b = 0, 0, 0
         return r, g, b
 
+    def _get_cuboid_x_and_y_contour_paths(self, cuboid: RectangularCuboid) -> Tuple[NDArray, NDArray]:
+        item_type = cuboid.name.split(" ")[0]
+        if item_type in self.NON_RECTANGULAR_ITEMS:
+            if item_type == "LBlock":
+                x_path, y_path = self._get_l_block_path(cuboid)
+            elif item_type == "UBlock":
+                x_path, y_path = self._get_u_block_path(cuboid)
+            elif item_type == "JBlock":
+                x_path, y_path = self._get_j_block_path(cuboid)
+            else:
+                x_path, y_path = self._get_rectangular_item_path(cuboid)
+        else:
+            x_path, y_path = self._get_rectangular_item_path(cuboid)
+        return x_path, y_path
+
     @staticmethod
-    def _get_cuboid_x_and_y_contour_paths(cuboid) -> Tuple[NDArray, NDArray]:
+    def _get_rectangular_item_path(cuboid: RectangularCuboid) -> Tuple[NDArray, NDArray]:
         # Concatenate because need to provide first element back to contour path for shape contour to be complete
         # See first example of https://plotly.com/python/shapes/
         x_path = np.concatenate(
@@ -85,6 +105,31 @@ class Visualiser:
         y_path = np.concatenate(
             (cuboid.lower_base_vertices[:, 1], np.reshape(cuboid.lower_base_vertices[0, 1], newshape=(1,))))
         return x_path, y_path
+
+    @staticmethod
+    def _get_non_rectangular_path(cuboid: RectangularCuboid,
+                                  calculate_vertices: Callable) -> Tuple[NDArray, NDArray]:
+        # TODO: could move the logic of determining the l_block_vertices to a dedicated LBlock class when I make it
+        #  reduce coupling as much as possible (no need for geometry_helper methods in here)
+        vertices = calculate_vertices(center=cuboid.center[:2],
+                                      width=cuboid.width,
+                                      height=cuboid.height,
+                                      angle_deg=cuboid.deg_rotation)
+        x_path = np.concatenate(
+            (vertices[:, 0], np.reshape(vertices[0, 0], newshape=(1,))))
+        y_path = np.concatenate(
+            (vertices[:, 1], np.reshape(vertices[0, 1], newshape=(1,))))
+        return x_path, y_path
+
+    def _get_l_block_path(self,
+                          cuboid: RectangularCuboid) -> Tuple[NDArray, NDArray]:
+        return self._get_non_rectangular_path(cuboid, calculate_vertices_of_rotated_l_block)
+
+    def _get_u_block_path(self, cuboid: RectangularCuboid) -> Tuple[NDArray, NDArray]:
+        return self._get_non_rectangular_path(cuboid, calculate_vertices_of_rotated_u_block)
+
+    def _get_j_block_path(self, cuboid: RectangularCuboid) -> Tuple[NDArray, NDArray]:
+        return self._get_non_rectangular_path(cuboid, calculate_vertices_of_rotated_j_block)
 
     @staticmethod
     def _get_contour_colour_and_width(name: str, names_items_with_overlap: List[str]) -> Tuple[str, float]:
@@ -128,3 +173,5 @@ class Visualiser:
 #  the direction this file may take in the future if it is developed further.
 
 # TODO: could have a user-friendly way of editing the style of the figure (a style guide for the arena figure, for e.g.)
+
+# TODO: Remove all the magic numbers/strings in file
