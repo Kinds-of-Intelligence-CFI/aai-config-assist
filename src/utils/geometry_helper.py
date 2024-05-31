@@ -1,7 +1,12 @@
-from typing import Tuple
+from typing import Tuple, Callable
 
 import numpy as np
 import numpy.typing as npt
+
+# These are the proportions of the x (width in this module) and z (height in this module) components
+# that the non-rectangular object thicknesses occupy with respect to the overall shape dimensions
+SMALL_RATIO = 0.25
+LARGE_RATIO = 0.75
 
 
 def calculate_vertices_of_rotated_rectangle(center: npt.NDArray,
@@ -47,6 +52,78 @@ def calculate_vertices_of_axis_aligned_rectangle(center: npt.NDArray, width: flo
 
     vertices = np.array([a, b, c, d])
     return vertices
+
+
+def calculate_vertices_of_rotated(center: npt.NDArray,
+                                  width: float,
+                                  height: float,
+                                  angle_deg: float,
+                                  get_vertices: Callable = calculate_vertices_of_axis_aligned_rectangle) -> npt.NDArray:
+    vertices = get_vertices(center, width, height)
+    rotated_vertices = calculate_clockwise_rotated_2d_points(vertices, angle_deg, center)
+    return rotated_vertices
+
+
+# TODO: methods specific to LBlock can be moved to the LBlock class if it gets created (same for all specific shapes)
+def calculate_vertices_of_rotated_l_block(center: npt.NDArray,
+                                          width: float,
+                                          height: float,
+                                          angle_deg: float) -> npt.NDArray:
+    return calculate_vertices_of_rotated(center,
+                                         width,
+                                         height,
+                                         angle_deg,
+                                         calculate_vertices_of_axis_aligned_l_block)
+
+
+def calculate_vertices_of_axis_aligned_l_block(center: npt.NDArray, width: float, height: float) -> npt.NDArray:
+    # TODO: the magic numbers below are approximations of AAI item dimensions
+    a, b, c, d = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
+    c1 = b + np.array([0, - SMALL_RATIO * height])
+    c2 = c1 + np.array([- LARGE_RATIO * width, 0])
+    c3 = c2 + np.array([0, - (c2[1] - d[1])])
+    return np.array([a, b, c1, c2, c3, d])
+
+
+def calculate_vertices_of_rotated_u_block(center: npt.NDArray,
+                                          width: float,
+                                          height: float,
+                                          angle_deg: float) -> npt.NDArray:
+    return calculate_vertices_of_rotated(center,
+                                         width,
+                                         height,
+                                         angle_deg,
+                                         calculate_vertices_of_axis_aligned_u_block)
+
+
+def calculate_vertices_of_axis_aligned_u_block(center: npt.NDArray, width: float, height: float) -> npt.NDArray:
+    # TODO: the magic numbers below are approximations of AAI item dimensions
+    a, b, c, d = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
+    c1 = c
+    c2 = c1 + np.array([- SMALL_RATIO * width, 0])
+    c3 = c2 + np.array([0, + LARGE_RATIO * height])
+    c4 = c3 + np.array([-0.5 * width, 0])
+    c5 = c4 + np.array([0, - LARGE_RATIO * height])
+    return np.array([a, b, c1, c2, c3, c4, c5, d])
+
+
+def calculate_vertices_of_rotated_j_block(center: npt.NDArray,
+                                          width: float,
+                                          height: float,
+                                          angle_deg: float) -> npt.NDArray:
+    return calculate_vertices_of_rotated(center,
+                                         width,
+                                         height,
+                                         angle_deg,
+                                         calculate_vertices_of_axis_aligned_j_block)
+
+
+def calculate_vertices_of_axis_aligned_j_block(center: npt.NDArray, width: float, height: float) -> npt.NDArray:
+    a, _, c, d = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
+    b1 = a + np.array([SMALL_RATIO * width, 0])
+    b2 = b1 + np.array([0, - LARGE_RATIO * height])
+    b3 = b2 + np.array([LARGE_RATIO * width, 0])
+    return np.array([a, b1, b2, b3, c, d])
 
 
 def calculate_clockwise_rotated_2d_points(points: npt.NDArray,
@@ -235,4 +312,5 @@ if __name__ == "__main__":
 
     geometry_helper_example()
     import doctest
+
     doctest.testmod()
