@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -66,6 +66,26 @@ class RectangularCuboid:
                                                                            width=self.length,
                                                                            height=self.width,
                                                                            angle_deg=self.deg_rotation)
+
+    def resize(self,
+               resized_length: Union[float, None] = None,
+               resized_width: Union[float, None] = None,
+               resized_height: Union[float, None] = None) -> None:
+        """Resizes the cuboid, including calculating and setting the coordinates of its new vertices.
+
+        Args:
+            resized_length (float or None): The new length (AAI-x).
+            resized_width(float or None): The new width (AAI-z).
+            resized_height (float or None): The new height (AAI-y).
+        """
+        self.length = self.length if resized_length is None else resized_length
+        self.width = self.width if resized_width is None else resized_width
+        self.height = self.height if resized_height is None else resized_height
+        new_vertices = calculate_vertices_of_rotated_rectangle(center=self.center[:2],
+                                                               width=self.length,
+                                                               height=self.width,
+                                                               angle_deg=self.deg_rotation)
+        self.lower_base_vertices = new_vertices
 
     @property
     def center_x(self):
