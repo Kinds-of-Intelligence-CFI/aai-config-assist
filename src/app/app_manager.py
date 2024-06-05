@@ -13,7 +13,7 @@ from src.app.callback_registrar import CallbackRegistrar
 
 
 class AppManager:
-    """Manager class that orchestrates the lifecycle of the Dash application."""
+    """The AppManager orchestrates the lifecycle of the Dash application."""
     PORT_NUMBER = 8000
     ITEM_PARAMETERS_FILE_PATH = "src/definitions/item_default_parameters.yaml"
     INITIAL_ARENA_INDEX = 0
