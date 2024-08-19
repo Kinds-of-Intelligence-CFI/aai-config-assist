@@ -11,6 +11,15 @@ from src.utils.physical_item_helper import (
 
 
 class Preprocessor:
+    """The Preprocessor transforms raw data from an AAI YAML configuration file to a list of Arena objects.
+
+    Note:
+        - The arena list that the Preprocessor creates contains as many Arena objects as arenas described by the
+        AAI YAML configuration file.
+        - In the absence of an existing AAI YAML configuration, the Preprocessor can create an empty/default list
+        of arenas via the create_default_arenas_list method.
+    """
+
     DEFAULT_PASS_MARK = 0
     DEFAULT_T = 1000
 

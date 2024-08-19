@@ -6,6 +6,8 @@ from src.processing.arena_config_loader import ArenaConfigLoader
 
 
 class Loader:
+    """The Loader uses the custom loader 'ArenaConfigLoader' to load AAI arena data from a YAML configuration file."""
+
     @staticmethod
     def load_config_data(config_path: str) -> Dict:
         """Parses and loads the data from the YAML file inputted to class constructor.

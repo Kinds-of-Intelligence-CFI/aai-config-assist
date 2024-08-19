@@ -4,6 +4,8 @@ from src.structures.rectangular_cuboid import RectangularCuboid
 
 
 class Arena:
+    """The Arena class describes a single AAI arena configuration."""
+
     def __init__(
         self,
         pass_mark: float,

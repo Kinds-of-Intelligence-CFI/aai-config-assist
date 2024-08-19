@@ -7,6 +7,8 @@ from src.structures.rectangular_cuboid import RectangularCuboid
 
 
 class Checker:
+    """The Checker is responsible for finding any positional clashes between physical objects."""
+
     @staticmethod
     def check_overlaps_between_cuboids(cuboids: List[RectangularCuboid]) -> Set[str]:
         """Displays a log of possible overlaps in the cuboids list to the terminal.

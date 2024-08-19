@@ -2,6 +2,8 @@ from typing import Dict
 
 
 class AppStyleGuide:
+    """The AppStyleGuide defines the styles (font, colours, sizes, ...) of each section of the application's UI."""
+
     def __init__(self) -> None:
         # Font
         self.font_size = "17px"

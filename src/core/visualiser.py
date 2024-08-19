@@ -14,6 +14,8 @@ from src.utils.geometry_helper import (
 
 
 class Visualiser:
+    """The Visualiser is responsible for displaying schematics of the AAI arena and objects."""
+
     NON_RECTANGULAR_ITEMS = ["LBlock", "UBlock", "JBlock"]
 
     def visualise_cuboid_bases(
