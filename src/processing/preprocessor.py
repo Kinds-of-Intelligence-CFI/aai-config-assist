@@ -116,8 +116,3 @@ class Preprocessor:
                 rec_cuboids += [rec_cuboid]
 
         return rec_cuboids
-
-
-# TODO: further modularise the _create_rectangular_method
-# TODO: could choose not to make these attributes and simply pass them to create_arena_list and private method
-#  to avoid the need for class attributes.

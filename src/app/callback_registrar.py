@@ -405,8 +405,9 @@ class CallbackRegistrar:
         Returns:
             (matplotlib.figure.Figure): The arena figure with all the pre-plotting attributes updated.
         """
-        # TODO: check whether the following command is needed.
-        self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
+        self._update_curr_item_lower_base_vertices(
+            cuboids, item_ix, xz_rotation
+        )  # TODO: This line may not be needed
         print(f"The item currently being moved is: {cuboids[item_ix].name}")
         curr_overlapping_items = self._update_curr_arena_overlapping_items(cuboids)
         fig = self.app_manager.visualiser.visualise_cuboid_bases(
@@ -515,48 +516,3 @@ class CallbackRegistrar:
     @property
     def current_item(self) -> RectangularCuboid:
         return self.cuboids[self.app_manager.curr_item_to_move_ix]
-
-
-# TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
-#  go through the whole class to check where you can modularise further
-
-# TODO: consider splitting the sliders callback into one callback for the current item board and one for the sliders
-#  or even one per sliders. Consider how you can do this callback waterfall whereby the click always causes all the
-#  others
-
-# TODO: Get rid of magic numbers and strings (e.g. which index corresponds to the x, y, or z component: that's also
-#  magic)
-
-# TODO: Could encapsulate the following lines into a wrapper function
-#  (that only gets called once at init or when the current arena changes to not repeat this at each dump).
-#  In dump current layout to config
-
-# TODO: should not set style (for _get_currently_selected_item...) in the CallbackRegistrar.
-#  should instead find a way to simply get the name of the item from the callback and leave the responsibility of
-#  displaying the information appropriately to the setup.py and style_guide.py.
-#  should really just have two HTML components. One that says "Current item" and another that says None by default
-#  and that is waiting for information from the callback who does nothing but pass the name of the current item,
-#  no display etc... it is not its responsibility. Anywhere there is a magic string e.g. "No item selected":
-#  make sure to draw that from a bank of constants (so it's centralised and there is no duplication and that
-#  responsibility is well separated).
-
-# TODO: Error handling
-
-# TODO: look out for (maybe) combining implementations in removing and resizing callbacks which have some similarities
-
-# TODO: must improve implementation of the resize_current_item method. Two points to study:
-#  1. The fact that we can't use variables to denote the app manager's attributes (the objects won't be linked)
-#   perhaps there is a way around this to stop having such long expressions throughout the file but still be pointing
-#   to the correct object
-#  2. There has to be a more automated way of 'updating' all of the necessary attributes of a RectangularCuboid
-#   because multiple times I've had to 'reevaluate' the lower base vertices of the RectangularCuboid and it feels like
-#   that responsibility should remain with the cuboid itself when one of its attributes is changed. Think about this.
-
-# TODO: In general there should be a reflection about how to make callback design more seamless
-
-# TODO: Decide on an ordering convention for the application x, y, z OR x, z, y; but not a mix of both.
-
-# TODO: All of these are being read only and not overwritten which is why we can create new vars.
-#   Think mutability problem and requirement for AppManager instance attributes to be
-#   updated during the callbacks.
-#   Think about explaining these in a docs folder for design choices.

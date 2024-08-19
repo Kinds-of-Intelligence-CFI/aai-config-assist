@@ -134,9 +134,3 @@ class AppStyleGuide:
             "marginRight": f"{self.margin_right}%",
             "cursor": "pointer",
         }
-
-
-# TODO: place all these defaults in a YAML definitions file
-#  (Maybe) Allow user to provide their own style guide and item defaults to the AppManager.
-# TODO Remove magic numbers remaining by creating new variables (e.g. /3 and * 2) make specific vars and dims for those
-#  specific components

@@ -225,10 +225,3 @@ class Visualiser:
 
 # TODO: could change type(names_items_with_overlap) to set, for consistency with checker.
 #  check that this does not break anything.
-
-# TODO: could transform this class into a module. Does not matter too much as very small, what is best will depend on
-#  the direction this file may take in the future if it is developed further.
-
-# TODO: could have a user-friendly way of editing the style of the figure (a style guide for the arena figure, for e.g.)
-
-# TODO: Remove all the magic numbers/strings in file

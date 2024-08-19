@@ -83,7 +83,7 @@ def calculate_vertices_of_rotated_l_block(
 def calculate_vertices_of_axis_aligned_l_block(
     center: npt.NDArray, width: float, height: float
 ) -> npt.NDArray:
-    # TODO: the magic numbers below are approximations of AAI item dimensions
+    # Note: The magic numbers below are approximations of AAI item dimensions
     a, b, c, d = calculate_vertices_of_axis_aligned_rectangle(center, width, height)
     c1 = b + np.array([0, -SMALL_RATIO * height])
     c2 = c1 + np.array([-LARGE_RATIO * width, 0])

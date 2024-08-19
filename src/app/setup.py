@@ -366,25 +366,3 @@ def _set_up_generate_config_layout(style_guide: AppStyleGuide) -> html.Div:
         ]
     )
     return layout
-
-
-# TODO: consider whether to make a function for setting up the slider layouts
-#  (to prepare for slider implementation changing)
-
-# TODO: consider whether this setup module should not be a class whereby the style_guide is an attribute to avoid
-#  passing it around very frequently. Even though, of course, this setup object wouldn't have a meaningful lifecycle
-#  with an evolving state, so could remain with a module, up for discussion.
-
-# TODO: in general, decide whether to split all layouts into single component functions or whether to combine certain
-#  components into single function layouts. Decide on a rule for how you are designing the setup code, in general.
-
-# TODO: consider somehow combining both the spawn sizing and resizing sections because they are very similar,
-#  could combine them somehow (either in the code: combine their implementations to avoid duplication) or even in the
-#  UI, have only one sizing section for example and depending on which button is pressed something new is done.
-
-# TODO: consider also having Dash 'tabs' for the various modalities:
-#  New item spawning
-#  Current item manipulation
-#  Dumping to YAML
-
-# TODO: decide how to constant management across the whole library (and apply the decision to these constants too)
