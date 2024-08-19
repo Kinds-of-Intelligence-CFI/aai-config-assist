@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List,  Dict, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 if TYPE_CHECKING:
     import numpy as np
@@ -19,6 +19,7 @@ class Dumper:
             method. Rather, every time an element is added to the overall_str, the _indent method must be employed.
 
     """
+
     def __init__(self, arenas: List[Arena], destination_file_path: str) -> None:
         self.arenas = arenas
         self.destination_file_path = destination_file_path
@@ -37,21 +38,31 @@ class Dumper:
 
     def _get_heading_str(self, level: int) -> str:
         """Gets the string representation of the overall arena configuration tag and arenas attribute."""
-        return self._indent("!ArenaConfig", level) + "\n" + self._indent("arenas:", level)
+        return (
+            self._indent("!ArenaConfig", level) + "\n" + self._indent("arenas:", level)
+        )
 
     def _get_arena_config_str(self, ix: int, level: int) -> str:
         """Gets the string representation of the updated arena at index ix inside the arenas class attribute."""
-        result = (self._indent(f"{ix}: !Arena", level) + "\n"
-                  + self._get_arena_settings_str(ix, level + 1) + "\n"
-                  + self._get_arena_items_str(ix, level + 1) + "\n"
-                  )
+        result = (
+            self._indent(f"{ix}: !Arena", level)
+            + "\n"
+            + self._get_arena_settings_str(ix, level + 1)
+            + "\n"
+            + self._get_arena_items_str(ix, level + 1)
+            + "\n"
+        )
         return result
 
     def _get_arena_settings_str(self, ix: int, level: int) -> str:
         """Gets the string representation of all the arena config attributes other than items (pass_mark, t)."""
         pass_mark = self.arenas[ix].pass_mark
         t = self.arenas[ix].t
-        return self._indent(f"pass_mark: {pass_mark}", level) + "\n" + self._indent(f"t: {t}", level)
+        return (
+            self._indent(f"pass_mark: {pass_mark}", level)
+            + "\n"
+            + self._indent(f"t: {t}", level)
+        )
 
     def _get_arena_items_str(self, ix: int, level: int) -> str:
         """Gets the string representation of all the items in the configuration."""
@@ -86,11 +97,13 @@ class Dumper:
 
         def _get_new_item_structure(curr_item_type: str) -> Dict:
             """Gets the A-AI structure for a new item."""
-            return {"name": curr_item_type,
-                    "positions": [],
-                    "rotations": [],
-                    "sizes": [],
-                    "colors": []}
+            return {
+                "name": curr_item_type,
+                "positions": [],
+                "rotations": [],
+                "sizes": [],
+                "colors": [],
+            }
 
         def _get_vector3_representation(a: float, b: float, c: float) -> str:
             """Gets the A-AI Vector3 representation of a triple."""
@@ -109,9 +122,21 @@ class Dumper:
             if name not in result:
                 result[name] = _get_new_item_structure(item.name.split(" ")[0])
             result[name]["rotations"] += [str(item.deg_rotation)]
-            result[name]["positions"] += [_get_vector3_representation(item.center_x, item.center_y, item.center_z,)]
-            result[name]["sizes"] += [_get_vector3_representation(item.length, item.height, item.width)]
-            result[name]["colors"] += [_get_rgb_representation(item.colour_red, item.colour_green, item.colour_blue)]
+            result[name]["positions"] += [
+                _get_vector3_representation(
+                    item.center_x,
+                    item.center_y,
+                    item.center_z,
+                )
+            ]
+            result[name]["sizes"] += [
+                _get_vector3_representation(item.length, item.height, item.width)
+            ]
+            result[name]["colors"] += [
+                _get_rgb_representation(
+                    item.colour_red, item.colour_green, item.colour_blue
+                )
+            ]
 
         # Convert result dict into simply a list of its values
         result = list(result.values())
@@ -124,8 +149,9 @@ class Dumper:
 
 
 def dumper_example() -> None:
-    import numpy as np
     from dataclasses import dataclass
+
+    import numpy as np
 
     @dataclass
     class DummyCuboid:
@@ -141,34 +167,39 @@ def dumper_example() -> None:
         "pass_mark": 0,
         "t": 1000,
         "items": [
-            DummyCuboid(name="Wall 0",
-                        center=np.array([18, 0, 37.5]),
-                        length=30,
-                        height=15,
-                        width=7.5,
-                        colour={"r": 30, "g": 15, "b": 7.5},
-                        deg_rotation=0,
-                        ),
-            DummyCuboid(name="Wall 1",
-                        center=np.array([10, 5, 10.5]),
-                        length=10,
-                        height=5,
-                        width=2.5,
-                        colour={"r": 10, "g": 5, "b": 2.5},
-                        deg_rotation=10,
-                        ),
-            DummyCuboid(name="Ramp 0",
-                        center=np.array([2, 10, 20]),
-                        length=29,
-                        height=1,
-                        width=5,
-                        colour={"r": 10, "g": 10, "b": 10},
-                        deg_rotation=34.6,
-                        ),
-        ]
+            DummyCuboid(
+                name="Wall 0",
+                center=np.array([18, 0, 37.5]),
+                length=30,
+                height=15,
+                width=7.5,
+                colour={"r": 30, "g": 15, "b": 7.5},
+                deg_rotation=0,
+            ),
+            DummyCuboid(
+                name="Wall 1",
+                center=np.array([10, 5, 10.5]),
+                length=10,
+                height=5,
+                width=2.5,
+                colour={"r": 10, "g": 5, "b": 2.5},
+                deg_rotation=10,
+            ),
+            DummyCuboid(
+                name="Ramp 0",
+                center=np.array([2, 10, 20]),
+                length=29,
+                height=1,
+                width=5,
+                colour={"r": 10, "g": 10, "b": 10},
+                deg_rotation=34.6,
+            ),
+        ],
     }
 
-    arenas = [arena1, ]
+    arenas = [
+        arena1,
+    ]
 
     destination_path = f"example_configs/auto_updated_config.yaml"
     arena_config_dumper = Dumper(arenas, destination_path)

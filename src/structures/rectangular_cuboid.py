@@ -15,6 +15,7 @@ class RectangularCuboid:
         - The only rotation possible for this object is a height-wise, "yaw"-type rotation of the lower base rectangle.
         - The lower base face is always parallel to the 2d plane made up of the 1st and 2nd dimensions of the 3d space.
     """
+
     X_INDEX = 0
     Z_INDEX = 1
     Y_INDEX = 2
@@ -22,12 +23,14 @@ class RectangularCuboid:
     GREEN_COMPONENT_INDEX = "g"
     BLUE_COMPONENT_INDEX = "b"
 
-    def __init__(self,
-                 lower_base_centroid: npt.NDArray,
-                 dimensions: Tuple,
-                 rotation: float,
-                 name: str = "Cuboid",
-                 colour: Optional[Dict] = None) -> None:
+    def __init__(
+        self,
+        lower_base_centroid: npt.NDArray,
+        dimensions: Tuple,
+        rotation: float,
+        name: str = "Cuboid",
+        colour: Optional[Dict] = None,
+    ) -> None:
         """Constructs an instance of RectangularCuboid.
 
         Args:
@@ -47,7 +50,9 @@ class RectangularCuboid:
         #  of the code are constructing RectangularCuboid objects with non-float arg for lower_base_centroid param.
         if lower_base_centroid.dtype != np.float_:
             arr_dtype = lower_base_centroid.dtype
-            raise Exception(f"The lower_base_centroid variable should be an array of floats. You are using {arr_dtype}")
+            raise Exception(
+                f"The lower_base_centroid variable should be an array of floats. You are using {arr_dtype}"
+            )
 
         self.center = lower_base_centroid
         self.length = dimensions[self.X_INDEX]
@@ -62,15 +67,19 @@ class RectangularCuboid:
         # The length of the 3d item = the width of the 2d item & the width of the 3d item = the height of the 2d item.
         # This is why the arguments provided below may seem to be in conflict with their parameter names.
         # The center should be only the 2d centroid coordinates, hence the clipping of the 3rd dimension with [:2].
-        self.lower_base_vertices = calculate_vertices_of_rotated_rectangle(center=self.center[:2],
-                                                                           width=self.length,
-                                                                           height=self.width,
-                                                                           angle_deg=self.deg_rotation)
+        self.lower_base_vertices = calculate_vertices_of_rotated_rectangle(
+            center=self.center[:2],
+            width=self.length,
+            height=self.width,
+            angle_deg=self.deg_rotation,
+        )
 
-    def resize(self,
-               resized_length: Union[float, None] = None,
-               resized_width: Union[float, None] = None,
-               resized_height: Union[float, None] = None) -> None:
+    def resize(
+        self,
+        resized_length: Union[float, None] = None,
+        resized_width: Union[float, None] = None,
+        resized_height: Union[float, None] = None,
+    ) -> None:
         """Resizes the cuboid, including calculating and setting the coordinates of its new vertices.
 
         Args:
@@ -81,10 +90,12 @@ class RectangularCuboid:
         self.length = self.length if resized_length is None else resized_length
         self.width = self.width if resized_width is None else resized_width
         self.height = self.height if resized_height is None else resized_height
-        new_vertices = calculate_vertices_of_rotated_rectangle(center=self.center[:2],
-                                                               width=self.length,
-                                                               height=self.width,
-                                                               angle_deg=self.deg_rotation)
+        new_vertices = calculate_vertices_of_rotated_rectangle(
+            center=self.center[:2],
+            width=self.length,
+            height=self.width,
+            angle_deg=self.deg_rotation,
+        )
         self.lower_base_vertices = new_vertices
 
     @property

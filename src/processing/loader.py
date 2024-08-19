@@ -1,4 +1,5 @@
 from typing import Dict
+
 import yaml
 
 from src.processing.arena_config_loader import ArenaConfigLoader
@@ -18,4 +19,3 @@ class Loader:
         with open(config_path) as file:
             config_data = yaml.load(file, Loader=ArenaConfigLoader)
         return config_data
-

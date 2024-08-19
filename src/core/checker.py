@@ -2,8 +2,8 @@ from typing import List, Set
 
 import numpy as np
 
-from src.structures.rectangular_cuboid import RectangularCuboid
 from src.core.separating_axis_theorem import apply_separating_axis_theorem
+from src.structures.rectangular_cuboid import RectangularCuboid
 
 
 class Checker:
@@ -32,5 +32,3 @@ class Checker:
                     items_with_overlap.add(item2.name)
 
         return items_with_overlap
-
-# TODO: eventually, IF efficiency becomes a problem (for now not at all), can do local rather than global overlap checks

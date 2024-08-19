@@ -1,18 +1,19 @@
 # To avoid circular imports
 from __future__ import annotations
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, List
+
 import os
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:
     from src.app.app_manager import AppManager
 
-import numpy as np
 import matplotlib.figure
-from dash import Output, Input, State, callback
+import numpy as np
+from dash import Input, Output, State, callback
 
 from src.processing.dumper import Dumper
-from src.structures.rectangular_cuboid import RectangularCuboid
 from src.structures.arena import Arena
+from src.structures.rectangular_cuboid import RectangularCuboid
 from src.utils.geometry_helper import calculate_vertices_of_rotated_rectangle
 from src.utils.physical_item_helper import get_default_item_parameter
 from src.utils.utils import create_directory_if_not_exists
@@ -20,6 +21,7 @@ from src.utils.utils import create_directory_if_not_exists
 
 class CallbackRegistrar:
     """The CallbackRegistrar is responsible for registering the callbacks of a Dash application."""
+
     DEFAULT_SLIDER_VALUE = 0
     FALLBACK_ITEM_SIZE = 1
     DEFAULT_SPAWNED_ITEM_ROTATION = 0
@@ -50,15 +52,21 @@ class CallbackRegistrar:
         """Creates a callback mechanism for when one of the items is selected to be moved."""
 
         @callback(
-            Output(component_id='output-current-item', component_property="children", allow_duplicate=True),
-            Output(component_id='x-slider', component_property="value"),
-            Output(component_id='y-slider', component_property="value"),
-            Output(component_id='z-slider', component_property="value"),
+            Output(
+                component_id="output-current-item",
+                component_property="children",
+                allow_duplicate=True,
+            ),
+            Output(component_id="x-slider", component_property="value"),
+            Output(component_id="y-slider", component_property="value"),
+            Output(component_id="z-slider", component_property="value"),
             Output(component_id="xz-rotation-slider", component_property="value"),
-            Input(component_id='aai-diagram', component_property='clickData'),
-            prevent_initial_call=True
+            Input(component_id="aai-diagram", component_property="clickData"),
+            prevent_initial_call=True,
         )
-        def _update_sliders(point_clicked: Dict) -> Tuple[str, float, float, float, float]:
+        def _update_sliders(
+            point_clicked: Dict,
+        ) -> Tuple[str, float, float, float, float]:
             """Updates the current item indicator and sliders when one of the AAI arena items is clicked.
 
             Args:
@@ -69,34 +77,49 @@ class CallbackRegistrar:
                 Tuple: The name, followed by the x, y, z, and xz-rotation components of the item that was clicked.
             """
             if point_clicked is not None:
-                self.app_manager.curr_item_to_move_ix = point_clicked['points'][0]["curveNumber"]
+                self.app_manager.curr_item_to_move_ix = point_clicked["points"][0][
+                    "curveNumber"
+                ]
                 ix = self.app_manager.curr_item_to_move_ix
-                return (self._get_currently_selected_item_display_text(self.cuboids[ix].name),
-                        self.cuboids[ix].center_x,
-                        self.cuboids[ix].center_y,
-                        self.cuboids[ix].center_z,
-                        self.cuboids[ix].deg_rotation)
+                return (
+                    self._get_currently_selected_item_display_text(
+                        self.cuboids[ix].name
+                    ),
+                    self.cuboids[ix].center_x,
+                    self.cuboids[ix].center_y,
+                    self.cuboids[ix].center_z,
+                    self.cuboids[ix].deg_rotation,
+                )
             else:
-                return ("",
-                        self.DEFAULT_SLIDER_VALUE,
-                        self.DEFAULT_SLIDER_VALUE,
-                        self.DEFAULT_SLIDER_VALUE,
-                        self.DEFAULT_SLIDER_VALUE)
+                return (
+                    "",
+                    self.DEFAULT_SLIDER_VALUE,
+                    self.DEFAULT_SLIDER_VALUE,
+                    self.DEFAULT_SLIDER_VALUE,
+                    self.DEFAULT_SLIDER_VALUE,
+                )
 
     def _register_move_cuboid_callback(self) -> None:
         """Creates a callback mechanism for when an item is being moved by the sliders."""
+
         @callback(
-            Output(component_id="aai-diagram", component_property="figure", allow_duplicate=True),
+            Output(
+                component_id="aai-diagram",
+                component_property="figure",
+                allow_duplicate=True,
+            ),
             Input(component_id="x-slider", component_property="value"),
             Input(component_id="y-slider", component_property="value"),
             Input(component_id="z-slider", component_property="value"),
             Input(component_id="xz-rotation-slider", component_property="value"),
-            prevent_initial_call=True
+            prevent_initial_call=True,
         )
-        def _move_cuboid(x_slider_value: float,
-                         y_slider_value: float,
-                         z_slider_value: float,
-                         xz_rotation: float) -> matplotlib.figure.Figure:
+        def _move_cuboid(
+            x_slider_value: float,
+            y_slider_value: float,
+            z_slider_value: float,
+            xz_rotation: float,
+        ) -> matplotlib.figure.Figure:
             """Moves the cuboid by the desired amount specified by each slider value.
 
             Args:
@@ -113,25 +136,34 @@ class CallbackRegistrar:
             self.cuboids[item_ix].center_y = y_slider_value
             self.cuboids[item_ix].center_z = z_slider_value
             self.cuboids[item_ix].deg_rotation = xz_rotation
-            fig = self._update_pre_plotting_attributes(self.cuboids, item_ix, xz_rotation)
+            fig = self._update_pre_plotting_attributes(
+                self.cuboids, item_ix, xz_rotation
+            )
             return fig
 
     def _register_spawn_item_callback(self) -> None:
         """Creates a callback mechanism for spawning a new item onto the arena."""
+
         @callback(
-            Output(component_id="aai-diagram", component_property="figure", allow_duplicate=True),
+            Output(
+                component_id="aai-diagram",
+                component_property="figure",
+                allow_duplicate=True,
+            ),
             State(component_id="item-dropdown", component_property="value"),
-            Input(component_id='new-item-button', component_property="n_clicks"),
+            Input(component_id="new-item-button", component_property="n_clicks"),
             State(component_id="spawn-x", component_property="value"),
             State(component_id="spawn-z", component_property="value"),
             State(component_id="spawn-y", component_property="value"),
-            prevent_initial_call=True
+            prevent_initial_call=True,
         )
-        def _spawn_item(item_dropdown_value: str,
-                        num_spawn_button_clicks: int,
-                        spawn_x_dim: str,
-                        spawn_z_dim: str,
-                        spawn_y_dim: str) -> Optional[matplotlib.figure.Figure]:
+        def _spawn_item(
+            item_dropdown_value: str,
+            num_spawn_button_clicks: int,
+            spawn_x_dim: str,
+            spawn_z_dim: str,
+            spawn_y_dim: str,
+        ) -> Optional[matplotlib.figure.Figure]:
             """Spawns a new item onto the arena.
 
             Args:
@@ -145,42 +177,60 @@ class CallbackRegistrar:
                 (matplotlib.figure.Figure or None): The updated arena figure with the new item spawned onto it.
             """
             if item_dropdown_value is None:
-                print("Please select an item from the dropdown to place that item. "
-                      "No item was selected and so no item was placed.")
+                print(
+                    "Please select an item from the dropdown to place that item. "
+                    "No item was selected and so no item was placed."
+                )
                 return None
 
-            spawned_lower_base_centroid = np.array([self.DEFAULT_SPAWNED_LOCATION_X,
-                                                    self.DEFAULT_SPAWNED_LOCATION_Z,
-                                                    self.DEFAULT_SPAWNED_LOCATION_Y], dtype=float)
+            spawned_lower_base_centroid = np.array(
+                [
+                    self.DEFAULT_SPAWNED_LOCATION_X,
+                    self.DEFAULT_SPAWNED_LOCATION_Z,
+                    self.DEFAULT_SPAWNED_LOCATION_Y,
+                ],
+                dtype=float,
+            )
             # Convert the dimensions (either str from callback or int from blank dimension fallback)
-            spawned_dimensions = self._transform_str_to_float_dimensions(spawn_x_dim, spawn_z_dim, spawn_y_dim)
+            spawned_dimensions = self._transform_str_to_float_dimensions(
+                spawn_x_dim, spawn_z_dim, spawn_y_dim
+            )
             spawned_rotation = self.DEFAULT_SPAWNED_ITEM_ROTATION
             spawned_name = f"{item_dropdown_value} {self.SPAWNED_ITEM_NAME_IDENTIFIER} {num_spawn_button_clicks}"
-            spawned_colour = get_default_item_parameter(item_name=item_dropdown_value,
-                                                        param_name="colour",
-                                                        default_item_params=self.app_manager.default_item_parameters)
-            spawned_auto_cuboid = RectangularCuboid(lower_base_centroid=spawned_lower_base_centroid,
-                                                    dimensions=spawned_dimensions,
-                                                    rotation=spawned_rotation,
-                                                    name=spawned_name,
-                                                    colour=spawned_colour)
+            spawned_colour = get_default_item_parameter(
+                item_name=item_dropdown_value,
+                param_name="colour",
+                default_item_params=self.app_manager.default_item_parameters,
+            )
+            spawned_auto_cuboid = RectangularCuboid(
+                lower_base_centroid=spawned_lower_base_centroid,
+                dimensions=spawned_dimensions,
+                rotation=spawned_rotation,
+                name=spawned_name,
+                colour=spawned_colour,
+            )
             self.cuboids += [spawned_auto_cuboid]
             self.app_manager.curr_item_to_move_ix = -1
             item_ix = self.app_manager.curr_item_to_move_ix
             xz_rotation = spawned_rotation
             print(f"You have just created: {spawned_name}")
-            fig = self._update_pre_plotting_attributes(self.cuboids, item_ix, xz_rotation)
+            fig = self._update_pre_plotting_attributes(
+                self.cuboids, item_ix, xz_rotation
+            )
             return fig
 
     def _register_dump_current_layout_to_config_callback(self) -> None:
         """Creates a callback mechanism for dumping the current physical items to a new configuration file."""
+
         @callback(
-            Output(component_id='new-config-path-output', component_property="value"),
+            Output(component_id="new-config-path-output", component_property="value"),
             State(component_id="new-config-path", component_property="value"),
-            Input(component_id='new-config-path-button', component_property="n_clicks"),
-            prevent_initial_call=True
+            Input(component_id="new-config-path-button", component_property="n_clicks"),
+            prevent_initial_call=True,
         )
-        def _dump_current_layout_to_config(new_config_path: str, n_clicks: int) -> Optional[str]:
+        def _dump_current_layout_to_config(
+            new_config_path: str, n_clicks: int
+        ) -> Optional[str]:
             """Dumps the current in-application arena layout to a new YAML configuration file.
 
             Args:
@@ -194,23 +244,41 @@ class CallbackRegistrar:
 
             pass_mark = self.current_arena.pass_mark
             t = self.current_arena.t
-            arena = Arena(pass_mark=pass_mark, t=t, physical_items=self.cuboids, overlapping_items=[""])
+            arena = Arena(
+                pass_mark=pass_mark,
+                t=t,
+                physical_items=self.cuboids,
+                overlapping_items=[""],
+            )
             arena_config_dumper = Dumper([arena], destination_file_path="")
             if n_clicks > 0:
                 arena_config_dumper.destination_file_path = new_config_path
                 arena_config_dumper.dump()
-                print(f"You have generated a new config YAML file at {new_config_path}.")
+                print(
+                    f"You have generated a new config YAML file at {new_config_path}."
+                )
                 return ""  # Empty the string after the process has completed
 
     def _register_remove_current_item_callback(self) -> None:
         """Creates a callback mechanism for removing the current physical items from the arena."""
+
         @callback(
-            Output(component_id="aai-diagram", component_property="figure", allow_duplicate=True),
-            Output(component_id='output-current-item', component_property="children", allow_duplicate=True),
+            Output(
+                component_id="aai-diagram",
+                component_property="figure",
+                allow_duplicate=True,
+            ),
+            Output(
+                component_id="output-current-item",
+                component_property="children",
+                allow_duplicate=True,
+            ),
             Input(component_id="remove-item-button", component_property="n_clicks"),
-            prevent_initial_call=True
+            prevent_initial_call=True,
         )
-        def _remove_current_item(num_remove_item_button_clicks: int) -> Tuple[matplotlib.figure.Figure, str]:
+        def _remove_current_item(
+            num_remove_item_button_clicks: int,
+        ) -> Tuple[matplotlib.figure.Figure, str]:
             """Removes the current physical item from the arena.
 
             Args:
@@ -223,27 +291,40 @@ class CallbackRegistrar:
             if num_remove_item_button_clicks > 0:
                 # Remove cuboid
                 curr_item_ix = self.app_manager.curr_item_to_move_ix
-                self.cuboids = self.cuboids[:curr_item_ix] + self.cuboids[curr_item_ix + 1:]
+                self.cuboids = (
+                    self.cuboids[:curr_item_ix] + self.cuboids[curr_item_ix + 1 :]
+                )
 
                 # Regenerate arena figure
-                overlapping_items = self._update_curr_arena_overlapping_items(self.cuboids)
-                fig = self.app_manager.visualiser.visualise_cuboid_bases(self.cuboids, overlapping_items)
+                overlapping_items = self._update_curr_arena_overlapping_items(
+                    self.cuboids
+                )
+                fig = self.app_manager.visualiser.visualise_cuboid_bases(
+                    self.cuboids, overlapping_items
+                )
                 return fig, "No item selected"
 
     def _register_resize_current_item_callback(self) -> None:
         """Creates a callback mechanism for resizing the current physical item."""
+
         @callback(
-            Output(component_id="aai-diagram", component_property="figure", allow_duplicate=True),
+            Output(
+                component_id="aai-diagram",
+                component_property="figure",
+                allow_duplicate=True,
+            ),
             Input(component_id="resize-item-button", component_property="n_clicks"),
             State(component_id="resize-x", component_property="value"),
             State(component_id="resize-z", component_property="value"),
             State(component_id="resize-y", component_property="value"),
-            prevent_initial_call=True
+            prevent_initial_call=True,
         )
-        def _resize_current_item(num_resize_item_button_clicks: int,
-                                 resize_x_dim: str,
-                                 resize_z_dim: str,
-                                 resize_y_dim: str) -> matplotlib.figure.Figure:
+        def _resize_current_item(
+            num_resize_item_button_clicks: int,
+            resize_x_dim: str,
+            resize_z_dim: str,
+            resize_y_dim: str,
+        ) -> matplotlib.figure.Figure:
             """Resizes the currently-selected item.
 
             Args:
@@ -257,17 +338,27 @@ class CallbackRegistrar:
             """
             if num_resize_item_button_clicks > 0:
                 # Transform the str inputs from the Dash application into a numerical type
-                resize_x_dim, resize_z_dim, resize_y_dim = self._transform_str_to_float_dimensions(resize_x_dim,
-                                                                                                   resize_z_dim,
-                                                                                                   resize_y_dim)
+                (
+                    resize_x_dim,
+                    resize_z_dim,
+                    resize_y_dim,
+                ) = self._transform_str_to_float_dimensions(
+                    resize_x_dim, resize_z_dim, resize_y_dim
+                )
                 # Resize the cuboid
-                self.current_item.resize(resized_length=resize_x_dim,
-                                         resized_width=resize_z_dim,
-                                         resized_height=resize_y_dim)
+                self.current_item.resize(
+                    resized_length=resize_x_dim,
+                    resized_width=resize_z_dim,
+                    resized_height=resize_y_dim,
+                )
 
                 # Regenerate the arena figure
-                overlapping_items = self._update_curr_arena_overlapping_items(self.cuboids)
-                fig = self.app_manager.visualiser.visualise_cuboid_bases(self.cuboids, overlapping_items)
+                overlapping_items = self._update_curr_arena_overlapping_items(
+                    self.cuboids
+                )
+                fig = self.app_manager.visualiser.visualise_cuboid_bases(
+                    self.cuboids, overlapping_items
+                )
                 return fig
 
     def _register_set_config_params_callback(self) -> None:
@@ -277,16 +368,16 @@ class CallbackRegistrar:
             - Combined pass mark and time limit callbacks to avoid bug where only one callback fires, when multiple
             callbacks share an input.
         """
+
         @callback(
-            Input(component_id='config-params-button', component_property="n_clicks"),
+            Input(component_id="config-params-button", component_property="n_clicks"),
             State(component_id="pass-mark", component_property="value"),
             State(component_id="time-limit", component_property="value"),
-            prevent_initial_call=True
+            prevent_initial_call=True,
         )
         def set_config_params(
-                num_set_config_params_button_click: int,
-                pass_mark: str,
-                time_limit: str) -> None:
+            num_set_config_params_button_click: int, pass_mark: str, time_limit: str
+        ) -> None:
             """Sets the arena's configuration parameters.
 
             Args:
@@ -298,10 +389,9 @@ class CallbackRegistrar:
                 self.current_arena.t = int(time_limit)
                 self.current_arena.pass_mark = int(pass_mark)
 
-    def _update_pre_plotting_attributes(self,
-                                        cuboids: List[RectangularCuboid],
-                                        item_ix: int,
-                                        xz_rotation: float) -> matplotlib.figure.Figure:
+    def _update_pre_plotting_attributes(
+        self, cuboids: List[RectangularCuboid], item_ix: int, xz_rotation: float
+    ) -> matplotlib.figure.Figure:
         """Updates attributes of the arena figure that must be up-to-date before plotting.
 
         Note:
@@ -319,10 +409,14 @@ class CallbackRegistrar:
         self._update_curr_item_lower_base_vertices(cuboids, item_ix, xz_rotation)
         print(f"The item currently being moved is: {cuboids[item_ix].name}")
         curr_overlapping_items = self._update_curr_arena_overlapping_items(cuboids)
-        fig = self.app_manager.visualiser.visualise_cuboid_bases(cuboids, curr_overlapping_items)
+        fig = self.app_manager.visualiser.visualise_cuboid_bases(
+            cuboids, curr_overlapping_items
+        )
         return fig
 
-    def _update_curr_arena_overlapping_items(self, cuboids: List[RectangularCuboid]) -> List[str]:
+    def _update_curr_arena_overlapping_items(
+        self, cuboids: List[RectangularCuboid]
+    ) -> List[str]:
         """Updates the current arena's overlapping items attribute.
 
         Args:
@@ -333,13 +427,16 @@ class CallbackRegistrar:
         """
         arena_ix = self.app_manager.curr_arena_ix
         self.app_manager.arenas[
-            arena_ix].overlapping_items = self.app_manager.checker.check_overlaps_between_cuboids(cuboids)
+            arena_ix
+        ].overlapping_items = self.app_manager.checker.check_overlaps_between_cuboids(
+            cuboids
+        )
         return self.app_manager.arenas[arena_ix].overlapping_items
 
     @staticmethod
-    def _update_curr_item_lower_base_vertices(cuboids: List[RectangularCuboid],
-                                              item_ix: int,
-                                              xz_rotation: float) -> None:
+    def _update_curr_item_lower_base_vertices(
+        cuboids: List[RectangularCuboid], item_ix: int, xz_rotation: float
+    ) -> None:
         """Updates the current item's lower base vertices.
 
         Args:
@@ -352,11 +449,12 @@ class CallbackRegistrar:
             center=np.array([cuboids[item_ix].center_x, cuboids[item_ix].center_z]),
             width=cuboids[item_ix].length,
             height=cuboids[item_ix].width,
-            angle_deg=xz_rotation)
+            angle_deg=xz_rotation,
+        )
 
-    def _generate_spawn_name(self,
-                             item_dropdown_value: str,
-                             num_spawn_button_clicks: int) -> str:
+    def _generate_spawn_name(
+        self, item_dropdown_value: str, num_spawn_button_clicks: int
+    ) -> str:
         """Generates the name of a newly-spawned item.
 
         Args:
@@ -380,10 +478,9 @@ class CallbackRegistrar:
         """
         return f"Current item: {item_name}"
 
-    def _transform_str_to_float_dimensions(self,
-                                           number_text1: str,
-                                           number_text2: str,
-                                           number_text3: str) -> Tuple[float, ...]:
+    def _transform_str_to_float_dimensions(
+        self, number_text1: str, number_text2: str, number_text3: str
+    ) -> Tuple[float, ...]:
         """Transforms item dimensions from text representation to numerical representation.
 
         Args:
@@ -411,11 +508,14 @@ class CallbackRegistrar:
 
     @cuboids.setter
     def cuboids(self, new_cuboids: List[RectangularCuboid]) -> None:
-        self.app_manager.arenas[self.app_manager.curr_arena_ix].physical_items = new_cuboids
+        self.app_manager.arenas[
+            self.app_manager.curr_arena_ix
+        ].physical_items = new_cuboids
 
     @property
     def current_item(self) -> RectangularCuboid:
         return self.cuboids[self.app_manager.curr_item_to_move_ix]
+
 
 # TODO: Further modularise. Make sure that every method is SINGLE PURPOSE as described by the method name
 #  go through the whole class to check where you can modularise further
