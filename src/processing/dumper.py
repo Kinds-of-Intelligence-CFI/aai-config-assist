@@ -55,13 +55,13 @@ class Dumper:
         return result
 
     def _get_arena_settings_str(self, ix: int, level: int) -> str:
-        """Gets the string representation of all the arena config attributes other than items (pass_mark, t)."""
-        pass_mark = self.arenas[ix].pass_mark
-        t = self.arenas[ix].t
+        """Gets the string representation of all the arena config attributes other than items (passMark, timeLimit)."""
+        passMark = self.arenas[ix].passMark
+        timeLimit = self.arenas[ix].timeLimit
         return (
-            self._indent(f"pass_mark: {pass_mark}", level)
+            self._indent(f"passMark: {passMark}", level)
             + "\n"
-            + self._indent(f"t: {t}", level)
+            + self._indent(f"timeLimit: {timeLimit}", level)
         )
 
     def _get_arena_items_str(self, ix: int, level: int) -> str:
@@ -164,8 +164,8 @@ def dumper_example() -> None:
         deg_rotation: float
 
     arena1 = {
-        "pass_mark": 0,
-        "t": 1000,
+        "passMark": 0,
+        "timeLimit": 1000,
         "items": [
             DummyCuboid(
                 name="Wall 0",
