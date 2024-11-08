@@ -242,11 +242,11 @@ class CallbackRegistrar:
             """
             create_directory_if_not_exists(os.path.dirname(new_config_path))
 
-            pass_mark = self.current_arena.pass_mark
-            t = self.current_arena.t
+            passMark = self.current_arena.passMark
+            timeLimit = self.current_arena.timeLimit
             arena = Arena(
-                pass_mark=pass_mark,
-                t=t,
+                passMark=passMark,
+                timeLimit=timeLimit,
                 physical_items=self.cuboids,
                 overlapping_items=[""],
             )
@@ -386,8 +386,8 @@ class CallbackRegistrar:
                 time_limit (str): The arena's new time_limit parameter.
             """
             if num_set_config_params_button_click > 0:
-                self.current_arena.t = int(time_limit)
-                self.current_arena.pass_mark = int(pass_mark)
+                self.current_arena.timeLimit = int(time_limit)
+                self.current_arena.passMark = int(pass_mark)
 
     def _update_pre_plotting_attributes(
         self, cuboids: List[RectangularCuboid], item_ix: int, xz_rotation: float

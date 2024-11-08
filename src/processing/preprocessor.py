@@ -21,7 +21,7 @@ class Preprocessor:
     """
 
     DEFAULT_PASS_MARK = 0
-    DEFAULT_T = 1000
+    DEFAULT_TIMELIMIT = 1000
 
     def __init__(
         self, default_item_parameters: Dict, all_aai_item_names: List[str]
@@ -31,8 +31,8 @@ class Preprocessor:
 
     def create_default_arenas_list(self) -> List[Arena]:
         default_arena = Arena(
-            pass_mark=self.DEFAULT_PASS_MARK,
-            t=self.DEFAULT_T,
+            passMark=self.DEFAULT_PASS_MARK,
+            timeLimit=self.DEFAULT_TIMELIMIT,
             physical_items=[],
             overlapping_items=[],
         )
@@ -45,12 +45,12 @@ class Preprocessor:
 
         for arena_ix in list(raw_arenas.keys()):
             raw_arena = raw_arenas[arena_ix]
-            pass_mark = raw_arena["pass_mark"]
-            t = raw_arena["t"]
+            passMark = raw_arena["passMark"]
+            timeLimit = raw_arena["timeLimit"]
             raw_physical_items = raw_arena["items"]
             physical_items = self._create_rectangular_cuboid_list(raw_physical_items)
             overlapping_items = []
-            arena = Arena(pass_mark, t, physical_items, overlapping_items)
+            arena = Arena(passMark, timeLimit, physical_items, overlapping_items)
             preprocessed_arenas_list += [arena]
 
         return preprocessed_arenas_list

@@ -8,12 +8,12 @@ class Arena:
 
     def __init__(
         self,
-        pass_mark: float,
-        t: float,
+        passMark: float,
+        timeLimit: float,
         physical_items: List[RectangularCuboid],
         overlapping_items: List[str],
     ) -> None:
-        self.pass_mark = pass_mark
-        self.t = t
+        self.passMark = passMark
+        self.timeLimit = timeLimit
         self.physical_items = physical_items
         self.overlapping_items = overlapping_items
