@@ -41,7 +41,7 @@ example, if your configuration file is `aai-config-assist/config.yaml` then your
 working directory is the `aai-config-assistant` repository on your local machine.
 4. In Terminal, enter the following command to execute the [running_app.py](scripts/running_app.py)
    ```shell
-   python -m scripts.checking_and_visualising
+   python -m scripts.running_app
    ```
 You should now see a visualisation of your configuration arena as well as a summary of the overlaps
 between items in your configuration (in the Terminal log output).
